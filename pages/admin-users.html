@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Users — HAMS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /*
+      Modal overlay — covers the whole screen with a dark
+      semi-transparent background when adding/editing a user.
+      display:none by default; JS sets it to flex to show it.
+    */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;                         /* shorthand for top/right/bottom/left: 0 */
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--grey-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 { margin: 0; }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--grey-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    /* Close button in modal header */
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--grey-400);
+      line-height: 1;
+    }
+    .btn-close:hover { color: var(--grey-900); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="navbar-brand">
+      <i class="fa-solid fa-hospital"></i> HAMS Admin
+    </a>
+    <div class="navbar-links">
+      <a href="admin-dashboard.html">
+        <i class="fa-solid fa-gauge"></i> Dashboard
+      </a>
+      <a href="admin-users.html" class="active">
+        <i class="fa-solid fa-users"></i> Users
+      </a>
+      <a href="admin-doctors.html">
+        <i class="fa-solid fa-user-doctor"></i> Doctors
+      </a>
+      <a href="admin-slots.html">
+        <i class="fa-solid fa-clock"></i> Slots
+      </a>
+      <div class="divider"></div>
+      <a href="../php/logout.php">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <a href="admin-dashboard.html">
+          <i class="fa-solid fa-gauge icon"></i> Dashboard
+        </a>
+        <a href="admin-appointments.html">
+          <i class="fa-solid fa-calendar-check icon"></i> All Appointments
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Manage</div>
+        <a href="admin-users.html" class="active">
+          <i class="fa-solid fa-users icon"></i> Users
+        </a>
+        <a href="admin-doctors.html">
+          <i class="fa-solid fa-user-doctor icon"></i> Doctors
+        </a>
+        <a href="admin-departments.html">
+          <i class="fa-solid fa-building-columns icon"></i> Departments
+        </a>
+        <a href="admin-slots.html">
+          <i class="fa-solid fa-clock icon"></i> Time Slots
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <a href="../php/logout.php">
+          <i class="fa-solid fa-right-from-bracket icon"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <div class="page-header">
+        <div>
+          <h2>Manage Users</h2>
+          <p class="text-muted text-sm">Add, edit, or disable patient and staff accounts.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">
+          <i class="fa-solid fa-user-plus"></i> Add User
+        </button>
+      </div>
+
+      <div id="alert-box" class="alert" style="display:none;"></div>
+
+      <!-- Search and filter bar -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="padding:14px 16px;">
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <div class="input-icon-wrap" style="flex:1; min-width:200px;">
+              <i class="fa-solid fa-magnifying-glass icon"></i>
+              <input type="text" id="search-input" class="form-control"
+                     placeholder="Search by name or email..."
+                     oninput="filterTable()">
+            </div>
+            <select id="role-filter" class="form-control" style="width:160px;"
+                    onchange="filterTable()">
+              <option value="">All Roles</option>
+              <option value="patient">Patients</option>
+              <option value="staff">Staff</option>
+              <option value="admin">Admins</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <div class="card">
+        <div class="card-body" style="padding:0;">
+
+          <div id="users-loading" style="padding:32px; text-align:center; color:var(--grey-400);">
+            <span class="spinner"></span>
+            <p style="margin-top:8px;">Loading users...</p>
+          </div>
+
+          <div id="users-wrap" style="display:none;">
+            <div class="table-wrap">
+              <table id="users-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="users-empty" class="empty-state" style="display:none;">
+            <i class="fa-solid fa-users icon" style="font-size:2.5rem; color:var(--grey-400);"></i>
+            <p>No users found.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- =====================================================
+       ADD / EDIT USER MODAL
+       A modal is a popup form that appears over the page.
+       It is hidden (display:none) until the Add User button
+       or an Edit button is clicked.
+       ===================================================== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+
+      <div class="modal-header">
+        <h3 id="modal-title">Add New User</h3>
+        <button class="btn-close" onclick="closeModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div id="modal-alert" class="alert alert-error" style="display:none;"></div>
+
+        <!-- Hidden field: stores user_id when editing an existing user -->
+        <input type="hidden" id="edit-user-id" value="">
+
+        <div class="form-group">
+          <label for="m-name">Full Name</label>
+          <input type="text" id="m-name" class="form-control" placeholder="Full name">
+        </div>
+
+        <div class="form-group">
+          <label for="m-email">Email Address</label>
+          <input type="email" id="m-email" class="form-control" placeholder="email@example.com">
+        </div>
+
+        <div class="form-group">
+          <label for="m-phone">Phone Number</label>
+          <input type="tel" id="m-phone" class="form-control" placeholder="+255712345678">
+        </div>
+
+        <div class="form-group">
+          <label for="m-role">Role</label>
+          <select id="m-role" class="form-control">
+            <option value="patient">Patient</option>
+            <option value="staff">Medical Staff</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+
+        <!--
+          Password field shown only when adding a new user.
+          When editing, leave blank to keep existing password.
+        -->
+        <div class="form-group" id="pw-group">
+          <label for="m-password">
+            Password <span class="text-muted" style="font-weight:400;" id="pw-hint"></span>
+          </label>
+          <input type="password" id="m-password" class="form-control"
+                 placeholder="Minimum 8 characters">
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-save-btn" onclick="saveUser()">
+          <i class="fa-solid fa-floppy-disk"></i> Save User
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ==========================================================
+    // ADMIN USERS PAGE JAVASCRIPT
+    // ==========================================================
+
+    // All users stored here after loading — used for client-side filtering
+    let allUsers = [];
+
+    // Session check
+    fetch('../php/session_check.php')
+      .then(r => r.json())
+      .then(d => {
+        if (!d.logged_in || d.role !== 'admin') {
+          window.location.href = '../index.html?msg=access_denied';
+        }
+      });
+
+    // --- Load all users from PHP ---
+    async function loadUsers() {
+      try {
+        const res  = await fetch('../php/admin_get_users.php');
+        allUsers   = await res.json();
+
+        document.getElementById('users-loading').style.display = 'none';
+
+        if (!allUsers.length) {
+          document.getElementById('users-empty').style.display = 'block';
+          return;
+        }
+
+        renderUsers(allUsers);
+
+      } catch (err) {
+        document.getElementById('users-loading').style.display = 'none';
+        document.getElementById('users-empty').style.display   = 'block';
+      }
+    }
+
+    // --- Render users array into the table ---
+    function renderUsers(users) {
+      const tbody = document.getElementById('users-tbody');
+      tbody.innerHTML = ''; // Clear existing rows before re-rendering
+
+      if (!users.length) {
+        document.getElementById('users-wrap').style.display  = 'none';
+        document.getElementById('users-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('users-empty').style.display = 'none';
+      document.getElementById('users-wrap').style.display  = 'block';
+
+      users.forEach((u, i) => {
+        const date = new Date(u.created_at).toLocaleDateString('en-GB');
+        const tr   = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="text-muted">${i + 1}</td>
+          <td>${escapeHtml(u.full_name)}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td>${escapeHtml(u.phone)}</td>
+          <td><span class="badge badge-confirmed">${escapeHtml(u.role)}</span></td>
+          <td>
+            <span class="badge ${u.is_active == 1 ? 'badge-seen' : 'badge-cancelled'}">
+              ${u.is_active == 1 ? 'Active' : 'Disabled'}
+            </span>
+          </td>
+          <td>${date}</td>
+          <td>
+            <button class="btn btn-ghost btn-sm" onclick='editUser(${JSON.stringify(u)})'>
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn btn-ghost btn-sm"
+              onclick="toggleUser(${u.user_id}, ${u.is_active}, this)">
+              <i class="fa-solid fa-${u.is_active == 1 ? 'ban' : 'check'}"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- Client-side filter: runs instantly as user types ---
+    // No server round-trip needed because all users are already loaded.
+    function filterTable() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const role   = document.getElementById('role-filter').value;
+
+      const filtered = allUsers.filter(u => {
+        // Check if name or email contains the search text
+        const matchText = u.full_name.toLowerCase().includes(search) ||
+                          u.email.toLowerCase().includes(search);
+        // Check if role matches the filter dropdown
+        const matchRole = role ? u.role === role : true;
+        return matchText && matchRole;
+      });
+
+      renderUsers(filtered);
+    }
+
+    // --- Open modal for adding a new user ---
+    function openModal() {
+      document.getElementById('modal-title').textContent    = 'Add New User';
+      document.getElementById('edit-user-id').value         = '';
+      document.getElementById('m-name').value               = '';
+      document.getElementById('m-email').value              = '';
+      document.getElementById('m-phone').value              = '';
+      document.getElementById('m-role').value               = 'patient';
+      document.getElementById('m-password').value           = '';
+      document.getElementById('pw-hint').textContent        = '';
+      document.getElementById('modal-alert').style.display  = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    // --- Open modal pre-filled for editing an existing user ---
+    function editUser(user) {
+      document.getElementById('modal-title').textContent   = 'Edit User';
+      document.getElementById('edit-user-id').value        = user.user_id;
+      document.getElementById('m-name').value              = user.full_name;
+      document.getElementById('m-email').value             = user.email;
+      document.getElementById('m-phone').value             = user.phone;
+      document.getElementById('m-role').value              = user.role;
+      document.getElementById('m-password').value          = '';
+      // Tell admin they can leave password blank to keep the current one
+      document.getElementById('pw-hint').textContent       = '(leave blank to keep current)';
+      document.getElementById('modal-alert').style.display = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    // Close modal if user clicks the dark overlay (outside the modal box)
+    document.getElementById('modal-overlay').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+
+    // --- Save user (add or edit) ---
+    async function saveUser() {
+      const userId   = document.getElementById('edit-user-id').value;
+      const name     = document.getElementById('m-name').value.trim();
+      const email    = document.getElementById('m-email').value.trim();
+      const phone    = document.getElementById('m-phone').value.trim();
+      const role     = document.getElementById('m-role').value;
+      const password = document.getElementById('m-password').value;
+      const alertBox = document.getElementById('modal-alert');
+
+      // Basic validation
+      if (!name || !email || !phone) {
+        alertBox.textContent   = 'Name, email, and phone are required.';
+        alertBox.style.display = 'block';
+        return;
+      }
+
+      // Password required only when adding a new user
+      if (!userId && password.length < 8) {
+        alertBox.textContent   = 'Password must be at least 8 characters.';
+        alertBox.style.display = 'block';
+        return;
+      }
+
+      setLoading('modal-save-btn', true);
+
+      try {
+        const res  = await fetch('../php/admin_save_user.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, name, email, phone, role, password }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          closeModal();
+          showAlert(userId ? 'User updated successfully.' : 'User added successfully.', 'success');
+          loadUsers(); // Reload the table to show changes
+        } else {
+          alertBox.textContent   = data.error || 'Save failed.';
+          alertBox.style.display = 'block';
+        }
+
+      } catch (err) {
+        alertBox.textContent   = 'Network error. Try again.';
+        alertBox.style.display = 'block';
+      }
+
+      setLoading('modal-save-btn', false);
+    }
+
+    // --- Enable or disable a user account ---
+    async function toggleUser(userId, currentStatus, btn) {
+      const action    = currentStatus == 1 ? 'disable' : 'enable';
+      const newStatus = currentStatus == 1 ? 0 : 1;
+
+      if (!confirmAction(`${action.charAt(0).toUpperCase() + action.slice(1)} this user account?`)) return;
+
+      btn.disabled = true;
+
+      try {
+        const res  = await fetch('../php/admin_save_user.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, toggle_active: newStatus }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert(`User ${action}d successfully.`, 'success');
+          loadUsers();
+        } else {
+          showAlert(data.error || 'Update failed.', 'error');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        btn.disabled = false;
+      }
+    }
+
+    loadUsers();
+  </script>
+
+</body>
+</html>

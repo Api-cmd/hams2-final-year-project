@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Profiles — HAMS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.45); z-index:200;
+      align-items:center; justify-content:center; padding:16px;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:var(--white); border-radius:var(--radius);
+      width:100%; max-width:440px; box-shadow:var(--shadow-md);
+    }
+    .modal-header {
+      padding:16px 20px; border-bottom:1px solid var(--grey-200);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .modal-header h3 { margin:0; }
+    .modal-body  { padding:20px; }
+    .modal-footer {
+      padding:14px 20px; border-top:1px solid var(--grey-200);
+      display:flex; justify-content:flex-end; gap:10px;
+    }
+    .btn-close {
+      background:none; border:none; font-size:1.2rem;
+      cursor:pointer; color:var(--grey-400);
+    }
+    .btn-close:hover { color:var(--grey-900); }
+
+    /* Family member cards grid */
+    .family-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--gap);
+      margin-top: 8px;
+    }
+
+    .family-card {
+      background: var(--white);
+      border: 1px solid var(--grey-200);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Coloured top stripe matching the relation type */
+    .family-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--blue);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .family-card .fc-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .family-card .fc-relation {
+      font-size: 0.82rem;
+      color: var(--grey-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .family-card .fc-dob {
+      font-size: 0.85rem;
+      color: var(--grey-700);
+      margin-bottom: 14px;
+    }
+
+    .family-card .fc-actions {
+      display: flex;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="dashboard.html" class="navbar-brand">
+      <i class="fa-solid fa-hospital"></i> HAMS
+    </a>
+    <div class="navbar-links">
+      <a href="dashboard.html">
+        <i class="fa-solid fa-gauge"></i> Dashboard
+      </a>
+      <a href="book.html">
+        <i class="fa-solid fa-calendar-plus"></i> Book
+      </a>
+      <a href="appointments.html">
+        <i class="fa-solid fa-calendar-check"></i> My Appointments
+      </a>
+      <a href="family.html" class="active">
+        <i class="fa-solid fa-people-group"></i> Family
+      </a>
+      <div class="divider"></div>
+      <a href="../php/logout.php">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <div style="padding:28px 32px; max-width:900px; margin:0 auto;">
+
+    <div class="page-header">
+      <div>
+        <h2>Family Profiles</h2>
+        <p class="text-muted text-sm">
+          Add family members so you can book appointments on their behalf.
+        </p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">
+        <i class="fa-solid fa-user-plus"></i> Add Member
+      </button>
+    </div>
+
+    <div id="alert-box" class="alert" style="display:none;"></div>
+
+    <!-- Info box explaining what family profiles are for -->
+    <div class="alert alert-info" style="margin-bottom:24px;">
+      <i class="fa-solid fa-circle-info"></i>
+      Add family members here, then select them when booking an appointment
+      instead of booking for yourself.
+    </div>
+
+    <!-- Loading state -->
+    <div id="fam-loading" style="text-align:center; padding:32px; color:var(--grey-400);">
+      <span class="spinner"></span>
+      <p style="margin-top:8px;">Loading family profiles...</p>
+    </div>
+
+    <!-- Cards grid — built by JS -->
+    <div class="family-grid" id="family-grid"></div>
+
+    <!-- Empty state -->
+    <div id="fam-empty" class="empty-state" style="display:none;">
+      <i class="fa-solid fa-people-group"
+         style="font-size:2.5rem; color:var(--grey-400);
+                display:block; margin-bottom:12px;"></i>
+      <p>No family members added yet.</p>
+      <button class="btn btn-primary" onclick="openModal()">
+        Add Your First Family Member
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ADD / EDIT FAMILY MEMBER MODAL -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Add Family Member</h3>
+        <button class="btn-close" onclick="closeModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-alert" class="alert alert-error" style="display:none;"></div>
+        <input type="hidden" id="edit-profile-id" value="">
+
+        <div class="form-group">
+          <label for="m-name">Full Name</label>
+          <input type="text" id="m-name" class="form-control"
+                 placeholder="Family member's full name">
+        </div>
+
+        <div class="form-group">
+          <label for="m-relation">Relationship</label>
+          <select id="m-relation" class="form-control">
+            <option value="">— Select relationship —</option>
+            <option value="Child">Child</option>
+            <option value="Spouse">Spouse</option>
+            <option value="Parent">Parent</option>
+            <option value="Sibling">Sibling</option>
+            <option value="Grandparent">Grandparent</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="m-dob">Date of Birth</label>
+          <input type="date" id="m-dob" class="form-control">
+          <p class="form-hint"></p>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-save-btn" onclick="saveMember()">
+          <i class="fa-solid fa-floppy-disk"></i> Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ==========================================================
+    // FAMILY PROFILES PAGE JAVASCRIPT
+    // ==========================================================
+
+    fetch('../php/session_check.php')
+      .then(r => r.json())
+      .then(d => {
+        if (!d.logged_in || d.role !== 'patient') {
+          window.location.href = '../index.html?msg=login_required';
+        }
+      });
+
+    async function loadFamily() {
+      try {
+        const res    = await fetch('../php/get_family.php');
+        const family = await res.json();
+
+        document.getElementById('fam-loading').style.display = 'none';
+
+        if (!family.length) {
+          document.getElementById('fam-empty').style.display = 'block';
+          return;
+        }
+
+        const grid = document.getElementById('family-grid');
+        grid.innerHTML = '';
+
+        family.forEach(f => {
+          // Calculate age from date of birth if provided
+          let ageText = '';
+          if (f.date_of_birth) {
+            const dob  = new Date(f.date_of_birth);
+            const age  = Math.floor(
+              (Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+            );
+            ageText = `Date of birth: ${formatDate(f.date_of_birth)} (${age} yrs)`;
+          }
+
+          const card = document.createElement('div');
+          card.className = 'family-card';
+          card.innerHTML = `
+            <div class="fc-name">${escapeHtml(f.full_name)}</div>
+            <div class="fc-relation">${escapeHtml(f.relationship)}</div>
+            <div class="fc-dob">
+              ${ageText || '<span class="text-muted">No date of birth set</span>'}
+            </div>
+            <div class="fc-actions">
+              <button class="btn btn-ghost btn-sm"
+                      onclick='editMember(${JSON.stringify(f)})'>
+                <i class="fa-solid fa-pen"></i> Edit
+              </button>
+              <button class="btn btn-danger btn-sm"
+                      onclick="deleteMember(${f.profile_id}, this)">
+                <i class="fa-solid fa-trash"></i> Remove
+              </button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+      } catch (err) {
+        document.getElementById('fam-loading').style.display = 'none';
+        document.getElementById('fam-empty').style.display   = 'block';
+      }
+    }
+
+    function openModal() {
+      document.getElementById('modal-title').textContent   = 'Add Family Member';
+      document.getElementById('edit-profile-id').value     = '';
+      document.getElementById('m-name').value              = '';
+      document.getElementById('m-relation').value          = '';
+      document.getElementById('m-dob').value               = '';
+      document.getElementById('modal-alert').style.display = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function editMember(member) {
+      document.getElementById('modal-title').textContent   = 'Edit Family Member';
+      document.getElementById('edit-profile-id').value     = member.profile_id;
+      document.getElementById('m-name').value              = member.full_name;
+      document.getElementById('m-relation').value          = member.relationship;
+      document.getElementById('m-dob').value               = member.date_of_birth || '';
+      document.getElementById('modal-alert').style.display = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    async function saveMember() {
+      const profileId = document.getElementById('edit-profile-id').value;
+      const name      = document.getElementById('m-name').value.trim();
+      const relation  = document.getElementById('m-relation').value;
+      const dob       = document.getElementById('m-dob').value;
+      const box       = document.getElementById('modal-alert');
+
+      if (!name || !relation) {
+        box.textContent   = 'Name and relationship are required.';
+        box.style.display = 'block';
+        return;
+      }
+
+      setLoading('modal-save-btn', true);
+
+      try {
+        const res  = await fetch('../php/save_family.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            profile_id: profileId, name, relationship: relation, date_of_birth: dob
+          }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          closeModal();
+          showAlert(profileId ? 'Member updated.' : 'Member added.', 'success');
+          // Reload cards
+          document.getElementById('family-grid').innerHTML = '';
+          document.getElementById('fam-empty').style.display  = 'none';
+          document.getElementById('fam-loading').style.display = 'block';
+          loadFamily();
+        } else {
+          box.textContent   = data.error || 'Save failed.';
+          box.style.display = 'block';
+        }
+      } catch (err) {
+        box.textContent   = 'Network error. Try again.';
+        box.style.display = 'block';
+      }
+
+      setLoading('modal-save-btn', false);
+    }
+
+    async function deleteMember(profileId, btn) {
+      if (!confirmAction('Remove this family member?')) return;
+      btn.disabled = true;
+
+      try {
+        const res  = await fetch('../php/save_family.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profile_id: profileId, delete: true }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert('Family member removed.', 'success');
+          document.getElementById('family-grid').innerHTML    = '';
+          document.getElementById('fam-loading').style.display = 'block';
+          document.getElementById('fam-empty').style.display  = 'none';
+          loadFamily();
+        } else {
+          btn.disabled = false;
+          showAlert(data.error || 'Failed.', 'error');
+        }
+      } catch (err) {
+        btn.disabled = false;
+      }
+    }
+
+    loadFamily();
+  </script>
+
+</body>
+</html>

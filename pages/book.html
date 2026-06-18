@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment — HAMS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="dashboard.html" class="navbar-brand">
+      <i class="fa-solid fa-hospital"></i> HAMS
+    </a>
+    <div class="navbar-links">
+      <a href="dashboard.html">
+        <i class="fa-solid fa-gauge"></i> Dashboard
+      </a>
+      <a href="book.html" class="active">
+        <i class="fa-solid fa-calendar-plus"></i> Book
+      </a>
+      <a href="appointments.html">
+        <i class="fa-solid fa-calendar-check"></i> My Appointments
+      </a>
+      <a href="family.html">
+        <i class="fa-solid fa-people-group"></i> Family
+      </a>
+      <div class="divider"></div>
+      <a href="../php/logout.php">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <div style="padding:28px 32px; max-width:680px; margin:0 auto;">
+
+    <div class="page-header">
+      <div>
+        <h2>Book an Appointment</h2>
+        <p class="text-muted text-sm">Complete each step to schedule your visit.</p>
+      </div>
+      <a href="dashboard.html" class="btn btn-ghost btn-sm">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </a>
+    </div>
+
+    <!-- Alert box for errors -->
+    <div id="alert-box" class="alert" style="display:none;"></div>
+
+    <!-- Success message shown after booking -->
+    <div id="success-box" class="alert alert-success" style="display:none;">
+      <i class="fa-solid fa-circle-check"></i>
+      <strong>Appointment booked!</strong> A confirmation has been logged.
+      <br><a href="appointments.html">View your appointments</a>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+
+        <!--
+          Step indicator bar.
+          JS adds/removes 'active' and 'done' classes as the
+          user progresses through the steps.
+          Styles for .step, .step.active, .step.done are in style.css.
+        -->
+        <div class="step-indicator" id="step-bar">
+          <div class="step active" id="step-1">
+            <div class="num">1</div>
+            <span>Department</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="step-2">
+            <div class="num">2</div>
+            <span>Doctor</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="step-3">
+            <div class="num">3</div>
+            <span>Date & Slot</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" id="step-4">
+            <div class="num">4</div>
+            <span>Confirm</span>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- =====================================================
+             STEP 1: Choose Department
+             Departments are loaded from php/get_departments.php
+             when the page first opens.
+             ===================================================== -->
+        <div id="section-dept">
+          <div class="form-group">
+            <label for="dept_id">
+              <i class="fa-solid fa-building-columns"></i> Select Department
+            </label>
+            <select id="dept_id" class="form-control">
+              <option value="">— Loading departments... —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- =====================================================
+             STEP 2: Choose Doctor
+             Hidden until a department is selected.
+             Doctors are fetched from php/get_doctors.php?dept_id=X
+             ===================================================== -->
+        <div id="section-doctor" style="display:none;">
+          <div class="form-group">
+            <label for="doctor_id">
+              <i class="fa-solid fa-user-doctor"></i> Select Doctor
+            </label>
+            <select id="doctor_id" class="form-control">
+              <option value="">— Select a doctor —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- =====================================================
+             STEP 3: Choose Date then Slot
+             Date input appears after a doctor is chosen.
+             Time slot buttons appear after a date is picked.
+             ===================================================== -->
+        <div id="section-date" style="display:none;">
+          <div class="form-group">
+            <label for="slot_date">
+              <i class="fa-solid fa-calendar"></i> Preferred Date
+            </label>
+            <input type="date" id="slot_date" class="form-control">
+            <p class="form-hint">
+              You can book up to 30 days in advance.
+            </p>
+          </div>
+        </div>
+
+        <div id="section-slots" style="display:none;">
+          <div class="form-group">
+            <label>
+              <i class="fa-solid fa-clock"></i> Available Time Slots
+            </label>
+            <!--
+              .slots-grid is a flex container defined in style.css.
+              JS injects slot buttons here after fetching from PHP.
+              Each button has class="slot-btn" and gets class "selected"
+              when clicked — style.css handles the blue fill colour.
+            -->
+            <div class="slots-grid" id="slots-grid"></div>
+            <!-- Hidden input carries the selected slot_id to the PHP endpoint -->
+            <input type="hidden" id="slot_id" value="">
+          </div>
+        </div>
+
+        <!-- =====================================================
+             STEP 4: Notes + Family + Confirm button
+             Hidden until a time slot is selected.
+             ===================================================== -->
+        <div id="section-confirm" style="display:none;">
+
+          <!-- Who is this appointment for? -->
+          <div class="form-group">
+            <label for="family_profile_id">
+              <i class="fa-solid fa-person"></i> Booking for
+            </label>
+            <select id="family_profile_id" class="form-control">
+              <option value="0">Myself</option>
+              <!--
+                Family members are loaded by JS from
+                php/get_family.php after the page loads.
+              -->
+            </select>
+          </div>
+
+          <!-- Optional notes/symptoms -->
+          <div class="form-group">
+            <label for="notes">
+              <i class="fa-solid fa-note-sticky"></i> Symptoms / Notes
+              <span class="text-muted" style="font-weight:400;"> (optional)</span>
+            </label>
+            <textarea id="notes" class="form-control" rows="3"
+                      placeholder="Briefly describe your symptoms or reason for the visit..."
+                      maxlength="500"></textarea>
+            <p class="form-hint">
+              <span id="notes-count">0</span>/500 characters
+            </p>
+          </div>
+
+          <!-- Booking summary shown before confirming -->
+          <div id="booking-summary" class="alert alert-info" style="margin-bottom:20px;">
+            <p style="margin:0; font-weight:600;">
+              <i class="fa-solid fa-circle-info"></i> Booking Summary
+            </p>
+            <p style="margin:4px 0 0;" id="summary-text"></p>
+          </div>
+
+          <button class="btn btn-primary btn-block" id="confirm-btn"
+                  onclick="submitBooking()">
+            <i class="fa-solid fa-circle-check"></i> Confirm Booking
+          </button>
+
+        </div>
+
+      </div><!-- end card-body -->
+    </div><!-- end card -->
+
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ==========================================================
+    // BOOK APPOINTMENT PAGE JAVASCRIPT
+    // ==========================================================
+    // Flow:
+    //   Page load  → fetch departments, load family profiles
+    //   Dept chosen → fetch doctors for that dept    (step 1 → 2)
+    //   Doctor chosen → show date picker             (step 2 → 3)
+    //   Date chosen → fetch available slots          (step 3)
+    //   Slot chosen → show confirm section           (step 3 → 4)
+    //   Confirm btn → POST to php/book_appointment.php
+    // ==========================================================
+    //
+    // TIME RESTRICTION LOGIC:
+    //   - Any time slot that has already passed (based on current server/client time)
+    //     will be automatically filtered out and not displayed
+    //   - For same-day slots: slots with start_time earlier than current time are removed
+    //   - Future dates: all slots are shown normally
+    //   - 30-day maximum booking window maintained from original date picker logic
+    // ==========================================================
+
+    // Check login on load
+    fetch('../php/session_check.php')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.logged_in || data.role !== 'patient') {
+          window.location.href = '../index.html?msg=login_required';
+        }
+      });
+
+    // Set date input limits
+    const now     = new Date();
+    const today   = now.toISOString().split('T')[0];
+    const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                      .toISOString().split('T')[0];
+
+    document.getElementById('slot_date').min = today;
+    document.getElementById('slot_date').max = maxDate;
+    
+    // --- Step indicator helper ---
+    // Call this when the user moves to a new step.
+    // stepNum: 1, 2, 3, or 4
+    function setStep(stepNum) {
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById('step-' + i);
+        el.classList.remove('active', 'done');
+        if (i < stepNum)  el.classList.add('done');
+        if (i === stepNum) el.classList.add('active');
+      }
+    }
+
+    // Helper to show/hide a section div
+    function show(id) { document.getElementById(id).style.display = ''; }
+    function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+    // ==========================================================
+    // TIME RESTRICTION HELPER FUNCTION
+    // ==========================================================
+    // Checks if a given time slot has already passed based on the selected date
+    // Returns: true if slot is still available (future), false if it has passed
+    function isSlotAvailable(slotTime, slotDate) {
+      const now = new Date();
+      const [hours, minutes] = slotTime.split(':');
+      const slotDateTime = new Date(slotDate);
+      slotDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      // Compare with current time
+      // If slot time is less than current time, it has passed and should be removed
+      return slotDateTime > now;
+    }
+
+    // ==========================================================
+    // FILTER PASSED TIME SLOTS
+    // ==========================================================
+    // Filters an array of slots to remove any that have already passed
+    // Only applied for slots on the current date
+    function filterPassedSlots(slots, selectedDate) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      
+      // If selected date is today, filter out passed slots
+      if (selectedDate === todayStr) {
+        return slots.filter(slot => {
+          const isAvailable = isSlotAvailable(slot.start_time, selectedDate);
+          if (!isAvailable) {
+            console.log(`Slot at ${slot.start_time} has been removed (time passed)`);
+          }
+          return isAvailable;
+        });
+      }
+      
+      // For future dates, return all slots
+      return slots;
+    }
+
+    // ==========================================================
+    // PAGE LOAD: fetch departments and family profiles
+    // ==========================================================
+    async function init() {
+
+      // --- Load departments into the dropdown ---
+      try {
+        const res   = await fetch('../php/get_departments.php');
+        const depts = await res.json();
+        const sel   = document.getElementById('dept_id');
+
+        sel.innerHTML = '<option value="">— Select a department —</option>';
+        depts.forEach(d => {
+          const opt   = document.createElement('option');
+          opt.value   = d.dept_id;
+          opt.textContent = d.dept_name;
+          sel.appendChild(opt);
+        });
+      } catch (err) {
+        showAlert('Failed to load departments. Refresh the page.', 'error');
+      }
+
+      // --- Load family profiles into the confirm step dropdown ---
+      try {
+        const res    = await fetch('../php/get_family.php');
+        const family = await res.json();
+        const sel    = document.getElementById('family_profile_id');
+
+        family.forEach(f => {
+          const opt   = document.createElement('option');
+          opt.value   = f.profile_id;
+          // Show name and relationship e.g. "Baraka Juma (Child)"
+          opt.textContent = `${escapeHtml(f.full_name)} (${escapeHtml(f.relationship)})`;
+          sel.appendChild(opt);
+        });
+      } catch (err) {
+        // Family profiles are optional — fail silently
+        console.warn('Could not load family profiles:', err);
+      }
+    }
+
+    init();
+
+    // ==========================================================
+    // STEP 1 → 2: Department selected, load doctors
+    // ==========================================================
+    document.getElementById('dept_id').addEventListener('change', async function () {
+      // Reset everything below this step
+      hide('section-doctor');
+      hide('section-date');
+      hide('section-slots');
+      hide('section-confirm');
+      document.getElementById('slot_id').value = '';
+
+      if (!this.value) return;
+
+      setStep(2);
+
+      try {
+        const res     = await fetch(`../php/get_doctors.php?dept_id=${this.value}`);
+        const doctors = await res.json();
+        const sel     = document.getElementById('doctor_id');
+
+        sel.innerHTML = '<option value="">— Select a doctor —</option>';
+
+        if (!doctors.length) {
+          sel.innerHTML = '<option value="">No doctors available in this department</option>';
+        } else {
+          doctors.forEach(d => {
+            const opt   = document.createElement('option');
+            opt.value   = d.doctor_id;
+            // Show specialization if available e.g. "Dr. Salim Hassan — Pediatrics"
+            opt.textContent = `Dr. ${escapeHtml(d.full_name)}${d.specialization ? ' — ' + escapeHtml(d.specialization) : ''}`;
+            sel.appendChild(opt);
+          });
+        }
+
+        show('section-doctor');
+
+      } catch (err) {
+        showAlert('Failed to load doctors. Try again.', 'error');
+      }
+    });
+
+    // ==========================================================
+    // STEP 2 → 3: Doctor selected, show date picker
+    // ==========================================================
+    document.getElementById('doctor_id').addEventListener('change', function () {
+      hide('section-date');
+      hide('section-slots');
+      hide('section-confirm');
+      document.getElementById('slot_id').value = '';
+      document.getElementById('slot_date').value = '';
+
+      if (!this.value) return;
+
+      setStep(3);
+      show('section-date');
+    });
+
+    // ==========================================================
+    // STEP 3: Date chosen, load available time slots
+    // WITH TIME RESTRICTION: Removes any passed time slots from the page
+    // ==========================================================
+    document.getElementById('slot_date').addEventListener('change', async function () {
+      hide('section-slots');
+      hide('section-confirm');
+      document.getElementById('slot_id').value = '';
+
+      const doctorId = document.getElementById('doctor_id').value;
+      if (!this.value || !doctorId) return;
+
+      const grid = document.getElementById('slots-grid');
+      // Show loading indicator while fetching
+      grid.innerHTML = '<span class="spinner"></span>';
+      show('section-slots');
+
+      try {
+        const res   = await fetch(`../php/get_slots.php?doctor_id=${doctorId}&date=${this.value}`);
+        let slots = await res.json();
+
+        // ==========================================================
+        // TIME RESTRICTION IMPLEMENTATION:
+        // Filter out any time slots that have already passed
+        // ==========================================================
+        const selectedDate = this.value;
+        const originalCount = slots.length;
+        
+        slots = filterPassedSlots(slots, selectedDate);
+        
+        // Log filtering results for debugging
+        if (originalCount !== slots.length) {
+          console.log(`Time restriction applied: Removed ${originalCount - slots.length} passed slot(s) from ${selectedDate}`);
+          console.log(`Remaining available slots: ${slots.length}`);
+        }
+
+        grid.innerHTML = '';
+
+        if (!slots.length) {
+          grid.innerHTML = '<p class="text-muted text-sm">No available slots on this date. Try another date.</p>';
+          return;
+        }
+
+        // Build one button per slot (only for available/future slots)
+        slots.forEach(s => {
+          const btn       = document.createElement('button');
+          btn.type        = 'button';
+          btn.className   = 'slot-btn';
+          // formatTime() is defined in main.js
+          btn.textContent = formatTime(s.start_time);
+          btn.dataset.id  = s.slot_id;
+
+          btn.addEventListener('click', function () {
+            // ==========================================================
+            // ADDITIONAL SAFETY CHECK:
+            // Double-check the slot hasn't passed just before booking
+            // ==========================================================
+            const currentDate = new Date().toISOString().split('T')[0];
+            if (selectedDate === currentDate) {
+              const [hours, minutes] = s.start_time.split(':');
+              const now = new Date();
+              const slotTime = new Date(selectedDate);
+              slotTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+              
+              if (slotTime <= now) {
+                showAlert('This time slot has already passed. Please select a different slot.', 'error');
+                return;
+              }
+            }
+            
+            // Remove 'selected' from all buttons, add to this one
+            grid.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            // Store the chosen slot ID in the hidden input
+            document.getElementById('slot_id').value = s.slot_id;
+
+            // Update booking summary text shown above the confirm button
+            const deptName   = document.getElementById('dept_id').options[document.getElementById('dept_id').selectedIndex].text;
+            const doctorName = document.getElementById('doctor_id').options[document.getElementById('doctor_id').selectedIndex].text;
+            const dateStr    = formatDate(document.getElementById('slot_date').value);
+            const timeStr    = formatTime(s.start_time);
+
+            document.getElementById('summary-text').textContent =
+              `${deptName} · ${doctorName} · ${dateStr} at ${timeStr}`;
+
+            setStep(4);
+            show('section-confirm');
+          });
+
+          grid.appendChild(btn);
+        });
+
+      } catch (err) {
+        grid.innerHTML = '<p class="text-muted text-sm">Failed to load slots. Try again.</p>';
+        console.error('Error loading slots:', err);
+      }
+    });
+
+    // Notes character counter
+    document.getElementById('notes').addEventListener('input', function () {
+      document.getElementById('notes-count').textContent = this.value.length;
+    });
+
+    // ==========================================================
+    // STEP 4: Submit booking to PHP
+    // ==========================================================
+    async function submitBooking() {
+      const slot_id         = document.getElementById('slot_id').value;
+      const doctor_id       = document.getElementById('doctor_id').value;
+      const dept_id         = document.getElementById('dept_id').value;
+      const notes           = document.getElementById('notes').value.trim();
+      const family_profile_id = document.getElementById('family_profile_id').value;
+
+      if (!slot_id) {
+        showAlert('Please select a time slot.', 'error');
+        return;
+      }
+
+      // ==========================================================
+      // FINAL TIME VERIFICATION BEFORE SUBMISSION:
+      // Ensure the selected slot hasn't passed during user interaction
+      // ==========================================================
+      const selectedDate = document.getElementById('slot_date').value;
+      const todayStr = new Date().toISOString().split('T')[0];
+      
+      if (selectedDate === todayStr) {
+        // Get the selected slot time from the button text
+        const selectedBtn = document.querySelector('#slots-grid .slot-btn.selected');
+        if (selectedBtn) {
+          const slotTime = selectedBtn.textContent;
+          // Convert from display format (e.g., "2:30 PM") to 24-hour format for comparison
+          const timeMatch = slotTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+          if (timeMatch) {
+            let hours = parseInt(timeMatch[1]);
+            const minutes = parseInt(timeMatch[2]);
+            const ampm = timeMatch[3].toUpperCase();
+            
+            if (ampm === 'PM' && hours !== 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+            
+            const now = new Date();
+            const slotDateTime = new Date(selectedDate);
+            slotDateTime.setHours(hours, minutes, 0, 0);
+            
+            if (slotDateTime <= now) {
+              showAlert('This time slot has already passed. Please select a different slot.', 'error');
+              return;
+            }
+          }
+        }
+      }
+
+      setLoading('confirm-btn', true);
+
+      try {
+        // Send data as JSON to the PHP endpoint
+        const res  = await fetch('../php/book_appointment.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          // JSON.stringify converts the JS object to a JSON string
+          body: JSON.stringify({ slot_id, doctor_id, dept_id, notes, family_profile_id }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Hide the form card, show success message
+          document.querySelector('.card').style.display = 'none';
+          show('success-box');
+          // Scroll to top so user sees the success message
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          showAlert(data.error || 'Booking failed. Please try again.', 'error');
+          setLoading('confirm-btn', false);
+        }
+
+      } catch (err) {
+        showAlert('Network error. Check your connection and try again.', 'error');
+        setLoading('confirm-btn', false);
+      }
+    }
+</script>
+
+</body>
+</html>

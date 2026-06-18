@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Schedules — HAMS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /*
+      Weekly schedule grid.
+      Seven columns — one per day of the week.
+      Each cell shows working hours or "Off".
+    */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .day-cell {
+      border: 1.5px solid var(--grey-200);
+      border-radius: var(--radius);
+      padding: 10px;
+      text-align: center;
+      font-size: 0.82rem;
+      background: var(--white);
+    }
+
+    /* Working day — blue top border */
+    .day-cell.working {
+      border-top: 3px solid var(--blue);
+    }
+
+    /* Day off — grey, muted appearance */
+    .day-cell.off {
+      background: var(--grey-100);
+      color: var(--grey-400);
+      border-top: 3px solid var(--grey-200);
+    }
+
+    .day-cell .day-name {
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      color: var(--grey-700);
+    }
+
+    .day-cell.off .day-name { color: var(--grey-400); }
+
+    .day-cell .day-hours {
+      font-size: 0.8rem;
+      color: var(--grey-700);
+      margin-bottom: 4px;
+    }
+
+    .day-cell .day-slots {
+      font-size: 0.75rem;
+      color: var(--grey-400);
+    }
+
+    /* Doctor schedule card */
+    .doctor-schedule-card {
+      background: var(--white);
+      border: 1px solid var(--grey-200);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .doctor-schedule-card .card-top {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--grey-200);
+      background: var(--grey-100);
+    }
+
+    .doctor-schedule-card .card-content {
+      padding: 16px 18px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.45); z-index:200;
+      align-items:center; justify-content:center; padding:16px;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:var(--white); border-radius:var(--radius);
+      width:100%; max-width:520px; box-shadow:var(--shadow-md);
+      max-height:90vh; overflow-y:auto;
+    }
+    .modal-header {
+      padding:16px 20px; border-bottom:1px solid var(--grey-200);
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; background:var(--white); z-index:1;
+    }
+    .modal-header h3 { margin:0; }
+    .modal-body  { padding:20px; }
+    .modal-footer {
+      padding:14px 20px; border-top:1px solid var(--grey-200);
+      display:flex; justify-content:flex-end; gap:10px;
+      position:sticky; bottom:0; background:var(--white);
+    }
+    .btn-close {
+      background:none; border:none; font-size:1.2rem;
+      cursor:pointer; color:var(--grey-400);
+    }
+    .btn-close:hover { color: var(--grey-900); }
+
+    /*
+      Day toggle inside the edit modal.
+      Each day has a checkbox and time inputs.
+      Time inputs are hidden when is_working is unchecked.
+    */
+    .day-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 1fr 80px;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--grey-200);
+      font-size: 0.88rem;
+    }
+    .day-row:last-child { border-bottom: none; }
+    .day-row label { font-weight: 600; }
+    .day-row input[type="time"],
+    .day-row input[type="number"] {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1.5px solid var(--grey-200);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-family: var(--font);
+    }
+    .day-row input:focus {
+      border-color: var(--blue);
+      outline: none;
+    }
+    .day-row.is-off input[type="time"],
+    .day-row.is-off input[type="number"] {
+      opacity: 0.3;
+      pointer-events: none; /* Cannot click time inputs when day is off */
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="navbar-brand">
+      <i class="fa-solid fa-hospital"></i> HAMS Admin
+    </a>
+    <div class="navbar-links">
+      <a href="admin-dashboard.html">
+        <i class="fa-solid fa-gauge"></i> Dashboard
+      </a>
+      <a href="admin-users.html">
+        <i class="fa-solid fa-users"></i> Users
+      </a>
+      <a href="admin-doctors.html">
+        <i class="fa-solid fa-user-doctor"></i> Doctors
+      </a>
+      <a href="admin-schedules.html" class="active">
+        <i class="fa-solid fa-calendar-week"></i> Schedules
+      </a>
+      <a href="admin-slots.html">
+        <i class="fa-solid fa-clock"></i> Slots
+      </a>
+      <div class="divider"></div>
+      <a href="../php/logout.php">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <a href="admin-dashboard.html">
+          <i class="fa-solid fa-gauge icon"></i> Dashboard
+        </a>
+        <a href="admin-appointments.html">
+          <i class="fa-solid fa-calendar-check icon"></i> All Appointments
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Manage</div>
+        <a href="admin-users.html">
+          <i class="fa-solid fa-users icon"></i> Users
+        </a>
+        <a href="admin-doctors.html">
+          <i class="fa-solid fa-user-doctor icon"></i> Doctors
+        </a>
+        <a href="admin-departments.html">
+          <i class="fa-solid fa-building-columns icon"></i> Departments
+        </a>
+        <a href="admin-schedules.html" class="active">
+          <i class="fa-solid fa-calendar-week icon"></i> Schedules
+        </a>
+        <a href="admin-slots.html">
+          <i class="fa-solid fa-clock icon"></i> Time Slots
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <a href="../php/logout.php">
+          <i class="fa-solid fa-right-from-bracket icon"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <div class="page-header">
+        <div>
+          <h2>Doctor Schedules</h2>
+          <p class="text-muted text-sm">
+            Set weekly working hours per doctor. Slots are generated
+            automatically from these rules.
+          </p>
+        </div>
+        <!--
+          Generate Slots button: calls generate_slots.php which reads
+          the schedule rules and creates time_slots for the next 7 days.
+          Safe to click multiple times — duplicates are ignored.
+        -->
+        <button class="btn btn-primary" id="gen-btn" onclick="generateSlots()">
+          <i class="fa-solid fa-rotate"></i> Generate Slots (Next 7 Days)
+        </button>
+      </div>
+
+      <div id="alert-box" class="alert" style="display:none;"></div>
+
+      <!-- Info box explaining the workflow -->
+      <div class="alert alert-info" style="margin-bottom:24px;">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong>How it works:</strong> Set each doctor's weekly schedule below.
+        Click <strong>Generate Slots</strong> to create bookable time slots for
+        the next 7 days. Run it daily or whenever you add a new doctor.
+        Individual slots can still be disabled from the
+        <a href="admin-slots.html">Time Slots</a> page.
+      </div>
+
+      <!-- Loading state -->
+      <div id="sched-loading"
+           style="text-align:center; padding:40px; color:var(--grey-400);">
+        <span class="spinner"></span>
+        <p style="margin-top:8px;">Loading schedules...</p>
+      </div>
+
+      <!-- Doctor schedule cards — one per doctor -->
+      <div id="sched-container"></div>
+
+      <!-- Empty state -->
+      <div id="sched-empty" class="empty-state" style="display:none;">
+        <i class="fa-solid fa-user-doctor"
+           style="font-size:2.5rem; color:var(--grey-400);
+                  display:block; margin-bottom:12px;"></i>
+        <p>No doctors found. Add doctors first.</p>
+        <a href="admin-doctors.html" class="btn btn-primary">
+          Manage Doctors
+        </a>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- EDIT SCHEDULE MODAL -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Edit Schedule</h3>
+        <button class="btn-close" onclick="closeModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-alert" class="alert alert-error"
+             style="display:none;"></div>
+
+        <input type="hidden" id="edit-doctor-id" value="">
+
+        <p class="text-muted text-sm" style="margin-bottom:16px;">
+          Uncheck a day to mark it as a day off.
+          Changes take effect next time you generate slots.
+        </p>
+
+        <!-- Day rows built by JS — one row per day of week -->
+        <div id="day-rows"></div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-save-btn"
+                onclick="saveSchedule()">
+          <i class="fa-solid fa-floppy-disk"></i> Save Schedule
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ==========================================================
+    // ADMIN SCHEDULES PAGE JAVASCRIPT
+    // ==========================================================
+
+    const DAY_NAMES = [
+      'Sunday','Monday','Tuesday','Wednesday',
+      'Thursday','Friday','Saturday'
+    ];
+
+    fetch('../php/session_check.php')
+      .then(r => r.json())
+      .then(d => {
+        if (!d.logged_in || d.role !== 'admin') {
+          window.location.href = '../index.html?msg=access_denied';
+        }
+      });
+
+    // --- Load all doctor schedules ---
+    async function loadSchedules() {
+      try {
+        const res     = await fetch('../php/admin_get_schedules.php');
+        const doctors = await res.json();
+
+        document.getElementById('sched-loading').style.display = 'none';
+
+        if (!doctors.length) {
+          document.getElementById('sched-empty').style.display = 'block';
+          return;
+        }
+
+        const container = document.getElementById('sched-container');
+        container.innerHTML = '';
+
+        doctors.forEach(doc => {
+          const card = document.createElement('div');
+          card.className = 'doctor-schedule-card';
+
+          // --- Build the 7-day grid for this doctor ---
+          const dayCells = doc.schedule.map(day => {
+            const isWorking = day.is_working == 1;
+
+            // Calculate how many slots this day produces
+            let slotCount = 0;
+            if (isWorking) {
+              const startM = timeToMins(day.start_time);
+              const endM   = timeToMins(day.end_time);
+              slotCount    = Math.floor((endM - startM) / day.slot_duration);
+            }
+
+            return `
+              <div class="day-cell ${isWorking ? 'working' : 'off'}">
+                <div class="day-name">${DAY_NAMES[day.day_of_week].slice(0,3)}</div>
+                ${isWorking ? `
+                  <div class="day-hours">
+                    ${day.start_time.slice(0,5)} – ${day.end_time.slice(0,5)}
+                  </div>
+                  <div class="day-slots">
+                    ${slotCount} slots · ${day.slot_duration}min
+                  </div>
+                ` : `
+                  <div class="day-hours" style="color:var(--grey-400);">Day Off</div>
+                `}
+              </div>
+            `;
+          }).join('');
+
+          card.innerHTML = `
+            <div class="card-top">
+              <div>
+                <strong>Dr. ${escapeHtml(doc.full_name)}</strong>
+                <span class="text-muted text-sm" style="margin-left:8px;">
+                  ${escapeHtml(doc.dept_name)}
+                  ${doc.specialization ? '· ' + escapeHtml(doc.specialization) : ''}
+                </span>
+              </div>
+              <button class="btn btn-ghost btn-sm"
+                      onclick='openModal(${JSON.stringify(doc)})'>
+                <i class="fa-solid fa-pen"></i> Edit Schedule
+              </button>
+            </div>
+            <div class="card-content">
+              <div class="week-grid">${dayCells}</div>
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+
+      } catch (err) {
+        document.getElementById('sched-loading').style.display = 'none';
+        document.getElementById('sched-empty').style.display   = 'block';
+        console.error('Load error:', err);
+      }
+    }
+
+    // Convert "HH:MM:SS" to total minutes — used for slot count calculation
+    function timeToMins(t) {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    // --- Open edit modal for a doctor ---
+    function openModal(doc) {
+      document.getElementById('modal-title').textContent   =
+        `Edit Schedule — Dr. ${doc.full_name}`;
+      document.getElementById('edit-doctor-id').value      = doc.doctor_id;
+      document.getElementById('modal-alert').style.display = 'none';
+
+      const container = document.getElementById('day-rows');
+      container.innerHTML = '';
+
+      // Build one row per day of the week
+      doc.schedule.forEach(day => {
+        const isWorking = day.is_working == 1;
+        const rowId     = `day-${day.day_of_week}`;
+
+        const row = document.createElement('div');
+        row.className = `day-row ${isWorking ? '' : 'is-off'}`;
+        row.id        = rowId;
+
+        row.innerHTML = `
+          <label>
+            <!--
+              Checkbox controls whether this day is a working day.
+              When unchecked, the time inputs become disabled via
+              the .is-off CSS class which sets pointer-events:none.
+            -->
+            <input type="checkbox"
+                   id="chk-${day.day_of_week}"
+                   ${isWorking ? 'checked' : ''}
+                   onchange="toggleDay(${day.day_of_week})">
+            ${DAY_NAMES[day.day_of_week]}
+          </label>
+          <input type="time"
+                 id="start-${day.day_of_week}"
+                 value="${day.start_time.slice(0,5)}"
+                 title="Start time">
+          <input type="time"
+                 id="end-${day.day_of_week}"
+                 value="${day.end_time.slice(0,5)}"
+                 title="End time">
+          <input type="number"
+                 id="dur-${day.day_of_week}"
+                 value="${day.slot_duration}"
+                 min="10" max="120" step="5"
+                 title="Slot duration in minutes">
+        `;
+
+        container.appendChild(row);
+      });
+
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    // Toggle a day row between working and off
+    function toggleDay(dayNum) {
+      const row       = document.getElementById(`day-${dayNum}`);
+      const isChecked = document.getElementById(`chk-${dayNum}`).checked;
+      // Add/remove is-off class which controls the CSS opacity + pointer-events
+      row.classList.toggle('is-off', !isChecked);
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // --- Save the edited schedule ---
+    async function saveSchedule() {
+      const doctorId = document.getElementById('edit-doctor-id').value;
+      const alertBox = document.getElementById('modal-alert');
+
+      // Collect all 7 days from the modal form
+      const days = [];
+      for (let d = 0; d <= 6; d++) {
+        days.push({
+          day_of_week:    d,
+          is_working:     document.getElementById(`chk-${d}`).checked ? 1 : 0,
+          start_time:     document.getElementById(`start-${d}`).value,
+          end_time:       document.getElementById(`end-${d}`).value,
+          slot_duration:  parseInt(document.getElementById(`dur-${d}`).value),
+        });
+      }
+
+      // Validate: working days must have valid times
+      for (const day of days) {
+        if (day.is_working) {
+          if (!day.start_time || !day.end_time) {
+            alertBox.textContent   = `${DAY_NAMES[day.day_of_week]}: start and end time are required.`;
+            alertBox.style.display = 'block';
+            return;
+          }
+          if (day.end_time <= day.start_time) {
+            alertBox.textContent   = `${DAY_NAMES[day.day_of_week]}: end time must be after start time.`;
+            alertBox.style.display = 'block';
+            return;
+          }
+          if (!day.slot_duration || day.slot_duration < 10) {
+            alertBox.textContent   = `${DAY_NAMES[day.day_of_week]}: slot duration must be at least 10 minutes.`;
+            alertBox.style.display = 'block';
+            return;
+          }
+        }
+      }
+
+      setLoading('modal-save-btn', true);
+
+      try {
+        const res  = await fetch('../php/admin_save_schedule.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ doctor_id: doctorId, days }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          closeModal();
+          showAlert('Schedule saved. Click Generate Slots to apply changes.', 'success');
+          loadSchedules(); // Refresh the cards
+        } else {
+          alertBox.textContent   = data.error || 'Save failed.';
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.textContent   = 'Network error. Try again.';
+        alertBox.style.display = 'block';
+      }
+
+      setLoading('modal-save-btn', false);
+    }
+
+    // --- Run the slot generator ---
+    async function generateSlots() {
+      setLoading('gen-btn', true);
+
+      try {
+        const res  = await fetch('../php/generate_slots.php');
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert(data.message, 'success');
+        } else {
+          showAlert(data.error || 'Generation failed.', 'error');
+        }
+      } catch (err) {
+        showAlert('Network error. Try again.', 'error');
+      }
+
+      setLoading('gen-btn', false);
+    }
+
+    loadSchedules();
+  </script>
+
+</body>
+</html>

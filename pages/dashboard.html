@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard — HAMS</title>
+  <!-- Font Awesome  -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!--
+    PHP session check happens in php/session_check.php which is fetched
+    by main.js on page load. If the user is not logged in,
+    JS redirects them to the login page automatically.
+  -->
+
+  <!-- ============================================================
+       NAVBAR
+       The navbar is the same on every patient page.
+       To change the brand name or links, edit this section.
+       ============================================================ -->
+  <nav class="navbar">
+
+    <!-- Brand -->
+    <a href="dashboard.html" class="navbar-brand">
+      <span>🏥</span> HAMS
+    </a>
+
+    <!-- Navigation links (right side) -->
+    <div class="navbar-links">
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="book.html">Book Appointment</a>
+      <a href="appointments.html">My Appointments</a>
+      <a href="family.html">Family</a>
+      <div class="divider"></div>
+      <!--
+        The user's name is inserted here by JavaScript
+        after fetching it from the PHP session.
+      -->
+      <a href="profile.html" id="nav-username">Account</a>
+      <a href="../php/logout.php">Logout</a>
+    </div>
+
+  </nav>
+
+  <!-- ============================================================
+       MAIN CONTENT
+       No sidebar on patient pages — full width layout.
+       ============================================================ -->
+  <div style="padding: 28px 32px; max-width: 1100px; margin: 0 auto;">
+
+    <!-- Page header: greeting + quick action button -->
+    <div class="page-header">
+      <div>
+        <!--
+          id="greeting": JavaScript will replace "Patient" with the
+          actual logged-in user's name fetched from PHP.
+        -->
+        <h2>Welcome back, <span id="greeting">Patient</span> </h2>
+        <p class="text-muted text-sm" id="today-date"></p>
+      </div>
+      <a href="book.html" class="btn btn-primary">+ Book Appointment</a>
+    </div>
+
+    <!-- ============================================================
+         STAT CARDS
+         Four summary numbers. The values are loaded by JavaScript
+         which fetches them from php/get_stats.php
+         ============================================================ -->
+    <div class="stats-grid">
+
+      <!-- Total booked -->
+      <div class="stat-card">
+        <div class="stat-label">Total Booked</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-sub">all time</div>
+      </div>
+
+      <!-- Upcoming -->
+      <div class="stat-card" style="border-top-color:#3b82f6;">
+        <div class="stat-label">Upcoming</div>
+        <div class="stat-value" id="stat-upcoming">—</div>
+        <div class="stat-sub">pending or confirmed</div>
+      </div>
+
+      <!-- Completed -->
+      <div class="stat-card green">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" id="stat-completed">—</div>
+        <div class="stat-sub">seen by doctor</div>
+      </div>
+
+      <!-- Cancelled -->
+      <div class="stat-card red">
+        <div class="stat-label">Cancelled</div>
+        <div class="stat-value" id="stat-cancelled">—</div>
+        <div class="stat-sub">by you or staff</div>
+      </div>
+
+    </div><!-- end stats-grid -->
+
+    <!-- ============================================================
+         RECENT APPOINTMENTS TABLE
+         Loaded by JavaScript from php/get_appointments.php
+         ============================================================ -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Recent Appointments</h3>
+        <a href="appointments.html" class="btn btn-ghost btn-sm">View All</a>
+      </div>
+
+      <div class="card-body" style="padding:0;">
+
+        <!-- Shown while the table data is loading -->
+        <div id="table-loading" style="padding:32px; text-align:center; color:var(--grey-400);">
+          <span class="spinner"></span>
+          <p style="margin-top:8px;">Loading appointments...</p>
+        </div>
+
+        <!-- The actual table — hidden until data loads -->
+        <div id="table-wrap" style="display:none;">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Patient</th>
+                  <th>Doctor</th>
+                  <th>Department</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <!--
+                tbody is empty here.
+                JavaScript builds the rows and inserts them here
+                after fetching data from php/get_appointments.php
+              -->
+              <tbody id="appointments-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Shown when the patient has no appointments yet -->
+        <div id="table-empty" class="empty-state" style="display:none;">
+          <span class="icon"><i class="fa-solid fa-calendar-xmark"></i></span>
+          <p>No appointments yet.</p>
+          <a href="book.html" class="btn btn-primary">Book Your First Appointment</a>
+        </div>
+
+      </div><!-- end card-body -->
+    </div><!-- end card -->
+
+    <!-- ============================================================
+         QUICK LINKS
+         Three shortcut cards at the bottom of the dashboard.
+         ============================================================ -->
+    <div class="quick-links">
+
+      <a href="book.html" class="quick-link-card">
+        <span class="icon"><i class="fa-solid fa-calendar-plus"></i></span>
+        <div class="title">Book Appointment</div>
+        <div class="sub">Choose a doctor and time slot</div>
+      </a>
+
+      <a href="appointments.html" class="quick-link-card">
+        <span class="icon"><i class="fa-solid fa-calendar-check"></i></span>
+        <div class="title">My Appointments</div>
+        <div class="sub">View, cancel or reschedule</div>
+      </a>
+
+      <a href="family.html" class="quick-link-card">
+        <span class="icon"><i class="fa-solid fa-users"></i></span>
+        <div class="title">Family Profiles</div>
+        <div class="sub">Book for a family member</div>
+      </a>
+
+    </div>
+
+  </div><!-- end main content -->
+
+  <footer>
+    &copy; <span id="footer-year"></span> Health Appointment Management System | Developed by Group 09
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ===========================================================
+    // DASHBOARD PAGE JAVASCRIPT
+    // ===========================================================
+
+    // Set today's date in the page header
+    document.getElementById('today-date').textContent =
+      new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    // Set footer year automatically
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+    // --- Load session info (logged-in user's name and role) ---
+    // We call php/session_check.php which returns JSON like:
+    // { "logged_in": true, "name": "Amina Juma", "role": "patient" }
+    async function loadSession() {
+      try {
+        const res  = await fetch('../php/session_check.php');
+        const data = await res.json();
+
+        if (!data.logged_in) {
+          // Not logged in — send back to login page
+          window.location.href = '../index.html?msg=login_required';
+          return;
+        }
+
+        if (data.role !== 'patient') {
+          // Wrong role — e.g. admin trying to access patient pages
+          window.location.href = '../index.html?msg=access_denied';
+          return;
+        }
+
+        // Insert the user's first name into the greeting
+        const firstName = data.name.split(' ')[0];
+        document.getElementById('greeting').textContent = firstName;
+        document.getElementById('nav-username').textContent = data.name;
+
+      } catch (err) {
+        console.error('Session check failed:', err);
+      }
+    }
+
+    // --- Load stat card numbers ---
+    // Fetches from php/get_stats.php which returns:
+    // { "total": 5, "upcoming": 2, "completed": 2, "cancelled": 1 }
+    async function loadStats() {
+      try {
+        const res  = await fetch('../php/get_stats.php');
+        const data = await res.json();
+
+        document.getElementById('stat-total').textContent     = data.total     ?? 0;
+        document.getElementById('stat-upcoming').textContent  = data.upcoming  ?? 0;
+        document.getElementById('stat-completed').textContent = data.completed ?? 0;
+        document.getElementById('stat-cancelled').textContent = data.cancelled ?? 0;
+
+      } catch (err) {
+        console.error('Stats load failed:', err);
+      }
+    }
+
+    // --- Load recent appointments table ---
+    // Fetches from php/get_appointments.php?limit=5
+    // Returns an array of appointment objects.
+    async function loadAppointments() {
+      try {
+        const res  = await fetch('../php/get_appointments.php?limit=5');
+        const data = await res.json();
+
+        // Hide the loading spinner
+        document.getElementById('table-loading').style.display = 'none';
+
+        if (!data.length) {
+          // Show empty state message
+          document.getElementById('table-empty').style.display = 'block';
+          return;
+        }
+
+        // Build HTML rows from the data
+        const tbody = document.getElementById('appointments-tbody');
+
+        data.forEach((appt, index) => {
+          // Determine who the appointment is for
+          const patientName = appt.family_name || 'Mysel';
+
+          // Format the date into DD/MM/YYYY
+          const date = new Date(appt.slot_date);
+          const formattedDate = date.toLocaleDateString('en-GB');
+
+          // Format the time into 12-hour format e.g. "08:30 AM"
+          const timeParts = appt.start_time.split(':');
+          const timeObj   = new Date();
+          timeObj.setHours(timeParts[0], timeParts[1]);
+          const formattedTime = timeObj.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true });
+
+          // Build the status badge HTML
+          // The badge class matches what we defined in style.css e.g. badge-seen
+          const badgeHtml = `<span class="badge badge-${appt.status}">${appt.status}</span>`;
+
+          // Build the action button — only show cancel if status allows it
+          let actionHtml = '—';
+          if (['pending','confirmed'].includes(appt.status)) {
+            actionHtml = `<a href="appointments.html?id=${appt.appt_id}"
+                            class="btn btn-ghost btn-sm">View</a>`;
+          }
+
+          // Create the table row
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${escapeHtml(patientName)}</td>
+            <td>Dr. ${escapeHtml(appt.doctor_name)}</td>
+            <td>${escapeHtml(appt.dept_name)}</td>
+            <td>${formattedDate}</td>
+            <td>${formattedTime}</td>
+            <td>${badgeHtml}</td>
+            <td>${actionHtml}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Show the table now that rows are inserted
+        document.getElementById('table-wrap').style.display = 'block';
+
+      } catch (err) {
+        console.error('Appointments load failed:', err);
+        document.getElementById('table-loading').style.display = 'none';
+        document.getElementById('table-empty').style.display   = 'block';
+      }
+    }
+
+    // Run all three loaders when the page opens
+    loadSession();
+    loadStats();
+    loadAppointments();
+  </script>
+
+</body>
+</html>

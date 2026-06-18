@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Appointments — HAMS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="navbar-brand">
+      <i class="fa-solid fa-hospital"></i> HAMS Admin
+    </a>
+    <div class="navbar-links">
+      <a href="admin-dashboard.html">
+        <i class="fa-solid fa-gauge"></i> Dashboard
+      </a>
+      <a href="admin-users.html">
+        <i class="fa-solid fa-users"></i> Users
+      </a>
+      <a href="admin-appointments.html" class="active">
+        <i class="fa-solid fa-calendar-check"></i> Appointments
+      </a>
+      <div class="divider"></div>
+      <a href="../php/logout.php">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <a href="admin-dashboard.html">
+          <i class="fa-solid fa-gauge icon"></i> Dashboard
+        </a>
+        <a href="admin-appointments.html" class="active">
+          <i class="fa-solid fa-calendar-check icon"></i> All Appointments
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Manage</div>
+        <a href="admin-users.html">
+          <i class="fa-solid fa-users icon"></i> Users
+        </a>
+        <a href="admin-doctors.html">
+          <i class="fa-solid fa-user-doctor icon"></i> Doctors
+        </a>
+        <a href="admin-departments.html">
+          <i class="fa-solid fa-building-columns icon"></i> Departments
+        </a>
+        <a href="admin-slots.html">
+          <i class="fa-solid fa-clock icon"></i> Time Slots
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <a href="../php/logout.php">
+          <i class="fa-solid fa-right-from-bracket icon"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <div class="page-header">
+        <div>
+          <h2>All Appointments</h2>
+          <p class="text-muted text-sm">View and manage every appointment in the system.</p>
+        </div>
+      </div>
+
+      <div id="alert-box" class="alert" style="display:none;"></div>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="padding:14px 16px;">
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+
+            <div class="input-icon-wrap" style="flex:1; min-width:180px;">
+              <i class="fa-solid fa-magnifying-glass icon"></i>
+              <input type="text" id="search-input" class="form-control"
+                     placeholder="Search patient or doctor..."
+                     oninput="filterTable()">
+            </div>
+
+            <select id="filter-status" class="form-control" style="width:170px;"
+                    onchange="filterTable()">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="arrived">Arrived</option>
+              <option value="seen">Seen</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="no_show">No Show</option>
+            </select>
+
+            <input type="date" id="filter-date" class="form-control"
+                   style="width:170px;" onchange="filterTable()">
+
+            <button class="btn btn-ghost btn-sm" onclick="clearFilters()">
+              <i class="fa-solid fa-filter-circle-xmark"></i> Clear
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments table -->
+      <div class="card">
+        <div class="card-body" style="padding:0;">
+
+          <div id="appt-loading" style="padding:32px; text-align:center; color:var(--grey-400);">
+            <span class="spinner"></span>
+            <p style="margin-top:8px;">Loading appointments...</p>
+          </div>
+
+          <div id="appt-wrap" style="display:none;">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Change Status</th>
+                  </tr>
+                </thead>
+                <tbody id="appt-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="appt-empty" class="empty-state" style="display:none;">
+            <i class="fa-solid fa-calendar-xmark"
+               style="font-size:2.5rem; color:var(--grey-400); display:block; margin-bottom:12px;"></i>
+            <p>No appointments found.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ==========================================================
+    // ADMIN APPOINTMENTS PAGE JAVASCRIPT
+    // ==========================================================
+
+    let allAppointments = []; // Stored after load for client-side filtering
+
+    fetch('../php/session_check.php')
+      .then(r => r.json())
+      .then(d => {
+        if (!d.logged_in || d.role !== 'admin') {
+          window.location.href = '../index.html?msg=access_denied';
+        }
+      });
+
+    // --- Load all appointments ---
+    async function loadAppointments() {
+      try {
+        const res        = await fetch('../php/admin_get_appointments.php');
+        allAppointments  = await res.json();
+
+        document.getElementById('appt-loading').style.display = 'none';
+        renderTable(allAppointments);
+
+      } catch (err) {
+        document.getElementById('appt-loading').style.display = 'none';
+        document.getElementById('appt-empty').style.display   = 'block';
+      }
+    }
+
+    // --- Render appointments into the table ---
+    function renderTable(data) {
+      const tbody = document.getElementById('appt-tbody');
+      tbody.innerHTML = '';
+
+      if (!data.length) {
+        document.getElementById('appt-wrap').style.display  = 'none';
+        document.getElementById('appt-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('appt-empty').style.display = 'none';
+      document.getElementById('appt-wrap').style.display  = 'block';
+
+      data.forEach((a, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="text-muted">${i + 1}</td>
+          <td>${escapeHtml(a.patient_name)}</td>
+          <td>Dr. ${escapeHtml(a.doctor_name)}</td>
+          <td>${escapeHtml(a.dept_name)}</td>
+          <td>${formatDate(a.slot_date)}</td>
+          <td>${formatTime(a.start_time)}</td>
+          <td id="badge-${a.appt_id}">${statusBadge(a.status)}</td>
+          <td>
+            <!--
+              Status dropdown: admin can move any appointment to
+              any valid status directly from this table.
+            -->
+            <select class="form-control" style="width:130px; padding:5px 10px; font-size:0.82rem;"
+                    onchange="changeStatus(${a.appt_id}, this.value, this)"
+                    id="sel-${a.appt_id}">
+              <option value="pending"   ${a.status==='pending'   ?'selected':''}>Pending</option>
+              <option value="confirmed" ${a.status==='confirmed' ?'selected':''}>Confirmed</option>
+              <option value="arrived"   ${a.status==='arrived'   ?'selected':''}>Arrived</option>
+              <option value="seen"      ${a.status==='seen'      ?'selected':''}>Seen</option>
+              <option value="cancelled" ${a.status==='cancelled' ?'selected':''}>Cancelled</option>
+              <option value="no_show"   ${a.status==='no_show'   ?'selected':''}>No Show</option>
+            </select>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- Client-side filter ---
+    function filterTable() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+      const date   = document.getElementById('filter-date').value;
+
+      const filtered = allAppointments.filter(a => {
+        const matchSearch = a.patient_name.toLowerCase().includes(search) ||
+                            a.doctor_name.toLowerCase().includes(search);
+        const matchStatus = status ? a.status === status : true;
+        const matchDate   = date   ? a.slot_date === date : true;
+        return matchSearch && matchStatus && matchDate;
+      });
+
+      renderTable(filtered);
+    }
+
+    function clearFilters() {
+      document.getElementById('search-input').value  = '';
+      document.getElementById('filter-status').value = '';
+      document.getElementById('filter-date').value   = '';
+      renderTable(allAppointments);
+    }
+
+    // --- Change appointment status via dropdown ---
+    async function changeStatus(apptId, newStatus, sel) {
+      sel.disabled = true;
+
+      try {
+        const res  = await fetch('../php/admin_update_appointment.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appt_id: apptId, status: newStatus }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Update only the badge in that row — no full reload needed
+          document.getElementById('badge-' + apptId).innerHTML = statusBadge(newStatus);
+          showAlert('Status updated.', 'success');
+
+          // Update our local data array to keep filters working correctly
+          const appt = allAppointments.find(a => a.appt_id == apptId);
+          if (appt) appt.status = newStatus;
+
+        } else {
+          showAlert(data.error || 'Update failed.', 'error');
+        }
+      } catch (err) {
+        showAlert('Network error.', 'error');
+      }
+
+      sel.disabled = false;
+    }
+
+    loadAppointments();
+  </script>
+
+</body>
+</html>

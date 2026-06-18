@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — HAMS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <!--
+    Font Awesome loaded from CDN.
+    All icons use class="fa-solid fa-..." syntax.
+    Full icon list: https://fontawesome.com/icons
+  -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="page-center">
+    <div class="auth-card">
+
+      <!-- Branding -->
+      <div class="logo">
+        <i class="fa-solid fa-hospital" style="font-size:2.5rem; color:var(--blue);"></i>
+        <h1>Create Account</h1>
+        <p>Register to book appointments online</p>
+      </div>
+
+      <!--
+        Alert box for validation errors passed back from PHP via URL.
+        PHP encodes errors as: ?errors=Name+required|Invalid+email
+        JS decodes and displays them here.
+      -->
+      <div id="alert-box" class="alert alert-error" style="display:none;"></div>
+
+      <!--
+        novalidate: disables browser built-in validation popups.
+        We handle validation ourselves in JS for better control
+        over error messages and styling.
+      -->
+      <form id="register-form" action="../php/register.php" method="POST" novalidate>
+
+        <!-- Full Name -->
+        <div class="form-group">
+          <label for="full_name">Full Name</label>
+          <div class="input-icon-wrap">
+            <i class="fa-solid fa-user icon"></i>
+            <input type="text" id="full_name" name="full_name"
+                   class="form-control" placeholder="e.g. Amina Juma"
+                   autocomplete="name" required>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="fa-solid fa-envelope icon"></i>
+            <input type="email" id="email" name="email"
+                   class="form-control" placeholder="yourname@email.com"
+                   autocomplete="email" required>
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <div class="input-icon-wrap">
+            <i class="fa-solid fa-phone icon"></i>
+            <input type="tel" id="phone" name="phone"
+                   class="form-control" placeholder="+255712345678"
+                   autocomplete="tel" required>
+          </div>
+          <p class="form-hint">Include country code, e.g. +255 for Tanzania</p>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-icon-wrap">
+            <i class="fa-solid fa-lock icon"></i>
+            <input type="password" id="password" name="password"
+                   class="form-control" placeholder="Minimum 8 characters"
+                   autocomplete="new-password" required>
+            <button type="button" class="toggle-pw"
+                    onclick="toggleVisibility('password', this)"
+                    title="Show or hide password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <!--
+            Password strength bar.
+            The fill div width and colour change via JS
+            as the user types. Styles are in style.css.
+          -->
+          <div class="strength-bar">
+            <div class="strength-bar-fill" id="strength-fill"></div>
+          </div>
+          <p class="form-hint" id="strength-label"></p>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirm">Confirm Password</label>
+          <div class="input-icon-wrap">
+            <i class="fa-solid fa-lock icon"></i>
+            <input type="password" id="confirm" name="confirm"
+                   class="form-control" placeholder="Re-enter your password"
+                   autocomplete="new-password" required>
+            <button type="button" class="toggle-pw"
+                    onclick="toggleVisibility('confirm', this)"
+                    title="Show or hide password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <p class="form-hint text-danger" id="match-msg" style="display:none;">
+            Passwords do not match.
+          </p>
+        </div>
+
+        <div class="form-group" style="margin-top:24px;">
+          <button type="submit" class="btn btn-primary btn-block" id="reg-btn">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+          </button>
+        </div>
+
+      </form>
+
+      <hr class="divider">
+      <p class="text-center text-sm">
+        Already have an account? <a href="../index.html">Sign in here</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ==========================================================
+    // REGISTER PAGE JAVASCRIPT
+    // ==========================================================
+
+    // --- Show errors passed back from PHP via the URL ---
+    // When PHP finds validation errors it redirects back with:
+    // ?errors=Full+name+required|Invalid+email
+    // The | character separates multiple error messages.
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const raw    = params.get('errors');
+      if (!raw) return;
+
+      // Decode URL encoding then split on the | separator
+      const messages = decodeURIComponent(raw).split('|');
+      const box      = document.getElementById('alert-box');
+
+      // Build one line per error
+      box.innerHTML     = messages.map(m => `<p><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(m)}</p>`).join('');
+      box.style.display = 'block';
+    })();
+
+    // --- Toggle password field between hidden and visible ---
+    // 'fieldId' is the id of the input to toggle.
+    // 'btn' is the button element so we can swap the icon.
+    function toggleVisibility(fieldId, btn) {
+      const input = document.getElementById(fieldId);
+      const icon  = btn.querySelector('i');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        // Switch from eye to eye-slash to show the user password is visible
+        icon.className = 'fa-solid fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+      }
+    }
+
+    // --- Live password strength indicator ---
+    // Runs every time the user types in the password field.
+    document.getElementById('password').addEventListener('input', function () {
+      const val    = this.value;
+      const fill   = document.getElementById('strength-fill');
+      const label  = document.getElementById('strength-label');
+
+      // Each condition adds 1 point to the strength score
+      let score = 0;
+      if (val.length >= 8)            score++; // long enough
+      if (/[A-Z]/.test(val))          score++; // has uppercase letter
+      if (/[0-9]/.test(val))          score++; // has a number
+      if (/[^A-Za-z0-9]/.test(val))   score++; // has special character e.g. @#!
+
+      // Map score to width, colour, and label text
+      const levels = [
+        { width: '10%', color: '#ef4444', text: '' },        // score 0 — just started
+        { width: '25%', color: '#ef4444', text: 'Weak' },    // score 1
+        { width: '50%', color: '#f59e0b', text: 'Fair' },    // score 2
+        { width: '75%', color: '#3b82f6', text: 'Good' },    // score 3
+        { width: '100%',color: '#10b981', text: 'Strong' },  // score 4
+      ];
+
+      const lvl          = levels[score];
+      fill.style.width   = lvl.width;
+      fill.style.background = lvl.color;
+      label.textContent  = lvl.text;
+      // To change the colours, edit the color values in the levels array above
+    });
+
+    // --- Live confirm password match check ---
+    // Runs every time the user types in the confirm field
+    document.getElementById('confirm').addEventListener('input', function () {
+      const match = this.value === document.getElementById('password').value;
+      const msg   = document.getElementById('match-msg');
+      msg.style.display = match ? 'none' : 'block';
+    });
+
+    // --- Client-side form validation before submitting to PHP ---
+    document.getElementById('register-form').addEventListener('submit', function (e) {
+      const name     = document.getElementById('full_name').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const phone    = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm').value;
+      const box      = document.getElementById('alert-box');
+
+      const errors = [];
+
+      if (name.length < 2)        errors.push('Full name is required.');
+      if (!email.includes('@'))   errors.push('Enter a valid email address.');
+      if (phone.length < 9)       errors.push('Enter a valid phone number.');
+      if (password.length < 8)    errors.push('Password must be at least 8 characters.');
+      if (password !== confirm)   errors.push('Passwords do not match.');
+
+      if (errors.length) {
+        e.preventDefault(); // stop form from going to PHP
+        box.innerHTML     = errors.map(m => `<p><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(m)}</p>`).join('');
+        box.style.display = 'block';
+        // Scroll to the top of the form so the user sees the errors
+        box.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      // Validation passed — show loading state on button
+      setLoading('reg-btn', true);
+    });
+  </script>
+
+</body>
+</html>

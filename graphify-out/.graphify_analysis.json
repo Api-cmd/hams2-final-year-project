@@ -1,0 +1,185 @@
+{
+  "communities": {
+    "0": [
+      "admin_doctors_page",
+      "patient_book_page",
+      "patient_family_page",
+      "php_admin_get_doctors",
+      "php_admin_get_staff_users",
+      "php_admin_save_doctor",
+      "php_book_appointment",
+      "php_get_departments",
+      "php_get_doctors",
+      "php_get_family",
+      "php_get_slots",
+      "php_save_family"
+    ],
+    "1": [
+      "php_config",
+      "php_config_check_login_rate_limit",
+      "php_config_clean",
+      "php_config_cleanup_old_attempts",
+      "php_config_is_logged_in",
+      "php_config_is_suspicious_ip",
+      "php_config_record_login_attempt",
+      "php_config_require_login",
+      "php_config_require_role",
+      "php_config_send_json"
+    ],
+    "2": [
+      "js_main",
+      "js_main_confirmaction",
+      "js_main_escapehtml",
+      "js_main_formatdate",
+      "js_main_formattime",
+      "js_main_setloading",
+      "js_main_showalert",
+      "js_main_statusbadge"
+    ],
+    "3": [
+      "admin_dashboard_page",
+      "admin_users_page",
+      "php_admin_get_stats",
+      "php_admin_get_today",
+      "php_admin_get_users",
+      "php_admin_save_user"
+    ],
+    "4": [
+      "admin_schedules_page",
+      "php_admin_get_schedules",
+      "php_admin_save_schedule",
+      "php_generate_slots",
+      "php_generate_slots_minstotime",
+      "php_generate_slots_timetomins"
+    ],
+    "5": [
+      "patient_appointments_page",
+      "patient_dashboard_page",
+      "php_cancel_appointment",
+      "php_get_appointments",
+      "php_get_stats"
+    ],
+    "6": [
+      "admin_appointments_page",
+      "php_admin_get_appointments",
+      "php_admin_update_appointment",
+      "php_session_check"
+    ],
+    "7": [
+      "php_cache",
+      "php_cache_cache_clear",
+      "php_cache_cache_get",
+      "php_cache_cache_set"
+    ],
+    "8": [
+      "admin_departments_page",
+      "php_admin_get_departments",
+      "php_admin_save_department"
+    ],
+    "9": [
+      "admin_slots_page",
+      "php_admin_get_slots",
+      "php_admin_save_slots"
+    ],
+    "10": [
+      "php_get_profile",
+      "php_save_profile",
+      "profile_page"
+    ],
+    "11": [
+      "php_staff_get_schedule",
+      "php_staff_update_status",
+      "staff_dashboard_page"
+    ],
+    "12": [
+      "index_login_form",
+      "php_login"
+    ],
+    "13": [
+      "php_register",
+      "register_page"
+    ],
+    "14": [
+      "php_staff_get_full_schedule",
+      "staff_schedule_page"
+    ],
+    "15": [
+      "php_logout"
+    ]
+  },
+  "cohesion": {
+    "0": 0.16666666666666666,
+    "1": 0.3111111111111111,
+    "2": 0.25,
+    "3": 0.3333333333333333,
+    "4": 0.3333333333333333,
+    "5": 0.4,
+    "6": 0.5,
+    "7": 0.5,
+    "8": 0.6666666666666666,
+    "9": 0.6666666666666666,
+    "10": 0.6666666666666666,
+    "11": 0.6666666666666666,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0
+  },
+  "gods": [
+    {
+      "id": "patient_book_page",
+      "label": "Patient Booking Page",
+      "degree": 5
+    },
+    {
+      "id": "php_config_send_json",
+      "label": "send_json()",
+      "degree": 4
+    },
+    {
+      "id": "php_config_require_login",
+      "label": "require_login()",
+      "degree": 4
+    },
+    {
+      "id": "admin_doctors_page",
+      "label": "Admin Doctors Page",
+      "degree": 4
+    },
+    {
+      "id": "php_config_require_role",
+      "label": "require_role()",
+      "degree": 3
+    },
+    {
+      "id": "admin_appointments_page",
+      "label": "Admin Appointments Page",
+      "degree": 3
+    },
+    {
+      "id": "admin_dashboard_page",
+      "label": "Admin Dashboard Page",
+      "degree": 3
+    },
+    {
+      "id": "admin_schedules_page",
+      "label": "Admin Schedules Page",
+      "degree": 3
+    },
+    {
+      "id": "php_config_is_logged_in",
+      "label": "is_logged_in()",
+      "degree": 2
+    },
+    {
+      "id": "php_config_check_login_rate_limit",
+      "label": "check_login_rate_limit()",
+      "degree": 2
+    }
+  ],
+  "surprises": [],
+  "tokens": {
+    "input": 60879,
+    "output": 8435
+  }
+}

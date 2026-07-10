@@ -39,13 +39,12 @@
   /* --- Status colours (appointment badges) --- */
   --status-pending:   #f59e0b;   /* amber  */
   --status-confirmed: #3b82f6;   /* blue   */
-  --status-arrived:   #8b5cf6;   /* purple */
   --status-seen:      #10b981;   /* green  */
   --status-cancelled: #ef4444;   /* red    */
   --status-no-show:   #6b7280;   /* grey   */
 
   /* --- Typography --- */
-  --font:        'Segoe UI', Arial, sans-serif;  /* system font, no download needed */
+  --font: 'Inter ', sans-serif;  /* system font, no download needed */
   --font-size:   15px;
   --line-height: 1.6;
 
@@ -1008,7 +1007,6 @@ table tbody tr:hover {
 
 .badge-pending   { background: none; color: #f9a82f; }
 .badge-confirmed { background: none; color: #1e40af; }
-.badge-arrived   { background: none; color: #5b21b6; }
 .badge-seen      { background: none; color: #065f46; }
 .badge-cancelled { background: none; color: #d10c0c; }
 .badge-no-show   { background: none; color: #374151; }

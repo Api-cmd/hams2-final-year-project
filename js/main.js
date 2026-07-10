@@ -199,6 +199,11 @@ function confirmDialog(message, { confirmText = 'Confirm', cancelText = 'Cancel'
   });
 }
 
+// Backwards-compatible wrapper for confirmAction (uses confirmDialog)
+function confirmAction(message) {
+  return confirmDialog(message);
+}
+
 
 // -----------------------------------------------------------
 // setLoading(buttonId, isLoading)

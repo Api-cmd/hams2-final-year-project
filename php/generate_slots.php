@@ -1,110 +1,175 @@
 <?php
 // ============================================================
 // php/generate_slots.php
-// Reads doctor_schedules table and generates time_slots
-// for the next 7 days for every active doctor.
+// Generates time slots from schedule templates for the next 7 days.
+// This script is safe to run multiple times because it uses
+// INSERT IGNORE and keeps existing bookings intact.
 //
 // HOW TO RUN:
-//   Manual:    visit http://localhost/hams/php/generate_slots.php
-//              while logged in as admin
-//   Automatic: on a real server you would set up a cron job
-//              to run this every day at midnight:
-//              0 0 * * * php /path/to/generate_slots.php
-//
-// SAFE TO RUN MULTIPLE TIMES:
-//   Uses INSERT IGNORE so existing slots are never duplicated.
+//   Manual:   visit http://localhost/hams2/php/generate_slots.php
+//   Cron:     0 0 * * * php /path/to/hams2/php/generate_slots.php
 // ============================================================
 
 require_once 'config.php';
-require_role('admin');
+if (PHP_SAPI !== 'cli') {
+    require_role('admin');
+}
 
-// How many days ahead to generate slots for
-// 7 means today + the next 6 days
 $days_ahead = 7;
+$generated = 0;
+$skipped = 0;
 
-$generated = 0;  // Count of new slots created
-$skipped   = 0;  // Count of slots already existing (INSERT IGNORE skipped them)
-
-// Helper: convert HH:MM:SS time string to total minutes
-// e.g. "08:30:00" → 510
 function timeToMins(string $t): int {
     [$h, $m] = explode(':', $t);
     return (int)$h * 60 + (int)$m;
 }
 
-// Helper: convert total minutes back to "HH:MM:SS"
-// e.g. 510 → "08:30:00"
 function minsToTime(int $mins): string {
     return sprintf('%02d:%02d:00', intdiv($mins, 60), $mins % 60);
 }
 
-// Prepare the INSERT once — execute it in the loop for each slot
-// INSERT IGNORE silently skips if the UNIQUE key (doctor+date+start) already exists
 $insert = $pdo->prepare("
-    INSERT IGNORE INTO time_slots (doctor_id, slot_date, start_time, end_time)
-    VALUES (?, ?, ?, ?)
+    INSERT IGNORE INTO time_slots (dept_id, doctor_id, template_id, slot_date, start_time, end_time, capacity)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
 ");
 
-// Loop through each of the next 7 days
+$templateStmt = $pdo->query("
+    SELECT template_id, doctor_id, dept_id, slot_duration
+    FROM schedule_templates
+    WHERE is_active = 1
+");
+$templates = $templateStmt->fetchAll();
+
+$templatesByDay = [];
+$dayStmt = $pdo->prepare("
+    SELECT template_id, day_of_week, is_working, start_time, end_time, break_start, break_end
+    FROM template_days
+    WHERE template_id = ?
+");
+
+$globalHolidayStmt = $pdo->prepare("SELECT holiday_date FROM holidays WHERE holiday_date BETWEEN DATE(NOW()) AND DATE_ADD(DATE(NOW()), INTERVAL ? DAY)");
+$globalHolidayStmt->execute([$days_ahead]);
+$globalHolidayDates = $globalHolidayStmt->fetchAll(PDO::FETCH_COLUMN);
+$globalHolidayMap = array_flip($globalHolidayDates);
+
+$templateHolidayStmt = $pdo->prepare("SELECT holiday_date FROM template_holidays WHERE template_id = ? AND holiday_date BETWEEN DATE(NOW()) AND DATE_ADD(DATE(NOW()), INTERVAL ? DAY)");
+
+$exceptionStmt = $pdo->prepare("SELECT exception_date, is_working, start_time, end_time, break_start, break_end FROM schedule_exceptions WHERE doctor_id = ? AND exception_date BETWEEN DATE(NOW()) AND DATE_ADD(DATE(NOW()), INTERVAL ? DAY)");
+
+$exceptionsByDoctor = [];
+
+foreach ($templates as $template) {
+    $templateHolidayStmt->execute([$template['template_id'], $days_ahead]);
+    $templateHolidayDates = $templateHolidayStmt->fetchAll(PDO::FETCH_COLUMN);
+    $templateHolidayMap = array_flip($templateHolidayDates);
+    $template['template_holidays'] = $templateHolidayMap;
+
+    $exceptionStmt->execute([$template['doctor_id'], $days_ahead]);
+    $exceptions = $exceptionStmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($exceptions as $exception) {
+        $exceptionsByDoctor[$template['doctor_id']][$exception['exception_date']] = $exception;
+    }
+
+    $dayStmt->execute([$template['template_id']]);
+    $dayRows = $dayStmt->fetchAll();
+    foreach ($dayRows as $dayRow) {
+        $dayRow['doctor_id'] = $template['doctor_id'];
+        $dayRow['dept_id'] = $template['dept_id'];
+        $dayRow['template_holidays'] = $template['template_holidays'];
+        if ((int)$dayRow['is_working'] !== 1) {
+            continue;
+        }
+        $templatesByDay[(int)$dayRow['day_of_week']][] = array_merge($template, $dayRow);
+    }
+}
+
 for ($i = 0; $i < $days_ahead; $i++) {
+    $date = date('Y-m-d', strtotime("+{$i} days"));
+    $weekday = (int)date('w', strtotime($date));
+    $currentTemplates = $templatesByDay[$weekday] ?? [];
 
-    // Get the date and day of week for this iteration
-    // date('w') returns 0=Sunday through 6=Saturday — matches our DB column
-    $date        = date('Y-m-d', strtotime("+{$i} days"));
-    $day_of_week = (int)date('w', strtotime($date));
+    foreach ($currentTemplates as $template) {
+        if (isset($globalHolidayMap[$date])) {
+            $skipped++;
+            continue;
+        }
 
-    // Get all doctor schedules for this day of the week
-    $stmt = $pdo->prepare("
-        SELECT
-            ds.doctor_id,
-            ds.start_time,
-            ds.end_time,
-            ds.slot_duration,
-            ds.is_working
-        FROM doctor_schedules ds
-        JOIN doctors  dr ON ds.doctor_id = dr.doctor_id
-        JOIN users    u  ON dr.user_id   = u.user_id
-        WHERE ds.day_of_week = ?
-          AND ds.is_working  = 1    -- skip days off
-          AND u.is_active    = 1    -- skip disabled doctor accounts
-    ");
-    $stmt->execute([$day_of_week]);
-    $schedules = $stmt->fetchAll();
+        if (isset($template['template_holidays'][$date])) {
+            $skipped++;
+            continue;
+        }
 
-    foreach ($schedules as $schedule) {
-        $startMins = timeToMins($schedule['start_time']);
-        $endMins   = timeToMins($schedule['end_time']);
-        $duration  = (int)$schedule['slot_duration'];
-        $current   = $startMins;
+        $exception = $exceptionsByDoctor[$template['doctor_id']][$date] ?? null;
+        $isWorking = (int)$template['is_working'];
+        $startTime = $template['start_time'];
+        $endTime = $template['end_time'];
+        $breakStart = $template['break_start'];
+        $breakEnd = $template['break_end'];
 
-        // Generate one slot per duration block within working hours
-        while ($current + $duration <= $endMins) {
-            $slotStart = minsToTime($current);
-            $slotEnd   = minsToTime($current + $duration);
-
-            $insert->execute([
-                $schedule['doctor_id'],
-                $date,
-                $slotStart,
-                $slotEnd,
-            ]);
-
-            // rowCount() returns 1 if inserted, 0 if INSERT IGNORE skipped it
-            if ($insert->rowCount() > 0) {
-                $generated++;
-            } else {
-                $skipped++;
+        if ($exception) {
+            $isWorking = (int)$exception['is_working'];
+            if ($exception['start_time']) {
+                $startTime = $exception['start_time'];
             }
+            if ($exception['end_time']) {
+                $endTime = $exception['end_time'];
+            }
+            $breakStart = $exception['break_start'] ?: $breakStart;
+            $breakEnd = $exception['break_end'] ?: $breakEnd;
+        }
 
-            $current += $duration;
+        if ($isWorking !== 1 || !$startTime || !$endTime) {
+            $skipped++;
+            continue;
+        }
+
+        $startMins = timeToMins($startTime);
+        $endMins = timeToMins($endTime);
+        $duration = (int)$template['slot_duration'];
+        // Fixed single-patient slots to simplify logic
+        $capacity = 1;
+
+        $periods = [];
+        if ($breakStart && $breakEnd && timeToMins($breakEnd) > timeToMins($breakStart)) {
+            if (timeToMins($breakStart) > $startMins) {
+                $periods[] = [$startMins, timeToMins($breakStart)];
+            }
+            if (timeToMins($breakEnd) < $endMins) {
+                $periods[] = [timeToMins($breakEnd), $endMins];
+            }
+        } else {
+            $periods[] = [$startMins, $endMins];
+        }
+
+        foreach ($periods as [$periodStart, $periodEnd]) {
+            $slotStart = $periodStart;
+            while ($slotStart + $duration <= $periodEnd) {
+                $insert->execute([
+                    $template['dept_id'],
+                    $template['doctor_id'],
+                    $template['template_id'],
+                    $date,
+                    minsToTime($slotStart),
+                    minsToTime($slotStart + $duration),
+                    $capacity,
+                ]);
+
+                if ($insert->rowCount() > 0) {
+                    $generated++;
+                } else {
+                    $skipped++;
+                }
+
+                $slotStart += $duration;
+            }
         }
     }
 }
 
 send_json([
-    'success'   => true,
+    'success' => true,
     'generated' => $generated,
-    'skipped'   => $skipped,
-    'message'   => "{$generated} slots created, {$skipped} already existed.",
+    'skipped' => $skipped,
+    'message' => "{$generated} slots created, {$skipped} already existed.",
 ]);
 ?>

@@ -20,6 +20,9 @@
       <a href="admin-users.html">
         <i class="fa-solid fa-users"></i> Users
       </a>
+      <a href="admin-doctors.html">
+        <i class="fa-solid fa-user-doctor"></i> Doctors
+      </a>
       <a href="admin-appointments.html" class="active">
         <i class="fa-solid fa-calendar-check"></i> Appointments
       </a>
@@ -83,7 +86,7 @@
             <div class="input-icon-wrap" style="flex:1; min-width:180px;">
               <i class="fa-solid fa-magnifying-glass icon"></i>
               <input type="text" id="search-input" class="form-control"
-                     placeholder="Search patient or doctor..."
+                     placeholder="Search patient or department..."
                      oninput="filterTable()">
             </div>
 
@@ -92,7 +95,6 @@
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
-              <option value="arrived">Arrived</option>
               <option value="seen">Seen</option>
               <option value="cancelled">Cancelled</option>
               <option value="no_show">No Show</option>
@@ -197,10 +199,12 @@
 
       data.forEach((a, i) => {
         const tr = document.createElement('tr');
+        // Display doctor name if available, otherwise show "Auto-assigned"
+        const doctorDisplay = a.doctor_name ? `Dr. ${escapeHtml(a.doctor_name)}` : '<span class="text-muted text-sm">Auto-assigned</span>';
         tr.innerHTML = `
           <td class="text-muted">${i + 1}</td>
           <td>${escapeHtml(a.patient_name)}</td>
-          <td>Dr. ${escapeHtml(a.doctor_name)}</td>
+          <td>${doctorDisplay}</td>
           <td>${escapeHtml(a.dept_name)}</td>
           <td>${formatDate(a.slot_date)}</td>
           <td>${formatTime(a.start_time)}</td>
@@ -215,7 +219,6 @@
                     id="sel-${a.appt_id}">
               <option value="pending"   ${a.status==='pending'   ?'selected':''}>Pending</option>
               <option value="confirmed" ${a.status==='confirmed' ?'selected':''}>Confirmed</option>
-              <option value="arrived"   ${a.status==='arrived'   ?'selected':''}>Arrived</option>
               <option value="seen"      ${a.status==='seen'      ?'selected':''}>Seen</option>
               <option value="cancelled" ${a.status==='cancelled' ?'selected':''}>Cancelled</option>
               <option value="no_show"   ${a.status==='no_show'   ?'selected':''}>No Show</option>
@@ -234,7 +237,7 @@
 
       const filtered = allAppointments.filter(a => {
         const matchSearch = a.patient_name.toLowerCase().includes(search) ||
-                            a.doctor_name.toLowerCase().includes(search);
+                            a.dept_name.toLowerCase().includes(search);
         const matchStatus = status ? a.status === status : true;
         const matchDate   = date   ? a.slot_date === date : true;
         return matchSearch && matchStatus && matchDate;

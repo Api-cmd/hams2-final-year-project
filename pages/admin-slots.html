@@ -98,22 +98,24 @@
       <div class="page-header">
         <div>
           <h2>Manage Time Slots</h2>
-          <p class="text-muted text-sm">Create and manage doctor appointment slots.</p>
+          <p class="text-muted text-sm">Review and manage appointment slots by doctor and department. Manual slot creation is reserved for overrides or temporary coverage.</p>
         </div>
         <button class="btn btn-primary" onclick="openModal()">
-          <i class="fa-solid fa-plus"></i> Add Slots
+          <i class="fa-solid fa-plus"></i> Create Override Slots
         </button>
       </div>
 
       <div id="alert-box" class="alert" style="display:none;"></div>
 
-      <!-- Filter bar: filter slots by doctor and date -->
+      <!-- Filter bar: filter slots by department and date -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-body" style="padding:14px 16px;">
           <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-            <select id="filter-doctor" class="form-control" style="width:220px;"
-                    onchange="loadSlots()">
+            <select id="filter-doctor" class="form-control" style="width:240px;" onchange="loadSlots()">
               <option value="">All Doctors</option>
+            </select>
+            <select id="filter-dept" class="form-control" style="width:220px;" onchange="loadSlots()">
+              <option value="">All Departments</option>
             </select>
             <input type="date" id="filter-date" class="form-control"
                    style="width:180px;" onchange="loadSlots()">
@@ -139,13 +141,13 @@
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Doctor</th>
                     <th>Department</th>
+                    <th>Doctor</th>
                     <th>Date</th>
                     <th>Start</th>
                     <th>End</th>
                     <th>Booked</th>
-                    <th>Active</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -170,7 +172,7 @@
     <div class="modal">
 
       <div class="modal-header">
-        <h3>Add Time Slots</h3>
+        <h3>Create Override Slots</h3>
         <button class="btn-close" onclick="closeModal()">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -181,15 +183,25 @@
 
         <!--
           Bulk slot generation:
-          Admin picks a doctor, a date, start time, end time,
+          Admin picks a department, a date, start time, end time,
           and duration. PHP generates all slots in that range.
           e.g. 08:00 to 12:00 in 30-min slots = 8 slots created at once.
+          In HAMS2, slots are department-based, not doctor-specific.
+          Patients can optionally choose a doctor when booking.
         -->
-        <div class="form-group">
-          <label for="m-doctor">Doctor</label>
-          <select id="m-doctor" class="form-control">
-            <option value="">— Select a doctor —</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="m-doctor">Doctor</label>
+            <select id="m-doctor" class="form-control">
+              <option value="">— Select a doctor —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="m-dept">Department</label>
+            <select id="m-dept" class="form-control">
+              <option value="">— Select a department —</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">
@@ -211,9 +223,10 @@
         <div class="form-group">
           <label for="m-duration">Slot Duration (minutes)</label>
           <select id="m-duration" class="form-control">
+            <option value="10" selected>10 minutes</option>
             <option value="15">15 minutes</option>
             <option value="20">20 minutes</option>
-            <option value="30" selected>30 minutes</option>
+            <option value="30">30 minutes</option>
             <option value="45">45 minutes</option>
             <option value="60">1 hour</option>
           </select>
@@ -253,44 +266,61 @@
       if (mDateEl) mDateEl.setAttribute('min', today);
     })();
 
-    // Load doctors into both the filter dropdown and the modal dropdown
-    async function loadDoctors() {
+    // Load doctors and departments into the filter dropdowns and the modal form.
+    async function loadDepartments() {
       try {
-        const res     = await fetch('../php/admin_get_doctors.php');
-        const doctors = await res.json();
+        const [deptRes, doctorRes] = await Promise.all([
+          fetch('../php/admin_get_departments.php'),
+          fetch('../php/admin_get_doctors.php')
+        ]);
 
-        const filterSel = document.getElementById('filter-doctor');
-        const modalSel  = document.getElementById('m-doctor');
+        const depts   = await deptRes.json();
+        const doctors = await doctorRes.json();
+
+        const filterDept = document.getElementById('filter-dept');
+        const filterDoc  = document.getElementById('filter-doctor');
+        const modalDept  = document.getElementById('m-dept');
+        const modalDoc   = document.getElementById('m-doctor');
+
+        depts.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.dept_id;
+          opt.textContent = d.dept_name;
+          filterDept.appendChild(opt);
+
+          const opt2 = document.createElement('option');
+          opt2.value = d.dept_id;
+          opt2.textContent = d.dept_name;
+          modalDept.appendChild(opt2);
+        });
 
         doctors.forEach(d => {
-          const label = `Dr. ${d.full_name} — ${d.dept_name}`;
+          const opt = document.createElement('option');
+          opt.value = d.doctor_id;
+          opt.textContent = `${d.full_name} (${d.dept_name || 'Unknown dept'})`;
+          filterDoc.appendChild(opt);
 
-          // Add to filter bar
-          const opt1 = document.createElement('option');
-          opt1.value = d.doctor_id;
-          opt1.textContent = label;
-          filterSel.appendChild(opt1);
-
-          // Add to modal
           const opt2 = document.createElement('option');
           opt2.value = d.doctor_id;
-          opt2.textContent = label;
-          modalSel.appendChild(opt2);
+          opt2.textContent = `${d.full_name} — ${d.dept_name || 'Department unavailable'}`;
+          modalDoc.appendChild(opt2);
         });
       } catch (err) {
-        console.error('Could not load doctors:', err);
+        console.error('Could not load departments or doctors:', err);
       }
     }
 
     // --- Load time slots with optional filters ---
     async function loadSlots() {
+      const deptId   = document.getElementById('filter-dept').value;
       const doctorId = document.getElementById('filter-doctor').value;
       const date     = document.getElementById('filter-date').value;
 
       // Build query string from active filters
       const params = new URLSearchParams();
+      if (deptId) params.append('dept_id', deptId);
       if (doctorId) params.append('doctor_id', doctorId);
-      if (date)     params.append('date', date);
+      if (date)   params.append('date', date);
 
       document.getElementById('slots-loading').style.display = 'block';
       document.getElementById('slots-wrap').style.display    = 'none';
@@ -314,14 +344,14 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td class="text-muted">${i + 1}</td>
-            <td>Dr. ${escapeHtml(s.doctor_name)}</td>
             <td>${escapeHtml(s.dept_name)}</td>
+            <td>${escapeHtml(s.doctor_name || '—')}</td>
             <td>${formatDate(s.slot_date)}</td>
             <td>${formatTime(s.start_time)}</td>
             <td>${formatTime(s.end_time)}</td>
             <td>
-              <span class="badge ${s.is_booked == 1 ? 'badge-cancelled' : 'badge-seen'}">
-                ${s.is_booked == 1 ? 'Booked' : 'Free'}
+              <span class="badge ${s.is_booked == 0 ? 'badge-seen' : 'badge-no-show'}">
+                ${s.is_booked == 0 ? 'Available' : 'Booked'}
               </span>
             </td>
             <td>
@@ -335,7 +365,7 @@
                 A booked slot cannot be deactivated because
                 a patient already has that appointment.
               -->
-              ${s.is_booked == 0 ? `
+              ${s.booked_count == 0 ? `
                 <button class="btn btn-ghost btn-sm"
                   onclick="toggleSlot(${s.slot_id}, ${s.is_active}, this)">
                   <i class="fa-solid fa-${s.is_active == 1 ? 'ban' : 'check'}"></i>
@@ -355,8 +385,9 @@
     }
 
     function clearFilters() {
+      document.getElementById('filter-dept').value = '';
       document.getElementById('filter-doctor').value = '';
-      document.getElementById('filter-date').value   = '';
+      document.getElementById('filter-date').value = '';
       loadSlots();
     }
 
@@ -400,7 +431,9 @@
     });
 
     // --- Generate and save slots ---
+    // Logic: In HAMS2, slots are created for departments, not doctors
     async function saveSlots() {
+      const dept_id   = document.getElementById('m-dept').value;
       const doctor_id = document.getElementById('m-doctor').value;
       const date      = document.getElementById('m-date').value;
       const start     = document.getElementById('m-start').value;
@@ -408,8 +441,12 @@
       const duration  = document.getElementById('m-duration').value;
       const alertBox  = document.getElementById('modal-alert');
 
-      if (!doctor_id || !date || !start || !end) {
-        showToast('All fields are required.', 'error', 4000);
+      if (!doctor_id && !dept_id) {
+        showToast('Choose a doctor or department for the slots.', 'error', 4000);
+        return;
+      }
+      if (!date || !start || !end) {
+        showToast('Date and time range are required.', 'error', 4000);
         return;
       }
 
@@ -438,7 +475,7 @@
         const res  = await fetch('../php/admin_save_slots.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ doctor_id, date, start, end, duration }),
+          body: JSON.stringify({ dept_id, doctor_id, date, start, end, duration }),
         });
         const data = await res.json();
 
@@ -502,7 +539,7 @@
       }
     }
 
-    loadDoctors();
+    loadDepartments();
     loadSlots();
   </script>
 

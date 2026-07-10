@@ -162,9 +162,6 @@ switch ($user['role']) {
     case 'patient':
         header('Location: ../pages/dashboard.html');
         break;
-    case 'staff':
-        header('Location: ../pages/staff-dashboard.html');
-        break;
     case 'admin':
         header('Location: ../pages/admin-dashboard.html');
         break;

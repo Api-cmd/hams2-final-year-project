@@ -10,13 +10,13 @@
 // ====================== DATABASE CREDENTIALS ======================
 // Update these values according to your environment (XAMPP, live server, etc.)
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'hams_db');
+define('DB_NAME', 'hams2_db');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
 // ====================== APPLICATION SETTINGS ======================
-define('APP_NAME', 'HAMS');
-define('APP_URL',  'http://localhost/hams');
+define('APP_NAME', 'HAMS2');
+define('APP_URL',  'http://localhost/hams2');
 
 // Set timezone to Tanzania (East Africa Time - EAT)
 date_default_timezone_set('Africa/Dar_es_Salaam');
@@ -92,7 +92,7 @@ function require_login(): void {
 /**
  * Require user to be logged in AND have a specific role.
  *
- * @param string $role  'patient', 'staff', or 'admin'
+ * @param string $role  'patient' or 'admin'
  */
 function require_role(string $role): void {
     require_login();
@@ -110,6 +110,21 @@ function require_role(string $role): void {
  */
 function clean(string $value): string {
     return strip_tags(trim($value));
+}
+
+function is_valid_time(string $value): bool {
+    return preg_match('/^([01]\d|2[0-3]):([0-5]\d)$/', $value) === 1;
+}
+
+function time_to_minutes(string $value): int {
+    [$h, $m] = explode(':', $value);
+    return (int)$h * 60 + (int)$m;
+}
+
+function minutes_to_time(int $minutes): string {
+    $hours = intdiv($minutes, 60);
+    $mins  = $minutes % 60;
+    return sprintf('%02d:%02d:00', $hours, $mins);
 }
 
 // ===========================================================

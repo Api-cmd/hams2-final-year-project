@@ -1,37 +1,28 @@
 <?php
+// php/admin_get_doctors.php
+// Returns all doctors with their department information
+// Called by admin-doctors.html page
 require_once 'config.php';
+
+// Only admin can access this endpoint
 require_role('admin');
 
 try {
+    // Query all doctors with their department names
+    // LEFT JOIN ensures we get all doctors even if department is inactive
     $stmt = $pdo->query("
         SELECT
-            dr.doctor_id,
-            dr.dept_id,
-            dr.specialization,
-            dr.bio,
-            u.user_id,
-            u.full_name,
-            u.email,
-            u.phone,
-            u.is_active,
-            d.dept_name,
-            COUNT(a.appt_id) AS total_appointments
-        FROM doctors dr
-        JOIN users       u  ON dr.user_id  = u.user_id
-        JOIN departments d  ON dr.dept_id  = d.dept_id
-        LEFT JOIN appointments a ON a.doctor_id = dr.doctor_id
-        GROUP BY
-            dr.doctor_id,
-            dr.dept_id,
-            dr.specialization,
-            dr.bio,
-            u.user_id,
-            u.full_name,
-            u.email,
-            u.phone,
-            u.is_active,
-            d.dept_name
-        ORDER BY u.full_name ASC
+            d.doctor_id,
+            d.dept_id,
+            d.full_name,
+            d.specialization,
+            d.bio,
+            d.is_active,
+            d.created_at,
+            dept.dept_name
+        FROM doctors d
+        LEFT JOIN departments dept ON d.dept_id = dept.dept_id
+        ORDER BY d.dept_id ASC, d.full_name ASC
     ");
 
     send_json($stmt->fetchAll());

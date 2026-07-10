@@ -73,12 +73,12 @@
           <div class="step-line"></div>
           <div class="step" id="step-2">
             <div class="num">2</div>
-            <span>Doctor</span>
+            <span>Date & Slot</span>
           </div>
           <div class="step-line"></div>
           <div class="step" id="step-3">
             <div class="num">3</div>
-            <span>Date & Slot</span>
+            <span>Doctor (Optional)</span>
           </div>
           <div class="step-line"></div>
           <div class="step" id="step-4">
@@ -106,24 +106,8 @@
         </div>
 
         <!-- =====================================================
-             STEP 2: Choose Doctor
-             Hidden until a department is selected.
-             Doctors are fetched from php/get_doctors.php?dept_id=X
-             ===================================================== -->
-        <div id="section-doctor" style="display:none;">
-          <div class="form-group">
-            <label for="doctor_id">
-              <i class="fa-solid fa-user-doctor"></i> Select Doctor
-            </label>
-            <select id="doctor_id" class="form-control">
-              <option value="">— Select a doctor —</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- =====================================================
-             STEP 3: Choose Date then Slot
-             Date input appears after a doctor is chosen.
+             STEP 2: Choose Date then Slot
+             Date input appears after a department is selected.
              Time slot buttons appear after a date is picked.
              ===================================================== -->
         <div id="section-date" style="display:none;">
@@ -156,8 +140,39 @@
         </div>
 
         <!-- =====================================================
-             STEP 4: Notes + Family + Confirm button
+             STEP 3: Choose Doctor (Optional)
              Hidden until a time slot is selected.
+             Patients can optionally choose their preferred doctor.
+             If no doctor is chosen, the system will auto-assign one.
+             ===================================================== -->
+        <div id="section-doctor" style="display:none;">
+          <div id="doctor-bound-info" class="alert alert-info" style="display:none; margin-bottom:16px;">
+            <strong>This slot is assigned to a specific doctor.</strong>
+            <div id="bound-doctor-name"></div>
+          </div>
+          <div id="doctor-selection-controls">
+            <div class="form-group">
+              <label for="doctor_id">
+                <i class="fa-solid fa-user-doctor"></i> Preferred Doctor (Optional)
+              </label>
+              <select id="doctor_id" class="form-control">
+                <option value="">— Auto-assign doctor —</option>
+              </select>
+              <p class="form-hint">
+                If you don't choose a doctor, the system will automatically assign one for you.
+              </p>
+            </div>
+            <div style="margin-top:16px;">
+              <button class="btn btn-primary" onclick="skipDoctor()">
+                Skip Doctor Selection <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =====================================================
+             STEP 4: Notes + Family + Confirm button
+             Hidden until a doctor is selected or skipped.
              ===================================================== -->
         <div id="section-confirm" style="display:none;">
 
@@ -245,13 +260,14 @@
     const today   = now.toISOString().split('T')[0];
     const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
                       .toISOString().split('T')[0];
+    let selectedSlotDoctor = null;
 
     document.getElementById('slot_date').min = today;
     document.getElementById('slot_date').max = maxDate;
     
     // --- Step indicator helper ---
     // Call this when the user moves to a new step.
-    // stepNum: 1, 2, 3, or 4
+    // stepNum: 1, 2, 3, or 4 (step 3 is optional doctor selection)
     function setStep(stepNum) {
       for (let i = 1; i <= 4; i++) {
         const el = document.getElementById('step-' + i);
@@ -348,73 +364,37 @@
     init();
 
     // ==========================================================
-    // STEP 1 → 2: Department selected, load doctors
+    // STEP 1 → 2: Department selected, show date picker
     // ==========================================================
-    document.getElementById('dept_id').addEventListener('change', async function () {
+    document.getElementById('dept_id').addEventListener('change', function () {
       // Reset everything below this step
-      hide('section-doctor');
       hide('section-date');
       hide('section-slots');
+      hide('section-doctor');
       hide('section-confirm');
       document.getElementById('slot_id').value = '';
+      document.getElementById('slot_date').value = '';
+      document.getElementById('doctor_id').value = '';
 
       if (!this.value) return;
 
       setStep(2);
-
-      try {
-        const res     = await fetch(`../php/get_doctors.php?dept_id=${this.value}`);
-        const doctors = await res.json();
-        const sel     = document.getElementById('doctor_id');
-
-        sel.innerHTML = '<option value="">— Select a doctor —</option>';
-
-        if (!doctors.length) {
-          sel.innerHTML = '<option value="">No doctors available in this department</option>';
-        } else {
-          doctors.forEach(d => {
-            const opt   = document.createElement('option');
-            opt.value   = d.doctor_id;
-            // Show specialization if available e.g. "Dr. Salim Hassan — Pediatrics"
-            opt.textContent = `Dr. ${escapeHtml(d.full_name)}${d.specialization ? ' — ' + escapeHtml(d.specialization) : ''}`;
-            sel.appendChild(opt);
-          });
-        }
-
-        show('section-doctor');
-
-      } catch (err) {
-        showAlert('Failed to load doctors. Try again.', 'error');
-      }
-    });
-
-    // ==========================================================
-    // STEP 2 → 3: Doctor selected, show date picker
-    // ==========================================================
-    document.getElementById('doctor_id').addEventListener('change', function () {
-      hide('section-date');
-      hide('section-slots');
-      hide('section-confirm');
-      document.getElementById('slot_id').value = '';
-      document.getElementById('slot_date').value = '';
-
-      if (!this.value) return;
-
-      setStep(3);
       show('section-date');
     });
 
     // ==========================================================
-    // STEP 3: Date chosen, load available time slots
+    // STEP 2: Date chosen, load available time slots
     // WITH TIME RESTRICTION: Removes any passed time slots from the page
     // ==========================================================
     document.getElementById('slot_date').addEventListener('change', async function () {
       hide('section-slots');
+      hide('section-doctor');
       hide('section-confirm');
       document.getElementById('slot_id').value = '';
+      document.getElementById('doctor_id').value = '';
 
-      const doctorId = document.getElementById('doctor_id').value;
-      if (!this.value || !doctorId) return;
+      const deptId = document.getElementById('dept_id').value;
+      if (!this.value || !deptId) return;
 
       const grid = document.getElementById('slots-grid');
       // Show loading indicator while fetching
@@ -422,7 +402,7 @@
       show('section-slots');
 
       try {
-        const res   = await fetch(`../php/get_slots.php?doctor_id=${doctorId}&date=${this.value}`);
+        const res   = await fetch(`../php/get_slots.php?dept_id=${deptId}&date=${this.value}`);
         let slots = await res.json();
 
         // ==========================================================
@@ -449,12 +429,13 @@
 
         // Build one button per slot (only for available/future slots)
         slots.forEach(s => {
-          const btn       = document.createElement('button');
-          btn.type        = 'button';
-          btn.className   = 'slot-btn';
-          // formatTime() is defined in main.js
-          btn.textContent = formatTime(s.start_time);
-          btn.dataset.id  = s.slot_id;
+          const btn         = document.createElement('button');
+          btn.type          = 'button';
+          btn.className     = 'slot-btn';
+          btn.dataset.id    = s.slot_id;
+          btn.dataset.startTime = s.start_time;
+          btn.dataset.doctorName = s.doctor_name || '';
+          btn.innerHTML     = `<div>${formatTime(s.start_time)}</div>${s.doctor_name ? `<small style="display:block; margin-top:4px; color:var(--grey-600); font-size:0.82rem;">${escapeHtml(s.doctor_name)}</small>` : ''}`;
 
           btn.addEventListener('click', function () {
             // ==========================================================
@@ -467,31 +448,41 @@
               const now = new Date();
               const slotTime = new Date(selectedDate);
               slotTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-              
+               
               if (slotTime <= now) {
                 showAlert('This time slot has already passed. Please select a different slot.', 'error');
                 return;
               }
             }
-            
+             
             // Remove 'selected' from all buttons, add to this one
             grid.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
-
+ 
             // Store the chosen slot ID in the hidden input
             document.getElementById('slot_id').value = s.slot_id;
-
-            // Update booking summary text shown above the confirm button
-            const deptName   = document.getElementById('dept_id').options[document.getElementById('dept_id').selectedIndex].text;
-            const doctorName = document.getElementById('doctor_id').options[document.getElementById('doctor_id').selectedIndex].text;
-            const dateStr    = formatDate(document.getElementById('slot_date').value);
-            const timeStr    = formatTime(s.start_time);
-
-            document.getElementById('summary-text').textContent =
-              `${deptName} · ${doctorName} · ${dateStr} at ${timeStr}`;
-
-            setStep(4);
-            show('section-confirm');
+            selectedSlotDoctor = s.doctor_id ? {
+              doctor_id: s.doctor_id,
+              doctor_name: s.doctor_name,
+              specialization: s.doctor_specialization
+            } : null;
+            document.getElementById('doctor_id').value = selectedSlotDoctor ? s.doctor_id : '';
+ 
+            if (selectedSlotDoctor) {
+              document.getElementById('doctor-selection-controls').style.display = 'none';
+              document.getElementById('doctor-bound-info').style.display = '';
+              document.getElementById('bound-doctor-name').textContent = `${selectedSlotDoctor.doctor_name}${selectedSlotDoctor.specialization ? ' — ' + selectedSlotDoctor.specialization : ''}`;
+              setStep(4);
+              show('section-doctor');
+              show('section-confirm');
+              updateSummary();
+            } else {
+              setStep(3);
+              loadDoctorsForDepartment(deptId);
+              document.getElementById('doctor-selection-controls').style.display = '';
+              document.getElementById('doctor-bound-info').style.display = 'none';
+              show('section-doctor');
+            }
           });
 
           grid.appendChild(btn);
@@ -509,12 +500,86 @@
     });
 
     // ==========================================================
+    // STEP 3: Load doctors for the selected department
+    // This is an optional step - patients can choose a doctor or skip
+    // ==========================================================
+    async function loadDoctorsForDepartment(deptId) {
+      try {
+        const res = await fetch(`../php/get_doctors.php?dept_id=${deptId}`);
+        const doctors = await res.json();
+        const sel = document.getElementById('doctor_id');
+
+        sel.innerHTML = '<option value="">— Auto-assign doctor —</option>';
+
+        if (!doctors.length) {
+          // If no doctors available, show message and auto-assign
+          sel.innerHTML = '<option value="">No doctors available (auto-assign)</option>';
+        } else {
+          doctors.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.doctor_id;
+            // Show doctor name and specialization if available
+            // Note: full_name already includes "Dr." prefix from database
+            opt.textContent = `${escapeHtml(d.full_name)}${d.specialization ? ' — ' + escapeHtml(d.specialization) : ''}`;
+            sel.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load doctors:', err);
+        document.getElementById('doctor_id').innerHTML = '<option value="">Auto-assign doctor</option>';
+      }
+    }
+
+    // ==========================================================
+    // STEP 3: Doctor selection changed
+    // If a doctor is selected, move to confirm step
+    // ==========================================================
+    document.getElementById('doctor_id').addEventListener('change', function () {
+      if (this.value) {
+        // Doctor selected - move to confirm
+        setStep(4);
+        show('section-confirm');
+        updateSummary();
+      }
+    });
+
+    // ==========================================================
+    // STEP 3: Skip doctor selection
+    // Patient chooses to let system auto-assign a doctor
+    // ==========================================================
+    function skipDoctor() {
+      // Keep doctor_id as empty string (auto-assign)
+      document.getElementById('doctor_id').value = '';
+      setStep(4);
+      show('section-confirm');
+      updateSummary();
+    }
+
+    // ==========================================================
+    // Update booking summary text
+    // Shows department, date, time, and optionally selected doctor
+    // ==========================================================
+    function updateSummary() {
+      const deptName = document.getElementById('dept_id').options[document.getElementById('dept_id').selectedIndex].text;
+      const dateStr = formatDate(document.getElementById('slot_date').value);
+      const selectedBtn = document.querySelector('#slots-grid .slot-btn.selected');
+      const timeStr = selectedBtn ? formatTime(selectedBtn.dataset.startTime || '') : '';
+      const doctorSel = document.getElementById('doctor_id');
+      const doctorName = selectedSlotDoctor
+        ? `${selectedSlotDoctor.doctor_name}${selectedSlotDoctor.specialization ? ' — ' + selectedSlotDoctor.specialization : ''}`
+        : (doctorSel.value ? doctorSel.options[doctorSel.selectedIndex].text : 'Auto-assigned');
+
+      document.getElementById('summary-text').textContent =
+        `${deptName} · ${dateStr} at ${timeStr} · ${doctorName}`;
+    }
+
+    // ==========================================================
     // STEP 4: Submit booking to PHP
     // ==========================================================
     async function submitBooking() {
       const slot_id         = document.getElementById('slot_id').value;
-      const doctor_id       = document.getElementById('doctor_id').value;
       const dept_id         = document.getElementById('dept_id').value;
+      const doctor_id       = selectedSlotDoctor ? selectedSlotDoctor.doctor_id : (document.getElementById('doctor_id').value || null); // null if auto-assign
       const notes           = document.getElementById('notes').value.trim();
       const family_profile_id = document.getElementById('family_profile_id').value;
 
@@ -534,21 +599,12 @@
         // Get the selected slot time from the button text
         const selectedBtn = document.querySelector('#slots-grid .slot-btn.selected');
         if (selectedBtn) {
-          const slotTime = selectedBtn.textContent;
-          // Convert from display format (e.g., "2:30 PM") to 24-hour format for comparison
-          const timeMatch = slotTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
-          if (timeMatch) {
-            let hours = parseInt(timeMatch[1]);
-            const minutes = parseInt(timeMatch[2]);
-            const ampm = timeMatch[3].toUpperCase();
-            
-            if (ampm === 'PM' && hours !== 12) hours += 12;
-            if (ampm === 'AM' && hours === 12) hours = 0;
-            
+          const slotTime = selectedBtn.dataset.startTime;
+          if (slotTime) {
+            const [hours, minutes] = slotTime.split(':').map(Number);
             const now = new Date();
             const slotDateTime = new Date(selectedDate);
             slotDateTime.setHours(hours, minutes, 0, 0);
-            
             if (slotDateTime <= now) {
               showAlert('This time slot has already passed. Please select a different slot.', 'error');
               return;
@@ -561,11 +617,12 @@
 
       try {
         // Send data as JSON to the PHP endpoint
+        // doctor_id is included if patient selected one, otherwise null for auto-assign
         const res  = await fetch('../php/book_appointment.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           // JSON.stringify converts the JS object to a JSON string
-          body: JSON.stringify({ slot_id, doctor_id, dept_id, notes, family_profile_id }),
+          body: JSON.stringify({ slot_id, dept_id, doctor_id, notes, family_profile_id }),
         });
 
         const data = await res.json();

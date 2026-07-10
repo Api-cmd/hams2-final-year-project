@@ -18,6 +18,9 @@ require_role('patient');
 
 $uid = $_SESSION['user_id'];
 
+// Debug: Log the user ID to check if session is working
+error_log('[HAMS] get_appointments.php - User ID: ' . $uid);
+
 // Read optional filter parameters from the URL
 // e.g. fetch('../php/get_appointments.php?limit=5')
 $limit  = isset($_GET['limit'])  ? (int)$_GET['limit']  : 50;
@@ -40,6 +43,8 @@ if ($filter === 'upcoming') {
 // 'all' filter: no extra condition, return everything
 
 // --- Main query ---
+// HAMS2: Doctors don't have user accounts, so we directly use doctors.full_name
+// doctor_id can be NULL (auto-assign case), so we use LEFT JOIN
 // JOIN pulls in related data from other tables so we don't
 // have to make separate queries for doctor name, dept, etc.
 $sql = "
@@ -52,19 +57,20 @@ $sql = "
         s.slot_date,
         s.start_time,
         s.end_time,
-        u.full_name  AS doctor_name,
+        dr.full_name AS doctor_name,
         d.dept_name,
         fp.full_name AS family_name
     FROM appointments a
     JOIN time_slots       s  ON a.slot_id           = s.slot_id
-    JOIN doctors          dr ON a.doctor_id          = dr.doctor_id
-    JOIN users            u  ON dr.user_id           = u.user_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
     JOIN departments      d  ON a.dept_id            = d.dept_id
     LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
     {$where}
     ORDER BY s.slot_date DESC, s.start_time DESC
     LIMIT :limit
 ";
+
+error_log('[HAMS] get_appointments.php - SQL: ' . $sql);
 
 // Note: LIMIT cannot use a named placeholder in PDO when emulate_prepares is false,
 // so we bind it separately using bindValue with an explicit integer type.
@@ -74,6 +80,8 @@ $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->execute();
 
 $appointments = $stmt->fetchAll();
+
+error_log('[HAMS] get_appointments.php - Found ' . count($appointments) . ' appointments');
 
 // The data goes straight to JSON — the HTML page builds the table rows from it
 send_json($appointments);

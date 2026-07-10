@@ -118,9 +118,9 @@
         </div>
 
         <div class="stat-card" style="border-top-color:#8b5cf6;">
-          <div class="stat-label">Total Doctors</div>
-          <div class="stat-value" id="stat-doctors">—</div>
-          <div class="stat-sub">active staff</div>
+          <div class="stat-label">Total Departments</div>
+          <div class="stat-value" id="stat-departments">—</div>
+          <div class="stat-sub">active departments</div>
         </div>
 
         <div class="stat-card green">
@@ -241,7 +241,7 @@
         const res  = await fetch('../php/admin_get_stats.php');
         const data = await res.json();
         document.getElementById('stat-patients').textContent = data.patients ?? 0;
-        document.getElementById('stat-doctors').textContent  = data.doctors  ?? 0;
+        document.getElementById('stat-departments').textContent = data.departments ?? 0;
         document.getElementById('stat-today').textContent    = data.today    ?? 0;
         document.getElementById('stat-pending').textContent  = data.pending  ?? 0;
       } catch (err) {

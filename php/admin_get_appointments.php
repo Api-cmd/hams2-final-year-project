@@ -1,5 +1,7 @@
 <?php
 // Returns all appointments system-wide for the admin view.
+// HAMS2: Doctors don't have user accounts, so we directly use doctors.full_name
+// doctor_id can be NULL (auto-assign case), so we use LEFT JOIN
 require_once 'config.php';
 require_role('admin');
 
@@ -14,13 +16,12 @@ try {
             s.start_time,
             s.end_time,
             u_p.full_name AS patient_name,
-            u_d.full_name AS doctor_name,
+            dr.full_name AS doctor_name,
             d.dept_name
         FROM appointments a
         JOIN time_slots  s   ON a.slot_id          = s.slot_id
         JOIN users       u_p ON a.patient_user_id  = u_p.user_id
-        JOIN doctors     dr  ON a.doctor_id        = dr.doctor_id
-        JOIN users       u_d ON dr.user_id         = u_d.user_id
+        LEFT JOIN doctors dr  ON a.doctor_id       = dr.doctor_id
         JOIN departments d   ON a.dept_id          = d.dept_id
         ORDER BY s.slot_date DESC, s.start_time DESC
         LIMIT 500

@@ -1,31 +1,35 @@
 <?php
-// ===========================================================
 // php/get_doctors.php
-// Returns doctors for a given department as JSON.
-// CALLED BY: pages/book.html when department is selected
-// URL PARAM: ?dept_id=2
-// ===========================================================
-
+// Returns active doctors for a specific department
+// Called by booking page (patient) to show optional doctor selection
+// If patient doesn't choose a doctor, the system will auto-assign one
 require_once 'config.php';
+
+// Only patients can call this endpoint
 require_role('patient');
 
-$dept_id = (int)($_GET['dept_id'] ?? 0);
+// Get department_id from query parameter
+$dept_id = $_GET['dept_id'] ?? null;
 
 if (!$dept_id) {
-    send_json([]); // Return empty array for missing input
+    send_json(['error' => 'Department ID is required.'], 400);
 }
 
 try {
-    // JOIN doctors + users to get the doctor's name alongside
-    // their specialization from the doctors table
+    // Query active doctors for the specified department
+    // Logic: Only return doctors who are active (is_active = 1)
+    // This allows patients to optionally choose their preferred doctor
     $stmt = $pdo->prepare("
-        SELECT dr.doctor_id, u.full_name, dr.specialization
-        FROM doctors dr
-        JOIN users u ON dr.user_id = u.user_id
-        WHERE dr.dept_id = ? AND u.is_active = 1
-        ORDER BY u.full_name ASC
+        SELECT
+            doctor_id,
+            full_name,
+            specialization
+        FROM doctors
+        WHERE dept_id = :dept_id
+          AND is_active = 1
+        ORDER BY full_name ASC
     ");
-    $stmt->execute([$dept_id]);
+    $stmt->execute([':dept_id' => $dept_id]);
 
     send_json($stmt->fetchAll());
 } catch (PDOException $e) {

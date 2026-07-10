@@ -10,11 +10,20 @@ if (!is_logged_in()) {
 }
 
 try {
+    // Query departments with count of active doctors for each department
+    // LEFT JOIN ensures we still show departments even if they have no doctors
+    // COUNT only counts non-NULL doctor_id values
+    // DISTINCT ensures we don't get duplicate departments
     $stmt = $pdo->query("
-        SELECT dept_id, dept_name, description
-        FROM departments
-        WHERE is_active = 1
-        ORDER BY dept_name ASC
+        SELECT DISTINCT
+            d.dept_id,
+            d.dept_name,
+            d.description,
+            d.is_active,
+            (SELECT COUNT(doc.doctor_id) FROM doctors doc WHERE doc.dept_id = d.dept_id AND doc.is_active = 1) AS doctor_count
+        FROM departments d
+        WHERE d.is_active = 1
+        ORDER BY d.dept_name ASC
     ");
 
     send_json($stmt->fetchAll());

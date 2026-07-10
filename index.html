@@ -276,11 +276,13 @@
       const box    = document.getElementById('alert-box');
 
       const messages = {
-        'logged_out'    : { type: 'success', text: 'You have been logged out successfully.' },
-        'registered'    : { type: 'success', text: 'Registration successful! You can now log in.' },
-        'login_required': { type: 'info',    text: 'Please log in to access that page.' },
-        'access_denied' : { type: 'error',   text: 'You do not have permission to access that page.' },
-        'login_failed'  : { type: 'error',   text: 'Invalid email or password. Please try again.' },
+        'logged_out'            : { type: 'success', text: 'You have been logged out successfully.' },
+        'registered'            : { type: 'success', text: 'Registration successful! You can now log in.' },
+        'login_required'        : { type: 'info',    text: 'Please log in to access that page.' },
+        'access_denied'         : { type: 'error',   text: 'You do not have permission to access that page.' },
+        'login_failed'          : { type: 'error',   text: 'Invalid email or password. Please try again.' },
+        'too_many_attempts_ip'  : { type: 'error',   text: 'Too many login attempts from your IP address. Please wait 10 minutes before trying again.' },
+        'too_many_attempts_email': { type: 'error',   text: 'Too many failed attempts for this account. Please wait 10 minutes before trying again.' },
       };
 
       if (msg && messages[msg]) {

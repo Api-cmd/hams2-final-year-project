@@ -18,7 +18,7 @@ try {
         JOIN users       u_d ON dr.user_id        = u_d.user_id
         JOIN departments d   ON a.dept_id         = d.dept_id
         WHERE s.slot_date = CURDATE()
-          AND a.status IN ('confirmed', 'arrived', 'seen')
+          AND a.status IN ('confirmed', 'seen')
         ORDER BY s.start_time ASC
     ");
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Doctors — HAMS</title>
+  <title>Manage Doctors — HAMS2</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -38,7 +38,7 @@
 
   <nav class="navbar">
     <a href="admin-dashboard.html" class="navbar-brand">
-      <i class="fa-solid fa-hospital"></i> HAMS Admin
+      <i class="fa-solid fa-hospital"></i> HAMS2 Admin
     </a>
     <div class="navbar-links">
       <a href="admin-dashboard.html">
@@ -49,6 +49,9 @@
       </a>
       <a href="admin-doctors.html" class="active">
         <i class="fa-solid fa-user-doctor"></i> Doctors
+      </a>
+      <a href="admin-departments.html">
+        <i class="fa-solid fa-building-columns"></i> Departments
       </a>
       <a href="admin-slots.html">
         <i class="fa-solid fa-clock"></i> Slots
@@ -100,7 +103,8 @@
         <div>
           <h2>Manage Doctors</h2>
           <p class="text-muted text-sm">
-            Link staff accounts to departments and specializations.
+            Add and manage doctor profiles. Patients can optionally choose their preferred doctor during booking.
+            If no doctor is chosen, the system auto-assigns one.
           </p>
         </div>
         <button class="btn btn-primary" onclick="openModal()">
@@ -139,7 +143,6 @@
                   <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Email</th>
                     <th>Department</th>
                     <th>Specialization</th>
                     <th>Status</th>
@@ -178,20 +181,12 @@
 
         <input type="hidden" id="edit-doctor-id" value="">
 
-        <!--
-          Staff user dropdown — only shows users with role='staff'
-          who do not already have a doctor profile.
-          Populated by JS from php/admin_get_staff_users.php
-        -->
-        <div class="form-group" id="user-group">
-          <label for="m-user">Staff Account</label>
-          <select id="m-user" class="form-control">
-            <option value="">— Select a staff user —</option>
-          </select>
-          <p class="form-hint">
-            Only staff accounts without a doctor profile are shown.
-            Add the user first under Manage Users if not listed.
-          </p>
+        <!-- Logic: In HAMS2, doctors don't need user accounts since they can't log in -->
+        <!-- We only store their profile information in the doctors table -->
+        <div class="form-group">
+          <label for="m-name">Full Name</label>
+          <input type="text" id="m-name" class="form-control"
+                 placeholder="Dr. John Smith">
         </div>
 
         <div class="form-group">
@@ -199,6 +194,7 @@
           <select id="m-dept" class="form-control">
             <option value="">— Select department —</option>
           </select>
+          <p class="form-hint">The department this doctor belongs to.</p>
         </div>
 
         <div class="form-group">
@@ -214,6 +210,15 @@
                     placeholder="Short professional background (optional)"></textarea>
         </div>
 
+        <div class="form-group">
+          <label for="m-active">Status</label>
+          <select id="m-active" class="form-control">
+            <option value="1">Active</option>
+            <option value="0">Disabled</option>
+          </select>
+          <p class="form-hint">Disabled doctors won't appear in patient booking options.</p>
+        </div>
+
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
@@ -226,8 +231,14 @@
 
   <script src="../js/main.js"></script>
   <script>
-    let allDoctors = [];
+    // ===========================================================
+    // ADMIN DOCTORS PAGE JAVASCRIPT
+    // ===========================================================
 
+    let allDoctors = [];
+    let allDepartments = [];
+
+    // Session check - ensure only admin can access
     fetch('../php/session_check.php')
       .then(r => r.json())
       .then(d => {
@@ -235,6 +246,25 @@
           window.location.href = '../index.html?msg=access_denied';
         }
       });
+
+    // --- Load departments for the dropdown ---
+    async function loadDepartments() {
+      try {
+        const res = await fetch('../php/admin_get_departments.php');
+        allDepartments = await res.json();
+
+        const sel = document.getElementById('m-dept');
+        sel.innerHTML = '<option value="">— Select department —</option>';
+        allDepartments.forEach(dept => {
+          const opt = document.createElement('option');
+          opt.value = dept.dept_id;
+          opt.textContent = dept.dept_name;
+          sel.appendChild(opt);
+        });
+      } catch (err) {
+        console.error('Failed to load departments:', err);
+      }
+    }
 
     // --- Load doctors table ---
     async function loadDoctors() {
@@ -250,6 +280,7 @@
       }
     }
 
+    // --- Render doctors into the table ---
     function renderDoctors(data) {
       const tbody = document.getElementById('doc-tbody');
       tbody.innerHTML = '';
@@ -269,7 +300,6 @@
         tr.innerHTML = `
           <td class="text-muted">${i + 1}</td>
           <td style="font-weight:600;">${escapeHtml(d.full_name)}</td>
-          <td>${escapeHtml(d.email)}</td>
           <td>${escapeHtml(d.dept_name)}</td>
           <td>${escapeHtml(d.specialization || '—')}</td>
           <td>
@@ -282,7 +312,7 @@
               <i class="fa-solid fa-pen"></i> Edit
             </button>
             <button class="btn btn-ghost btn-sm"
-                    onclick="toggleDoctor(${d.user_id}, ${d.is_active}, '${escapeHtml(d.full_name)}', this)">
+                    onclick="toggleDoctor(${d.doctor_id}, ${d.is_active}, '${escapeHtml(d.full_name)}', this)">
               <i class="fa-solid fa-${isActive ? 'ban' : 'circle-check'}"></i>
               ${isActive ? 'Disable' : 'Enable'}
             </button>
@@ -297,71 +327,23 @@
       const q = document.getElementById('search-input').value.toLowerCase();
       const filtered = allDoctors.filter(d =>
         d.full_name.toLowerCase().includes(q)       ||
-        d.dept_name.toLowerCase().includes(q)       ||
+        (d.dept_name || '').toLowerCase().includes(q) ||
         (d.specialization || '').toLowerCase().includes(q)
       );
       renderDoctors(filtered);
     }
 
-    // --- Load staff users and departments into modal dropdowns ---
-    async function loadModalData() {
-      try {
-        // Staff users who don't have a doctor profile yet
-        const r1    = await fetch('../php/admin_get_staff_users.php');
-        const staff = await r1.json();
-        const uSel  = document.getElementById('m-user');
-        uSel.innerHTML = '<option value="">— Select a staff user —</option>';
-        staff.forEach(u => {
-          const opt = document.createElement('option');
-          opt.value = u.user_id;
-          opt.textContent = u.full_name + ' (' + u.email + ')';
-          uSel.appendChild(opt);
-        });
-      } catch (err) {
-        console.error('Could not load staff users:', err);
-      }
-
-      try {
-        // All active departments
-        const r2    = await fetch('../php/get_departments.php');
-        const depts = await r2.json();
-        const dSel  = document.getElementById('m-dept');
-        dSel.innerHTML = '<option value="">— Select department —</option>';
-        depts.forEach(d => {
-          const opt = document.createElement('option');
-          opt.value = d.dept_id;
-          opt.textContent = d.dept_name;
-          dSel.appendChild(opt);
-        });
-      } catch (err) {
-        console.error('Could not load departments:', err);
-      }
-    }
-
-    async function openModal() {
-      document.getElementById('modal-title').textContent   = 'Add Doctor';
-      document.getElementById('edit-doctor-id').value      = '';
-      document.getElementById('m-user').value              = '';
-      document.getElementById('m-dept').value              = '';
-      document.getElementById('m-spec').value              = '';
-      document.getElementById('m-bio').value               = '';
-      document.getElementById('user-group').style.display  = 'block';
+    // --- Modal functions ---
+    function openModal() {
+      // Reset form for adding new doctor
+      document.getElementById('edit-doctor-id').value = '';
+      document.getElementById('m-name').value = '';
+      document.getElementById('m-dept').value = '';
+      document.getElementById('m-spec').value = '';
+      document.getElementById('m-bio').value = '';
+      document.getElementById('m-active').value = '1';
+      document.getElementById('modal-title').textContent = 'Add Doctor';
       document.getElementById('modal-alert').style.display = 'none';
-      await loadModalData();
-      document.getElementById('modal-overlay').classList.add('open');
-    }
-
-    async function editDoctor(doc) {
-      document.getElementById('modal-title').textContent   = 'Edit Doctor';
-      document.getElementById('edit-doctor-id').value      = doc.doctor_id;
-      document.getElementById('m-spec').value              = doc.specialization || '';
-      document.getElementById('m-bio').value               = doc.bio           || '';
-      // Hide the staff user dropdown when editing —
-      // you cannot change which user a doctor profile belongs to
-      document.getElementById('user-group').style.display  = 'none';
-      document.getElementById('modal-alert').style.display = 'none';
-      await loadModalData();
-      document.getElementById('m-dept').value = doc.dept_id;
       document.getElementById('modal-overlay').classList.add('open');
     }
 
@@ -369,89 +351,112 @@
       document.getElementById('modal-overlay').classList.remove('open');
     }
 
-    document.getElementById('modal-overlay').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
+    // --- Edit existing doctor ---
+    function editDoctor(d) {
+      // Logic: Populate modal with existing doctor data for editing
+      document.getElementById('edit-doctor-id').value = d.doctor_id;
+      document.getElementById('m-name').value = d.full_name;
+      document.getElementById('m-dept').value = d.dept_id;
+      document.getElementById('m-spec').value = d.specialization || '';
+      document.getElementById('m-bio').value = d.bio || '';
+      document.getElementById('m-active').value = d.is_active;
+      document.getElementById('modal-title').textContent = 'Edit Doctor';
+      document.getElementById('modal-alert').style.display = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
 
+    // --- Save doctor (create or update) ---
     async function saveDoctor() {
-      const doctorId = document.getElementById('edit-doctor-id').value;
-      const userId   = document.getElementById('m-user').value;
-      const deptId   = document.getElementById('m-dept').value;
-      const spec     = document.getElementById('m-spec').value.trim();
-      const bio      = document.getElementById('m-bio').value.trim();
-      const alertBox = document.getElementById('modal-alert');
+      const doctor_id = document.getElementById('edit-doctor-id').value || null;
+      const dept_id = document.getElementById('m-dept').value;
+      const full_name = document.getElementById('m-name').value.trim();
+      const specialization = document.getElementById('m-spec').value.trim();
+      const bio = document.getElementById('m-bio').value.trim();
+      const is_active = document.getElementById('m-active').value;
 
-      // When adding new: staff user is required
-      if (!doctorId && !userId) {
-        alertBox.textContent   = 'Please select a staff account.';
-        alertBox.style.display = 'block';
+      // Validation
+      if (!dept_id || !full_name) {
+        showAlert('Please select a department and enter a name.', 'error');
         return;
       }
 
-      if (!deptId) {
-        alertBox.textContent   = 'Please select a department.';
-        alertBox.style.display = 'block';
-        return;
-      }
-
-      setLoading('modal-save-btn', true);
+      const btn = document.getElementById('modal-save-btn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
 
       try {
-        const res  = await fetch('../php/admin_save_doctor.php', {
+        const res = await fetch('../php/admin_save_doctor.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ doctor_id: doctorId, user_id: userId,
-                                 dept_id: deptId, specialization: spec, bio }),
+          body: JSON.stringify({ doctor_id, dept_id, full_name, specialization, bio, is_active })
         });
+
         const data = await res.json();
 
         if (data.success) {
           closeModal();
-          showAlert(doctorId ? 'Doctor updated.' : 'Doctor added.', 'success');
-          loadDoctors();
+          loadDoctors(); // Reload table
+          showAlert(data.message, 'success');
         } else {
-          alertBox.textContent   = data.error || 'Save failed.';
-          alertBox.style.display = 'block';
+          showAlert(data.error || 'Failed to save doctor.', 'error');
         }
       } catch (err) {
-        alertBox.textContent   = 'Network error. Try again.';
-        alertBox.style.display = 'block';
+        showAlert('Network error. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
       }
-
-      setLoading('modal-save-btn', false);
     }
 
-    async function toggleDoctor(doctorId, currentActive, name, btn) {
-      const action = currentActive == 1 ? 'disable' : 'enable';
-      if (!confirmAction(`${action} Dr. ${name}?`)) return;
+    // --- Toggle doctor active status ---
+    async function toggleDoctor(doctorId, currentStatus, name, btn) {
+      const newStatus = currentStatus == 1 ? 0 : 1;
+      const action = newStatus == 1 ? 'enable' : 'disable';
+
+      if (!confirm(`Are you sure you want to ${action} ${name}?`)) {
+        return;
+      }
 
       btn.disabled = true;
 
       try {
-        // Toggle the user's is_active status (doctors are linked to users)
-        const res = await fetch('../php/admin_save_user.php', {
+        // Logic: Update only the is_active field
+        const res = await fetch('../php/admin_save_doctor.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            user_id: doctorId,
-            toggle_active: currentActive == 1 ? 0 : 1
-          }),
+            doctor_id: doctorId,
+            dept_id: 0, // Not needed for status toggle, but required by validation
+            full_name: name, // Not needed for status toggle, but required by validation
+            is_active: newStatus
+          })
         });
+
         const data = await res.json();
 
         if (data.success) {
-          showAlert(`Doctor ${action}d.`, 'success');
-          loadDoctors();
+          loadDoctors(); // Reload table to show updated status
         } else {
+          showAlert(data.error || 'Failed to update doctor status.', 'error');
           btn.disabled = false;
-          showAlert(data.error || 'Failed.', 'error');
         }
       } catch (err) {
+        showAlert('Network error. Please try again.', 'error');
         btn.disabled = false;
-        showAlert('Network error. Try again.', 'error');
       }
     }
 
+    // --- Helper: Show alert in modal ---
+    function showAlert(message, type) {
+      const alert = document.getElementById('modal-alert');
+      alert.className = 'alert alert-' + type;
+      alert.textContent = message;
+      alert.style.display = 'block';
+    }
+
+    // Initialize
+    loadDepartments();
     loadDoctors();
   </script>
 

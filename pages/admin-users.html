@@ -125,7 +125,7 @@
       <div class="page-header">
         <div>
           <h2>Manage Users</h2>
-          <p class="text-muted text-sm">Add, edit, or disable patient and staff accounts.</p>
+          <p class="text-muted text-sm">Add, edit, or disable patient and admin accounts.</p>
         </div>
         <button class="btn btn-primary" onclick="openModal()">
           <i class="fa-solid fa-user-plus"></i> Add User
@@ -148,7 +148,6 @@
                     onchange="filterTable()">
               <option value="">All Roles</option>
               <option value="patient">Patients</option>
-              <option value="staff">Staff</option>
               <option value="admin">Admins</option>
             </select>
           </div>
@@ -236,7 +235,6 @@
           <label for="m-role">Role</label>
           <select id="m-role" class="form-control">
             <option value="patient">Patient</option>
-            <option value="staff">Medical Staff</option>
             <option value="admin">Administrator</option>
           </select>
         </div>

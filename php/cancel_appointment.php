@@ -28,7 +28,7 @@ if (!in_array($appt['status'], ['pending', 'confirmed'])) {
     send_json(['error' => 'This appointment cannot be cancelled.'], 400);
 }
 
-// Use a transaction: cancel the appointment AND free the slot together.
+// Use a transaction: cancel the appointment AND update the slot together.
 // If either fails, both are rolled back.
 try {
     $pdo->beginTransaction();
@@ -36,9 +36,13 @@ try {
     $pdo->prepare("UPDATE appointments SET status='cancelled' WHERE appt_id=?")
         ->execute([$appt_id]);
 
-    // Free the slot so other patients can book it
-    $pdo->prepare("UPDATE time_slots SET is_booked=0 WHERE slot_id=?")
-        ->execute([$appt['slot_id']]);
+    // Reset slot to available for single-occupancy model
+    $pdo->prepare(
+        "UPDATE time_slots
+         SET booked_count = 0,
+             is_booked = 0
+         WHERE slot_id = ?"
+    )->execute([$appt['slot_id']]);
 
     $pdo->commit();
     send_json(['success' => true]);

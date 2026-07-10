@@ -13,17 +13,17 @@ try {
     // Cache miss — query the database
     $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'patient'");
     $patients = $stmt->fetchColumn();
-    
-    $stmt = $pdo->query("SELECT COUNT(*) FROM doctors");
-    $doctors = $stmt->fetchColumn();
-    
+
+    $stmt = $pdo->query("SELECT COUNT(*) FROM departments WHERE is_active = 1");
+    $departments = $stmt->fetchColumn();
+
     $stmt = $pdo->query("
         SELECT COUNT(*) FROM appointments a
         JOIN time_slots s ON a.slot_id = s.slot_id
         WHERE s.slot_date = CURDATE()
     ");
     $today = $stmt->fetchColumn();
-    
+
     $stmt = $pdo->query("
         SELECT COUNT(*) FROM appointments
         WHERE status = 'pending'
@@ -32,7 +32,7 @@ try {
 
     $stats = [
         'patients' => (int)$patients,
-        'doctors'  => (int)$doctors,
+        'departments' => (int)$departments,
         'today'    => (int)$today,
         'pending'  => (int)$pending,
     ];

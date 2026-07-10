@@ -3,179 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctor Schedules — HAMS</title>
+  <title>Schedule Templates — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /*
-      Weekly schedule grid.
-      Seven columns — one per day of the week.
-      Each cell shows working hours or "Off".
-    */
-    .week-grid {
+    .template-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      margin-top: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
     }
-
-    .day-cell {
-      border: 1.5px solid var(--grey-200);
-      border-radius: var(--radius);
-      padding: 10px;
-      text-align: center;
-      font-size: 0.82rem;
-      background: var(--white);
-    }
-
-    /* Working day — blue top border */
-    .day-cell.working {
-      border-top: 3px solid var(--blue);
-    }
-
-    /* Day off — grey, muted appearance */
-    .day-cell.off {
-      background: var(--grey-100);
-      color: var(--grey-400);
-      border-top: 3px solid var(--grey-200);
-    }
-
-    .day-cell .day-name {
-      font-weight: 700;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-      color: var(--grey-700);
-    }
-
-    .day-cell.off .day-name { color: var(--grey-400); }
-
-    .day-cell .day-hours {
-      font-size: 0.8rem;
-      color: var(--grey-700);
-      margin-bottom: 4px;
-    }
-
-    .day-cell .day-slots {
-      font-size: 0.75rem;
-      color: var(--grey-400);
-    }
-
-    /* Doctor schedule card */
-    .doctor-schedule-card {
+    .template-card {
       background: var(--white);
       border: 1px solid var(--grey-200);
       border-radius: var(--radius);
-      margin-bottom: 16px;
       overflow: hidden;
-    }
-
-    .doctor-schedule-card .card-top {
-      padding: 14px 18px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+    }
+    .template-card .card-header,
+    .template-card .card-footer {
+      padding: 16px;
       border-bottom: 1px solid var(--grey-200);
       background: var(--grey-100);
     }
-
-    .doctor-schedule-card .card-content {
-      padding: 16px 18px;
+    .template-card .card-footer {
+      border-top: 1px solid var(--grey-200);
+      border-bottom: none;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-
-    /* Modal */
-    .modal-overlay {
-      display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,0.45); z-index:200;
-      align-items:center; justify-content:center; padding:16px;
+    .template-card .card-body {
+      padding: 16px;
+      flex: 1;
     }
-    .modal-overlay.open { display:flex; }
-    .modal {
-      background:var(--white); border-radius:var(--radius);
-      width:100%; max-width:520px; box-shadow:var(--shadow-md);
-      max-height:90vh; overflow-y:auto;
-    }
-    .modal-header {
-      padding:16px 20px; border-bottom:1px solid var(--grey-200);
-      display:flex; align-items:center; justify-content:space-between;
-      position:sticky; top:0; background:var(--white); z-index:1;
-    }
-    .modal-header h3 { margin:0; }
-    .modal-body  { padding:20px; }
-    .modal-footer {
-      padding:14px 20px; border-top:1px solid var(--grey-200);
-      display:flex; justify-content:flex-end; gap:10px;
-      position:sticky; bottom:0; background:var(--white);
-    }
-    .btn-close {
-      background:none; border:none; font-size:1.2rem;
-      cursor:pointer; color:var(--grey-400);
-    }
-    .btn-close:hover { color: var(--grey-900); }
-
-    /*
-      Day toggle inside the edit modal.
-      Each day has a checkbox and time inputs.
-      Time inputs are hidden when is_working is unchecked.
-    */
-    .day-row {
+    .template-card .template-meta {
       display: grid;
-      grid-template-columns: 110px 1fr 1fr 80px;
-      align-items: center;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+      margin-bottom: 14px;
+    }
+    .template-card .template-meta .meta-block {
+      background: var(--grey-50);
+      border: 1px solid var(--grey-200);
+      border-radius: var(--radius);
+      padding: 10px;
+      font-size: 0.86rem;
+    }
+    .template-card .template-days {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .template-card .template-days .day-pill {
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      background: var(--grey-50);
+      border: 1px solid var(--grey-200);
+      font-size: 0.82rem;
+    }
+    .template-card .holiday-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .template-card .holiday-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--grey-200);
+      border-radius: var(--radius);
+      background: var(--white);
+      font-size: 0.85rem;
+    }
+    .template-card .holiday-item .holiday-note {
+      color: var(--grey-600);
+    }
+    .template-card .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .template-card .stats-row .stat {
+      border: 1px solid var(--grey-200);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: var(--grey-50);
+      text-align: center;
+      font-size: 0.86rem;
+    }
+    .template-card .stat strong {
+      display: block;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+    .modal .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .modal .day-row {
+      display: grid;
+      grid-template-columns: 180px repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
       padding: 8px 0;
       border-bottom: 1px solid var(--grey-200);
       font-size: 0.88rem;
     }
-    .day-row:last-child { border-bottom: none; }
-    .day-row label { font-weight: 600; }
-    .day-row input[type="time"],
-    .day-row input[type="number"] {
+    .modal .day-row:last-child { border-bottom: none; }
+    .modal .day-row.is-off {
+      opacity: 0.5;
+    }
+    .modal .day-row input[type="time"],
+    .modal .day-row input[type="number"] {
       width: 100%;
-      padding: 6px 10px;
+      padding: 8px 10px;
       border: 1.5px solid var(--grey-200);
       border-radius: var(--radius);
       font-size: 0.85rem;
-      font-family: var(--font);
     }
-    .day-row input:focus {
-      border-color: var(--blue);
-      outline: none;
+    .modal .holiday-table {
+      margin-bottom: 18px;
     }
-    .day-row.is-off input[type="time"],
-    .day-row.is-off input[type="number"] {
-      opacity: 0.3;
-      pointer-events: none; /* Cannot click time inputs when day is off */
+    .modal .holiday-table .holiday-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 78px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--grey-200);
     }
+    .modal .holiday-table .holiday-row:last-child { border-bottom: none; }
+    .modal .holiday-row button {
+      width: 100%;
+    }
+    .template-card .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      border: 1px solid var(--grey-200);
+      background: var(--white);
+      color: var(--grey-700);
+    }
+    .status-pill.active { color: #0b7285; border-color: #cfe2ff; }
+    .status-pill.off { color: #6c757d; border-color: #dee2e6; }
+    .status-pill.full { color: #842029; border-color: #f8d7da; }
   </style>
 </head>
 <body>
-
   <nav class="navbar">
     <a href="admin-dashboard.html" class="navbar-brand">
       <i class="fa-solid fa-hospital"></i> HAMS Admin
     </a>
     <div class="navbar-links">
-      <a href="admin-dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
-      </a>
-      <a href="admin-users.html">
-        <i class="fa-solid fa-users"></i> Users
-      </a>
-      <a href="admin-doctors.html">
-        <i class="fa-solid fa-user-doctor"></i> Doctors
-      </a>
-      <a href="admin-schedules.html" class="active">
-        <i class="fa-solid fa-calendar-week"></i> Schedules
-      </a>
-      <a href="admin-slots.html">
-        <i class="fa-solid fa-clock"></i> Slots
-      </a>
+      <a href="admin-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="admin-users.html"><i class="fa-solid fa-users"></i> Users</a>
+      <a href="admin-doctors.html"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
+      <a href="admin-departments.html"><i class="fa-solid fa-building-columns"></i> Departments</a>
+      <a href="admin-schedules.html" class="active"><i class="fa-solid fa-calendar-week"></i> Schedules</a>
+      <a href="admin-slots.html"><i class="fa-solid fa-clock"></i> Slots</a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </a>
+      <a href="../php/logout.php"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </div>
   </nav>
 
@@ -183,139 +181,198 @@
     <aside class="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-label">Overview</div>
-        <a href="admin-dashboard.html">
-          <i class="fa-solid fa-gauge icon"></i> Dashboard
-        </a>
-        <a href="admin-appointments.html">
-          <i class="fa-solid fa-calendar-check icon"></i> All Appointments
-        </a>
+        <a href="admin-dashboard.html"><i class="fa-solid fa-gauge icon"></i> Dashboard</a>
+        <a href="admin-appointments.html"><i class="fa-solid fa-calendar-check icon"></i> All Appointments</a>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Manage</div>
-        <a href="admin-users.html">
-          <i class="fa-solid fa-users icon"></i> Users
-        </a>
-        <a href="admin-doctors.html">
-          <i class="fa-solid fa-user-doctor icon"></i> Doctors
-        </a>
-        <a href="admin-departments.html">
-          <i class="fa-solid fa-building-columns icon"></i> Departments
-        </a>
-        <a href="admin-schedules.html" class="active">
-          <i class="fa-solid fa-calendar-week icon"></i> Schedules
-        </a>
-        <a href="admin-slots.html">
-          <i class="fa-solid fa-clock icon"></i> Time Slots
-        </a>
+        <a href="admin-users.html"><i class="fa-solid fa-users icon"></i> Users</a>
+        <a href="admin-doctors.html"><i class="fa-solid fa-user-doctor icon"></i> Doctors</a>
+        <a href="admin-departments.html"><i class="fa-solid fa-building-columns icon"></i> Departments</a>
+        <a href="admin-schedules.html" class="active"><i class="fa-solid fa-calendar-week icon"></i> Schedule Templates</a>
+        <a href="admin-slots.html"><i class="fa-solid fa-clock icon"></i> Time Slots</a>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Account</div>
-        <a href="../php/logout.php">
-          <i class="fa-solid fa-right-from-bracket icon"></i> Logout
-        </a>
+        <a href="../php/logout.php"><i class="fa-solid fa-right-from-bracket icon"></i> Logout</a>
       </div>
     </aside>
 
     <main class="main-content">
-
       <div class="page-header">
         <div>
-          <h2>Doctor Schedules</h2>
-          <p class="text-muted text-sm">
-            Set weekly working hours per doctor. Slots are generated
-            automatically from these rules.
-          </p>
+          <h2>Schedule Templates</h2>
+          <p class="text-muted text-sm">Create reusable monthly appointment templates and generate your clinic schedule without rebuilding slots by hand.</p>
         </div>
-        <!--
-          Generate Slots button: calls generate_slots.php which reads
-          the schedule rules and creates time_slots for the next 7 days.
-          Safe to click multiple times — duplicates are ignored.
-        -->
-        <button class="btn btn-primary" id="gen-btn" onclick="generateSlots()">
-          <i class="fa-solid fa-rotate"></i> Generate Slots (Next 7 Days)
-        </button>
+        <button class="btn btn-primary" onclick="openTemplateEditor()"><i class="fa-solid fa-plus"></i> New Template</button>
       </div>
 
       <div id="alert-box" class="alert" style="display:none;"></div>
 
-      <!-- Info box explaining the workflow -->
-      <div class="alert alert-info" style="margin-bottom:24px;">
-        <i class="fa-solid fa-circle-info"></i>
-        <strong>How it works:</strong> Set each doctor's weekly schedule below.
-        Click <strong>Generate Slots</strong> to create bookable time slots for
-        the next 7 days. Run it daily or whenever you add a new doctor.
-        Individual slots can still be disabled from the
-        <a href="admin-slots.html">Time Slots</a> page.
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+          <div class="form-group" style="min-width:180px;">
+            <label for="filter-month">Target month</label>
+            <input id="filter-month" type="month" class="form-control">
+          </div>
+          <div class="form-group" style="min-width:220px;">
+            <label for="filter-doctor">Doctor</label>
+            <select id="filter-doctor" class="form-control" onchange="loadTemplates()">
+              <option value="">All Doctors</option>
+            </select>
+          </div>
+          <div class="form-group" style="min-width:220px;">
+            <label for="filter-dept">Department</label>
+            <select id="filter-dept" class="form-control" onchange="loadTemplates()">
+              <option value="">All Departments</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i class="fa-solid fa-filter-circle-xmark"></i> Clear filters</button>
+        </div>
       </div>
 
-      <!-- Loading state -->
-      <div id="sched-loading"
-           style="text-align:center; padding:40px; color:var(--grey-400);">
+      <div id="sched-loading" style="text-align:center; padding:40px; color:var(--grey-400);">
         <span class="spinner"></span>
-        <p style="margin-top:8px;">Loading schedules...</p>
+        <p style="margin-top:8px;">Loading schedule templates...</p>
       </div>
 
-      <!-- Doctor schedule cards — one per doctor -->
-      <div id="sched-container"></div>
+      <div id="templates-grid" class="template-grid" style="display:none;"></div>
 
-      <!-- Empty state -->
-      <div id="sched-empty" class="empty-state" style="display:none;">
-        <i class="fa-solid fa-user-doctor"
-           style="font-size:2.5rem; color:var(--grey-400);
-                  display:block; margin-bottom:12px;"></i>
-        <p>No doctors found. Add doctors first.</p>
-        <a href="admin-doctors.html" class="btn btn-primary">
-          Manage Doctors
-        </a>
+      <div id="templates-empty" class="empty-state" style="display:none;">
+        <i class="fa-solid fa-calendar-plus" style="font-size:2.5rem; color:var(--grey-400); display:block; margin-bottom:12px;"></i>
+        <p>No schedule templates found yet.</p>
+        <button class="btn btn-primary" onclick="openTemplateEditor()">Create the first template</button>
       </div>
-
     </main>
   </div>
 
-  <!-- EDIT SCHEDULE MODAL -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <h3 id="modal-title">Edit Schedule</h3>
-        <button class="btn-close" onclick="closeModal()">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <h3 id="modal-title">New Schedule Template</h3>
+        <button class="btn-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
-        <div id="modal-alert" class="alert alert-error"
-             style="display:none;"></div>
+        <div id="modal-alert" class="alert alert-error" style="display:none;"></div>
 
-        <input type="hidden" id="edit-doctor-id" value="">
+        <input type="hidden" id="edit-template-id" value="">
 
-        <p class="text-muted text-sm" style="margin-bottom:16px;">
-          Uncheck a day to mark it as a day off.
-          Changes take effect next time you generate slots.
-        </p>
+        <div class="form-group">
+          <label for="tmpl-name">Template name</label>
+          <input id="tmpl-name" class="form-control" placeholder="E.g. General Medicine Weekdays">
+        </div>
 
-        <!-- Day rows built by JS — one row per day of week -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tmpl-doctor">Doctor</label>
+            <select id="tmpl-doctor" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label for="tmpl-dept">Department</label>
+            <select id="tmpl-dept" class="form-control" disabled></select>
+          </div>
+          <div class="form-group">
+            <label for="tmpl-duration">Slot duration</label>
+            <input id="tmpl-duration" type="number" class="form-control" min="5" max="180" value="10">
+          </div>
+          <div class="form-group" style="align-self:flex-end;">
+            <label>&nbsp;</label>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input id="tmpl-active" type="checkbox" checked>
+              <label for="tmpl-active" style="margin:0;">Active</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-bottom:10px;">
+          <h4 style="margin:0;">Working days</h4>
+          <p class="text-muted text-sm">Enable working days and define start/end hours plus optional break windows.</p>
+        </div>
         <div id="day-rows"></div>
 
+        <div class="section-header" style="margin-top:18px; margin-bottom:10px;">
+          <h4 style="margin:0;">Holidays and unavailable dates</h4>
+        </div>
+        <div id="holiday-list"></div>
+
+        <div class="form-row" style="align-items:flex-end;">
+          <div class="form-group">
+            <label for="holiday-date">Holiday date</label>
+            <input id="holiday-date" type="date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="holiday-note">Note</label>
+            <input id="holiday-note" type="text" class="form-control" placeholder="Optional description">
+          </div>
+          <div class="form-group" style="align-self:flex-end;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="addHoliday()"><i class="fa-solid fa-plus"></i> Add holiday</button>
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-top:18px; margin-bottom:10px;">
+          <h4 style="margin:0;">Doctor leave & one-off overrides</h4>
+          <p class="text-muted text-sm">Add a single-date override for a specific doctor without changing the recurring template.</p>
+        </div>
+        <div id="exception-list"></div>
+
+        <div class="form-row" style="align-items:flex-end; gap:14px;">
+          <div class="form-group" style="flex:1 1 180px;">
+            <label for="exception-date">Date</label>
+            <input id="exception-date" type="date" class="form-control">
+          </div>
+          <div class="form-group" style="flex:0 0 120px; display:flex; align-items:flex-end; gap:10px;">
+            <input id="exception-working" type="checkbox" checked>
+            <label for="exception-working" style="margin:0;">Working day</label>
+          </div>
+          <div class="form-group" style="flex:1 1 120px;">
+            <label for="exception-start">Start</label>
+            <input id="exception-start" type="time" class="form-control" value="08:00">
+          </div>
+          <div class="form-group" style="flex:1 1 120px;">
+            <label for="exception-end">End</label>
+            <input id="exception-end" type="time" class="form-control" value="12:00">
+          </div>
+        </div>
+        <div class="form-row" style="align-items:flex-end; gap:14px; margin-top:10px;">
+          <div class="form-group" style="flex:1 1 120px;">
+            <label for="exception-break-start">Break start</label>
+            <input id="exception-break-start" type="time" class="form-control">
+          </div>
+          <div class="form-group" style="flex:1 1 120px;">
+            <label for="exception-break-end">Break end</label>
+            <input id="exception-break-end" type="time" class="form-control">
+          </div>
+          <div class="form-group" style="flex:2 1 240px;">
+            <label for="exception-note">Note</label>
+            <input id="exception-note" type="text" class="form-control" placeholder="E.g. Doctor on leave">
+          </div>
+          <div class="form-group" style="flex:0 0 160px; align-self:flex-end;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="addException()"><i class="fa-solid fa-plus"></i> Add override</button>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="modal-save-btn"
-                onclick="saveSchedule()">
-          <i class="fa-solid fa-floppy-disk"></i> Save Schedule
-        </button>
+        <button class="btn btn-primary" id="modal-save-btn" onclick="saveTemplate()"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
       </div>
     </div>
   </div>
 
   <script src="../js/main.js"></script>
   <script>
-    // ==========================================================
-    // ADMIN SCHEDULES PAGE JAVASCRIPT
-    // ==========================================================
+    const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    let templates = [];
+    let departments = [];
+    let doctors = [];
+    let holidays = [];
+    let exceptions = [];
 
-    const DAY_NAMES = [
-      'Sunday','Monday','Tuesday','Wednesday',
-      'Thursday','Friday','Saturday'
-    ];
+    function formatMonth(month) {
+      if (!month) return '';
+      const [year, mon] = month.split('-');
+      const date = new Date(`${year}-${mon}-01`);
+      return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    }
 
     fetch('../php/session_check.php')
       .then(r => r.json())
@@ -325,245 +382,617 @@
         }
       });
 
-    // --- Load all doctor schedules ---
-    async function loadSchedules() {
+    document.addEventListener('DOMContentLoaded', () => {
+      const now = new Date();
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      document.getElementById('filter-month').value = nextMonth.toISOString().slice(0,7);
+      const tmplDoctorSelect = document.getElementById('tmpl-doctor');
+      tmplDoctorSelect.addEventListener('change', async () => {
+        syncDoctorDepartment();
+        await loadDoctorExceptions(tmplDoctorSelect.value);
+      });
+      loadDepartments().then(loadTemplates);
+    });
+
+    async function loadDepartments() {
       try {
-        const res     = await fetch('../php/admin_get_schedules.php');
-        const doctors = await res.json();
+        const [deptRes, doctorRes] = await Promise.all([
+          fetch('../php/admin_get_departments.php'),
+          fetch('../php/admin_get_doctors.php')
+        ]);
 
-        document.getElementById('sched-loading').style.display = 'none';
+        departments = await deptRes.json();
+        doctors = await doctorRes.json();
 
-        if (!doctors.length) {
-          document.getElementById('sched-empty').style.display = 'block';
-          return;
-        }
+        const filterDept = document.getElementById('filter-dept');
+        const filterDoc = document.getElementById('filter-doctor');
+        const templateDoc = document.getElementById('tmpl-doctor');
+        const templateDept = document.getElementById('tmpl-dept');
 
-        const container = document.getElementById('sched-container');
-        container.innerHTML = '';
+        filterDept.innerHTML = '<option value="">All Departments</option>';
+        filterDoc.innerHTML = '<option value="">All Doctors</option>';
+        templateDept.innerHTML = '<option value="">— Choose department —</option>';
+        templateDoc.innerHTML = '<option value="">— Choose doctor —</option>';
 
-        doctors.forEach(doc => {
-          const card = document.createElement('div');
-          card.className = 'doctor-schedule-card';
+        departments.forEach(dept => {
+          const opt1 = document.createElement('option');
+          opt1.value = dept.dept_id;
+          opt1.textContent = dept.dept_name;
+          filterDept.appendChild(opt1);
 
-          // --- Build the 7-day grid for this doctor ---
-          const dayCells = doc.schedule.map(day => {
-            const isWorking = day.is_working == 1;
-
-            // Calculate how many slots this day produces
-            let slotCount = 0;
-            if (isWorking) {
-              const startM = timeToMins(day.start_time);
-              const endM   = timeToMins(day.end_time);
-              slotCount    = Math.floor((endM - startM) / day.slot_duration);
-            }
-
-            return `
-              <div class="day-cell ${isWorking ? 'working' : 'off'}">
-                <div class="day-name">${DAY_NAMES[day.day_of_week].slice(0,3)}</div>
-                ${isWorking ? `
-                  <div class="day-hours">
-                    ${day.start_time.slice(0,5)} – ${day.end_time.slice(0,5)}
-                  </div>
-                  <div class="day-slots">
-                    ${slotCount} slots · ${day.slot_duration}min
-                  </div>
-                ` : `
-                  <div class="day-hours" style="color:var(--grey-400);">Day Off</div>
-                `}
-              </div>
-            `;
-          }).join('');
-
-          card.innerHTML = `
-            <div class="card-top">
-              <div>
-                <strong>Dr. ${escapeHtml(doc.full_name)}</strong>
-                <span class="text-muted text-sm" style="margin-left:8px;">
-                  ${escapeHtml(doc.dept_name)}
-                  ${doc.specialization ? '· ' + escapeHtml(doc.specialization) : ''}
-                </span>
-              </div>
-              <button class="btn btn-ghost btn-sm"
-                      onclick='openModal(${JSON.stringify(doc)})'>
-                <i class="fa-solid fa-pen"></i> Edit Schedule
-              </button>
-            </div>
-            <div class="card-content">
-              <div class="week-grid">${dayCells}</div>
-            </div>
-          `;
-
-          container.appendChild(card);
+          const opt2 = document.createElement('option');
+          opt2.value = dept.dept_id;
+          opt2.textContent = dept.dept_name;
+          templateDept.appendChild(opt2);
         });
 
+        doctors.forEach(doc => {
+          const opt = document.createElement('option');
+          opt.value = doc.doctor_id;
+          opt.textContent = doc.full_name + (doc.dept_name ? ` — ${doc.dept_name}` : '');
+          filterDoc.appendChild(opt);
+
+          const opt2 = document.createElement('option');
+          opt2.value = doc.doctor_id;
+          opt2.textContent = doc.full_name + (doc.dept_name ? ` — ${doc.dept_name}` : '');
+          templateDoc.appendChild(opt2);
+        });
       } catch (err) {
-        document.getElementById('sched-loading').style.display = 'none';
-        document.getElementById('sched-empty').style.display   = 'block';
-        console.error('Load error:', err);
+        console.error('Could not load departments or doctors:', err);
       }
     }
 
-    // Convert "HH:MM:SS" to total minutes — used for slot count calculation
-    function timeToMins(t) {
-      const [h, m] = t.split(':').map(Number);
-      return h * 60 + m;
+    function syncDoctorDepartment() {
+      const doctorSelect = document.getElementById('tmpl-doctor');
+      const deptSelect = document.getElementById('tmpl-dept');
+      const doctorId = parseInt(doctorSelect.value, 10);
+      const doctor = doctors.find(d => d.doctor_id === doctorId);
+      if (doctor) {
+        deptSelect.value = doctor.dept_id || '';
+      }
     }
 
-    // --- Open edit modal for a doctor ---
-    function openModal(doc) {
-      document.getElementById('modal-title').textContent   =
-        `Edit Schedule — Dr. ${doc.full_name}`;
-      document.getElementById('edit-doctor-id').value      = doc.doctor_id;
-      document.getElementById('modal-alert').style.display = 'none';
+    async function loadTemplates() {
+      const month = document.getElementById('filter-month').value;
+      const deptId = document.getElementById('filter-dept').value;
+      const doctorId = document.getElementById('filter-doctor').value;
+      document.getElementById('sched-loading').style.display = 'block';
+      document.getElementById('templates-grid').style.display = 'none';
+      document.getElementById('templates-empty').style.display = 'none';
+      document.getElementById('alert-box').style.display = 'none';
 
+      try {
+        const query = new URLSearchParams();
+        if (month) query.append('month', month);
+        if (deptId) query.append('dept_id', deptId);
+        if (doctorId) query.append('doctor_id', doctorId);
+
+        const res = await fetch(`../php/admin_get_schedule_templates.php?${query.toString()}`);
+        const result = await res.json();
+        templates = Array.isArray(result) ? result : [];
+        const filtered = templates.filter(t => (!deptId || t.dept_id == deptId) && (!doctorId || t.doctor_id == doctorId));
+        const monthLabel = month ? formatMonth(month) : 'Next month';
+
+        if (!filtered.length) {
+          document.getElementById('sched-loading').style.display = 'none';
+          document.getElementById('templates-empty').style.display = 'block';
+          return;
+        }
+
+        const grid = document.getElementById('templates-grid');
+        grid.innerHTML = '';
+
+        filtered.forEach(template => {
+          const card = document.createElement('div');
+          card.className = 'template-card';
+
+          const activeLabel = template.is_active == 1 ? '<span class="status-pill active"><i class="fa-solid fa-circle"></i> Active</span>' : '<span class="status-pill off"><i class="fa-solid fa-circle"></i> Inactive</span>';
+
+          const stats = month ? (template.month_stats || template.stats) : template.stats;
+          const statsLabel = month ? 'This month' : 'Total';
+          const daySummary = template.days.length
+            ? template.days.map(day => {
+                if (day.is_working == 0) {
+                  return `${DAY_NAMES[day.day_of_week].slice(0,3)} off`;
+                }
+                const start = day.start_time ? day.start_time.slice(0,5) : '—';
+                const end = day.end_time ? day.end_time.slice(0,5) : '—';
+                const breakInfo = day.break_start && day.break_end ? `, break ${day.break_start.slice(0,5)}–${day.break_end.slice(0,5)}` : '';
+                return `${DAY_NAMES[day.day_of_week].slice(0,3)} ${start}–${end}${breakInfo}`;
+              }).join(' · ')
+            : 'No schedule days defined.';
+
+          const holidayText = template.holidays.length
+            ? template.holidays.map(h => `${formatDate(h.holiday_date)}${h.note ? ` (${escapeHtml(h.note)})` : ''}`).join('<br>')
+            : '<span style="color:var(--grey-500);">None set</span>';
+
+          card.innerHTML = `
+            <div class="card-header">
+              <div>
+                <strong>${escapeHtml(template.template_name)}</strong>
+                <div class="text-muted text-sm">${escapeHtml(template.doctor_name || 'No doctor')} • ${escapeHtml(template.dept_name)}</div>
+              </div>
+              <div>${activeLabel}</div>
+            </div>
+            <div class="card-body">
+              <div class="template-meta">
+                <div class="meta-block"><strong>${template.slot_duration} min</strong>Slot duration</div>
+                <div class="meta-block"><strong>1</strong>Patient per slot</div>
+                <div class="meta-block"><strong>${stats.available_slots}</strong>${statsLabel} available</div>
+                <div class="meta-block"><strong>${stats.total_booked}</strong>${statsLabel} booked</div>
+              </div>
+              <div class="template-days">
+                ${daySummary.split(' · ').map(item => `<span class="day-pill">${escapeHtml(item)}</span>`).join('')}
+              </div>
+              <div class="holiday-list">
+                <div class="text-muted text-sm" style="margin-bottom:8px;"><strong>Holidays</strong></div>
+                <div>${holidayText}</div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn btn-ghost btn-sm" onclick="openTemplateEditor(${template.template_id})"><i class="fa-solid fa-pen"></i> Edit</button>
+              <button class="btn btn-primary btn-sm" onclick="generateMonth(${template.template_id})"><i class="fa-solid fa-calendar-plus"></i> Generate ${escapeHtml(monthLabel)}</button>
+            </div>
+          `;
+
+          grid.appendChild(card);
+        });
+
+        document.getElementById('sched-loading').style.display = 'none';
+        document.getElementById('templates-grid').style.display = 'grid';
+      } catch (err) {
+        document.getElementById('sched-loading').style.display = 'none';
+        document.getElementById('alert-box').textContent = 'Failed to load schedule templates. Please try again.';
+        document.getElementById('alert-box').className = 'alert alert-error';
+        document.getElementById('alert-box').style.display = 'block';
+      }
+    }
+
+    function clearFilters() {
+      document.getElementById('filter-month').value = '';
+      document.getElementById('filter-dept').value = '';
+      document.getElementById('filter-doctor').value = '';
+      loadTemplates();
+    }
+
+    async function openTemplateEditor(templateId = null) {
+      const modalTitle = document.getElementById('modal-title');
+      const templateIdInput = document.getElementById('edit-template-id');
+      const nameInput = document.getElementById('tmpl-name');
+      const doctorSelect = document.getElementById('tmpl-doctor');
+      const deptSelect = document.getElementById('tmpl-dept');
+      const durationInput = document.getElementById('tmpl-duration');
+      const activeCheckbox = document.getElementById('tmpl-active');
+      const holidayDate = document.getElementById('holiday-date');
+      const holidayNote = document.getElementById('holiday-note');
+
+      holidays = [];
+      exceptions = [];
+      holidayDate.value = '';
+      holidayNote.value = '';
+      document.getElementById('exception-date').value = '';
+      document.getElementById('exception-note').value = '';
+      document.getElementById('exception-start').value = '08:00';
+      document.getElementById('exception-end').value = '12:00';
+      document.getElementById('exception-break-start').value = '';
+      document.getElementById('exception-break-end').value = '';
+      document.getElementById('exception-working').checked = true;
+      toggleExceptionFields();
+
+      if (templateId) {
+        const template = templates.find(t => t.template_id == templateId);
+        if (!template) return;
+        modalTitle.textContent = `Edit Template — ${template.template_name}`;
+        templateIdInput.value = template.template_id;
+        nameInput.value = template.template_name;
+        doctorSelect.value = template.doctor_id;
+        deptSelect.value = template.dept_id;
+        durationInput.value = template.slot_duration;
+        activeCheckbox.checked = template.is_active == 1;
+        holidays = template.holidays.map(h => ({ holiday_date: h.holiday_date, note: h.note }));
+        buildDayRows(template.days);
+        await loadDoctorExceptions(template.doctor_id);
+        refreshExceptionList();
+      } else {
+        modalTitle.textContent = 'New Schedule Template';
+        templateIdInput.value = '';
+        nameInput.value = '';
+        doctorSelect.value = '';
+        deptSelect.value = '';
+        durationInput.value = 10;
+        activeCheckbox.checked = true;
+        const defaultDays = Array.from({ length: 7 }, (_, index) => ({
+          day_of_week: index,
+          is_working: index >= 1 && index <= 5 ? 1 : 0,
+          start_time: index >= 1 && index <= 5 ? '08:00' : '09:00',
+          end_time: index >= 1 && index <= 5 ? '16:00' : '13:00',
+          break_start: index >= 1 && index <= 5 ? '12:00' : '',
+          break_end: index >= 1 && index <= 5 ? '13:00' : '',
+        }));
+        buildDayRows(defaultDays);
+        refreshExceptionList();
+      }
+
+      refreshHolidayList();
+      document.getElementById('modal-alert').style.display = 'none';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function syncDoctorDepartment() {
+      const doctorSelect = document.getElementById('tmpl-doctor');
+      const deptSelect = document.getElementById('tmpl-dept');
+      const doctorId = parseInt(doctorSelect.value, 10);
+      const doctor = doctors.find(d => d.doctor_id === doctorId);
+      if (doctor && doctor.dept_id) {
+        deptSelect.value = doctor.dept_id;
+      }
+    }
+
+    function buildDayRows(days) {
       const container = document.getElementById('day-rows');
       container.innerHTML = '';
 
-      // Build one row per day of the week
-      doc.schedule.forEach(day => {
-        const isWorking = day.is_working == 1;
-        const rowId     = `day-${day.day_of_week}`;
-
+      days.forEach(day => {
         const row = document.createElement('div');
-        row.className = `day-row ${isWorking ? '' : 'is-off'}`;
-        row.id        = rowId;
+        row.className = `day-row ${day.is_working == 1 ? '' : 'is-off'}`;
+        row.id = `day-${day.day_of_week}`;
 
         row.innerHTML = `
-          <label>
-            <!--
-              Checkbox controls whether this day is a working day.
-              When unchecked, the time inputs become disabled via
-              the .is-off CSS class which sets pointer-events:none.
-            -->
-            <input type="checkbox"
-                   id="chk-${day.day_of_week}"
-                   ${isWorking ? 'checked' : ''}
-                   onchange="toggleDay(${day.day_of_week})">
+          <label style="font-weight:600; display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="chk-${day.day_of_week}" ${day.is_working == 1 ? 'checked' : ''} onchange="toggleDay(${day.day_of_week})">
             ${DAY_NAMES[day.day_of_week]}
           </label>
-          <input type="time"
-                 id="start-${day.day_of_week}"
-                 value="${day.start_time.slice(0,5)}"
-                 title="Start time">
-          <input type="time"
-                 id="end-${day.day_of_week}"
-                 value="${day.end_time.slice(0,5)}"
-                 title="End time">
-          <input type="number"
-                 id="dur-${day.day_of_week}"
-                 value="${day.slot_duration}"
-                 min="10" max="120" step="5"
-                 title="Slot duration in minutes">
+          <input type="time" id="start-${day.day_of_week}" value="${(day.start_time || '08:00').slice(0,5)}" placeholder="Start">
+          <input type="time" id="end-${day.day_of_week}" value="${(day.end_time || '16:00').slice(0,5)}" placeholder="End">
+          <input type="time" id="break-start-${day.day_of_week}" value="${(day.break_start || '').slice(0,5)}" placeholder="Break start">
+          <input type="time" id="break-end-${day.day_of_week}" value="${(day.break_end || '').slice(0,5)}" placeholder="Break end">
         `;
 
         container.appendChild(row);
       });
-
-      document.getElementById('modal-overlay').classList.add('open');
     }
 
-    // Toggle a day row between working and off
     function toggleDay(dayNum) {
-      const row       = document.getElementById(`day-${dayNum}`);
-      const isChecked = document.getElementById(`chk-${dayNum}`).checked;
-      // Add/remove is-off class which controls the CSS opacity + pointer-events
-      row.classList.toggle('is-off', !isChecked);
+      const row = document.getElementById(`day-${dayNum}`);
+      const checked = document.getElementById(`chk-${dayNum}`).checked;
+      row.classList.toggle('is-off', !checked);
+    }
+
+    function addHoliday() {
+      const dateEl = document.getElementById('holiday-date');
+      const noteEl = document.getElementById('holiday-note');
+      const date = dateEl.value;
+      const note = noteEl.value.trim();
+
+      if (!date) {
+        showToast('Select a holiday date before adding.', 'error');
+        return;
+      }
+
+      if (holidays.some(h => h.holiday_date === date)) {
+        showToast('This date is already added as a holiday.', 'warning');
+        return;
+      }
+
+      holidays.push({ holiday_date: date, note });
+      refreshHolidayList();
+      dateEl.value = '';
+      noteEl.value = '';
+    }
+
+    function refreshHolidayList() {
+      const container = document.getElementById('holiday-list');
+      if (!holidays.length) {
+        container.innerHTML = '<p class="text-muted text-sm">No holidays or unavailable dates defined.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      holidays.forEach((holiday, index) => {
+        const row = document.createElement('div');
+        row.className = 'holiday-row';
+        row.innerHTML = `
+          <div>${formatDate(holiday.holiday_date)}</div>
+          <div>${escapeHtml(holiday.note || 'No note')}</div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="removeHoliday(${index})"><i class="fa-solid fa-trash"></i></button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function removeHoliday(index) {
+      holidays.splice(index, 1);
+      refreshHolidayList();
+    }
+
+    function refreshExceptionList() {
+      const container = document.getElementById('exception-list');
+      if (!exceptions.length) {
+        container.innerHTML = '<p class="text-muted text-sm">No doctor leave or overrides defined.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      exceptions.forEach((exception, index) => {
+        const row = document.createElement('div');
+        row.className = 'holiday-row';
+        const status = exception.is_working == 1 ? 'Working' : 'Unavailable';
+        const range = exception.is_working == 1
+          ? `${exception.start_time ? exception.start_time.slice(0,5) : '—'}–${exception.end_time ? exception.end_time.slice(0,5) : '—'}`
+          : 'Off';
+        row.innerHTML = `
+          <div>
+            <strong>${formatDate(exception.exception_date)}</strong><br>
+            <span class="text-muted text-sm">${status} · ${range}</span>
+          </div>
+          <div>${escapeHtml(exception.note || 'No note')}</div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="removeException(${index})"><i class="fa-solid fa-trash"></i></button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function removeException(index) {
+      exceptions.splice(index, 1);
+      refreshExceptionList();
+    }
+
+    function toggleExceptionFields() {
+      const isWorking = document.getElementById('exception-working').checked;
+      ['exception-start', 'exception-end', 'exception-break-start', 'exception-break-end'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) field.disabled = !isWorking;
+      });
+    }
+
+    document.getElementById('exception-working').addEventListener('change', toggleExceptionFields);
+
+    async function loadDoctorExceptions(doctorId) {
+      exceptions = [];
+      if (!doctorId) {
+        refreshExceptionList();
+        return;
+      }
+
+      try {
+        const res = await fetch(`../php/admin_get_doctor_exceptions.php?doctor_id=${doctorId}`);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          exceptions = data.map(exc => ({
+            exception_date: exc.exception_date,
+            is_working: exc.is_working,
+            start_time: exc.start_time || '',
+            end_time: exc.end_time || '',
+            break_start: exc.break_start || '',
+            break_end: exc.break_end || '',
+            note: exc.note || '',
+          }));
+        }
+      } catch (err) {
+        console.error('Could not load doctor exceptions:', err);
+      }
+      refreshExceptionList();
+    }
+
+    function addException() {
+      const dateEl = document.getElementById('exception-date');
+      const noteEl = document.getElementById('exception-note');
+      const isWorkingEl = document.getElementById('exception-working');
+      const startEl = document.getElementById('exception-start');
+      const endEl = document.getElementById('exception-end');
+      const breakStartEl = document.getElementById('exception-break-start');
+      const breakEndEl = document.getElementById('exception-break-end');
+
+      const date = dateEl.value;
+      const isWorking = isWorkingEl.checked ? 1 : 0;
+      const start_time = startEl.value;
+      const end_time = endEl.value;
+      const break_start = breakStartEl.value;
+      const break_end = breakEndEl.value;
+      const note = noteEl.value.trim();
+
+      if (!date) {
+        showToast('Select a date for the override.', 'error');
+        return;
+      }
+      if (exceptions.some(exc => exc.exception_date === date)) {
+        showToast('An override already exists for this date.', 'warning');
+        return;
+      }
+      if (isWorking) {
+        if (!start_time || !end_time) {
+          showToast('Working overrides require a start and end time.', 'error');
+          return;
+        }
+        if (end_time <= start_time) {
+          showToast('Override end time must be after start time.', 'error');
+          return;
+        }
+        if ((break_start && !break_end) || (!break_start && break_end)) {
+          showToast('Override break must include both start and end times.', 'error');
+          return;
+        }
+        if (break_start && break_end) {
+          if (break_end <= break_start) {
+            showToast('Override break end must be after break start.', 'error');
+            return;
+          }
+          if (break_start <= start_time || break_end >= end_time) {
+            showToast('Override break must fit within the working window.', 'error');
+            return;
+          }
+        }
+      }
+
+      exceptions.push({
+        exception_date: date,
+        is_working,
+        start_time,
+        end_time,
+        break_start,
+        break_end,
+        note,
+      });
+
+      refreshExceptionList();
+      dateEl.value = '';
+      noteEl.value = '';
+      startEl.value = '08:00';
+      endEl.value = '12:00';
+      breakStartEl.value = '';
+      breakEndEl.value = '';
+      isWorkingEl.checked = true;
+      toggleExceptionFields();
     }
 
     function closeModal() {
       document.getElementById('modal-overlay').classList.remove('open');
     }
 
-    document.getElementById('modal-overlay').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-
-    // --- Save the edited schedule ---
-    async function saveSchedule() {
-      const doctorId = document.getElementById('edit-doctor-id').value;
+    async function saveTemplate() {
+      const templateId = document.getElementById('edit-template-id').value;
+      const name = document.getElementById('tmpl-name').value.trim();
+      const doctorId = document.getElementById('tmpl-doctor').value;
+      const deptId = document.getElementById('tmpl-dept').value;
+      const duration = parseInt(document.getElementById('tmpl-duration').value, 10);
+      const isActive = document.getElementById('tmpl-active').checked ? 1 : 0;
       const alertBox = document.getElementById('modal-alert');
 
-      // Collect all 7 days from the modal form
       const days = [];
       for (let d = 0; d <= 6; d++) {
+        const isWorking = document.getElementById(`chk-${d}`).checked ? 1 : 0;
+        const start = document.getElementById(`start-${d}`).value;
+        const end = document.getElementById(`end-${d}`).value;
+        const breakStart = document.getElementById(`break-start-${d}`).value;
+        const breakEnd = document.getElementById(`break-end-${d}`).value;
+
+        if (isWorking) {
+          if (!start || !end) {
+            alertBox.textContent = `${DAY_NAMES[d]} requires start and end times.`;
+            alertBox.style.display = 'block';
+            return;
+          }
+          if (end <= start) {
+            alertBox.textContent = `${DAY_NAMES[d]} end time must be after start time.`;
+            alertBox.style.display = 'block';
+            return;
+          }
+          if ((breakStart && !breakEnd) || (!breakStart && breakEnd)) {
+            alertBox.textContent = `${DAY_NAMES[d]} must have both break start and end or neither.`;
+            alertBox.style.display = 'block';
+            return;
+          }
+          if (breakStart && breakEnd) {
+            if (breakEnd <= breakStart) {
+              alertBox.textContent = `${DAY_NAMES[d]} break end must be after break start.`;
+              alertBox.style.display = 'block';
+              return;
+            }
+            if (breakStart <= start || breakEnd >= end) {
+              alertBox.textContent = `${DAY_NAMES[d]} break must fit inside working hours.`;
+              alertBox.style.display = 'block';
+              return;
+            }
+          }
+        }
+
         days.push({
-          day_of_week:    d,
-          is_working:     document.getElementById(`chk-${d}`).checked ? 1 : 0,
-          start_time:     document.getElementById(`start-${d}`).value,
-          end_time:       document.getElementById(`end-${d}`).value,
-          slot_duration:  parseInt(document.getElementById(`dur-${d}`).value),
+          day_of_week: d,
+          is_working: isWorking,
+          start_time: start,
+          end_time: end,
+          break_start: breakStart,
+          break_end: breakEnd,
         });
       }
 
-      // Validate: working days must have valid times
-      for (const day of days) {
-        if (day.is_working) {
-          if (!day.start_time || !day.end_time) {
-            alertBox.textContent   = `${DAY_NAMES[day.day_of_week]}: start and end time are required.`;
-            alertBox.style.display = 'block';
-            return;
-          }
-          if (day.end_time <= day.start_time) {
-            alertBox.textContent   = `${DAY_NAMES[day.day_of_week]}: end time must be after start time.`;
-            alertBox.style.display = 'block';
-            return;
-          }
-          if (!day.slot_duration || day.slot_duration < 10) {
-            alertBox.textContent   = `${DAY_NAMES[day.day_of_week]}: slot duration must be at least 10 minutes.`;
-            alertBox.style.display = 'block';
-            return;
-          }
-        }
+      if (!name || !doctorId || isNaN(duration) || duration < 5) {
+        alertBox.textContent = 'Template name, doctor and duration are required and must be valid.';
+        alertBox.style.display = 'block';
+        return;
       }
 
+      if (!days.some(day => day.is_working === 1)) {
+        alertBox.textContent = 'At least one working day must be enabled.';
+        alertBox.style.display = 'block';
+        return;
+      }
+
+      alertBox.style.display = 'none';
       setLoading('modal-save-btn', true);
 
       try {
-        const res  = await fetch('../php/admin_save_schedule.php', {
+        const res = await fetch('../php/admin_save_schedule_template.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ doctor_id: doctorId, days }),
+          body: JSON.stringify({
+            template_id: templateId || null,
+            template_name: name,
+            doctor_id: doctorId,
+            slot_duration: duration,
+            is_active: isActive,
+            days,
+            holidays,
+            exceptions,
+          }),
         });
-        const data = await res.json();
 
+        const data = await res.json();
         if (data.success) {
           closeModal();
-          showAlert('Schedule saved. Click Generate Slots to apply changes.', 'success');
-          loadSchedules(); // Refresh the cards
+          showToast('Schedule template saved successfully.', 'success');
+          loadTemplates();
         } else {
-          alertBox.textContent   = data.error || 'Save failed.';
+          alertBox.textContent = data.error || 'Failed to save template.';
           alertBox.style.display = 'block';
         }
       } catch (err) {
-        alertBox.textContent   = 'Network error. Try again.';
+        alertBox.textContent = 'Network error. Please try again.';
         alertBox.style.display = 'block';
       }
 
       setLoading('modal-save-btn', false);
     }
 
-    // --- Run the slot generator ---
-    async function generateSlots() {
-      setLoading('gen-btn', true);
-
-      try {
-        const res  = await fetch('../php/generate_slots.php');
-        const data = await res.json();
-
-        if (data.success) {
-          showAlert(data.message, 'success');
-        } else {
-          showAlert(data.error || 'Generation failed.', 'error');
-        }
-      } catch (err) {
-        showAlert('Network error. Try again.', 'error');
+    async function generateMonth(templateId) {
+      const month = document.getElementById('filter-month').value;
+      if (!month) {
+        showToast('Select a target month before generating.', 'error');
+        return;
       }
 
-      setLoading('gen-btn', false);
+      const payload = { template_id: templateId, month };
+      let shouldConfirm = false;
+      let confirmed = false;
+
+      do {
+        const res = await fetch('../php/admin_generate_schedule_slots.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        if (data.need_confirmation && !confirmed) {
+          const message = `Existing slots exist for ${data.duplicate_count} day(s) in ${month}. Continue and keep the existing bookings?`;
+          shouldConfirm = await confirmDialog(message, { confirmText: 'Continue', cancelText: 'Cancel' });
+          if (!shouldConfirm) {
+            return;
+          }
+          payload.confirm = true;
+          confirmed = true;
+          continue;
+        }
+
+        if (data.success) {
+          const message = data.message || `Generated ${data.created} slots for ${month}.`;
+          showToast(message, 'success', 7000);
+          loadTemplates();
+          return;
+        }
+
+        showToast(data.error || 'Schedule generation failed.', 'error', 6000);
+        return;
+      } while (shouldConfirm);
     }
-
-    loadSchedules();
   </script>
-
 </body>
 </html>

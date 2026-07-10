@@ -240,10 +240,12 @@
           // Clicking anywhere on the row opens the detail panel
           tr.style.cursor = 'pointer';
           tr.onclick = () => showDetail(a);
+          // Display doctor name if available, otherwise show "Auto-assigned"
+          const doctorDisplay = a.doctor_name ? `Dr. ${escapeHtml(a.doctor_name)}` : '<span class="text-muted text-sm">Auto-assigned</span>';
           tr.innerHTML = `
             <td class="text-muted">${i + 1}</td>
             <td>${escapeHtml(forName)}</td>
-            <td>Dr. ${escapeHtml(a.doctor_name)}</td>
+            <td>${doctorDisplay}</td>
             <td>${escapeHtml(a.dept_name)}</td>
             <td>${formatDate(a.slot_date)}</td>
             <td>${formatTime(a.start_time)}</td>
@@ -273,10 +275,12 @@
       const actions = document.getElementById('detail-actions');
 
       // Build detail items
+      // Display doctor name if available, otherwise show "Auto-assigned"
+      const doctorDisplay = appt.doctor_name ? 'Dr. ' + appt.doctor_name : 'Auto-assigned';
       const items = [
         { label: 'Appointment ID', value: '#' + appt.appt_id },
         { label: 'Booked For',     value: appt.family_name || 'Myself' },
-        { label: 'Doctor',         value: 'Dr. ' + appt.doctor_name },
+        { label: 'Doctor',         value: doctorDisplay },
         { label: 'Department',     value: appt.dept_name },
         { label: 'Date',           value: formatDate(appt.slot_date) },
         { label: 'Time',           value: formatTime(appt.start_time) + ' – ' + formatTime(appt.end_time) },

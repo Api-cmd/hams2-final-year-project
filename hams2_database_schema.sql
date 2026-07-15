@@ -41,6 +41,25 @@ CREATE TABLE IF NOT EXISTS departments (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ===========================================================
+-- DOCTORS TABLE
+-- Doctor profiles (admin managed, no login)
+-- ===========================================================
+CREATE TABLE IF NOT EXISTS doctors (
+    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    dept_id INT NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100),
+    bio TEXT,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (dept_id) REFERENCES departments(dept_id) ON DELETE CASCADE,
+    INDEX idx_dept (dept_id),
+    INDEX idx_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ===========================================================
 -- SCHEDULE TEMPLATES
 -- Reusable doctor schedule templates for monthly generation
 -- ===========================================================
@@ -160,35 +179,14 @@ CREATE TABLE IF NOT EXISTS time_slots (
 -- ===========================================================
 CREATE TABLE IF NOT EXISTS family_profiles (
     profile_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    patient_user_id INT NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     relationship VARCHAR(50) NOT NULL,
+    date_of_birth DATE NULL,
     phone VARCHAR(20),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    INDEX idx_user (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ===========================================================
--- DOCTORS TABLE
--- Doctor profiles linked to users (doctors cannot log in - admin managed)
--- This table stores doctor-specific information like specialization and bio
--- The actual user account is in the users table with role='staff' (for future use)
--- or we can create user accounts without login access
--- ===========================================================
-CREATE TABLE IF NOT EXISTS doctors (
-    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NULL,  -- Can be null if we don't want to create user accounts for doctors
-    dept_id INT NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    specialization VARCHAR(100),
-    bio TEXT,
-    is_active TINYINT(1) NOT NULL DEFAULT 1,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (dept_id) REFERENCES departments(dept_id) ON DELETE CASCADE,
-    INDEX idx_dept (dept_id),
-    INDEX idx_active (is_active)
+    FOREIGN KEY (patient_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    INDEX idx_patient_user (patient_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ===========================================================
@@ -204,6 +202,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     doctor_id INT NULL,  -- NULL if patient didn't choose, auto-assigned by system
     slot_id INT NOT NULL,
     notes TEXT,
+    cancellation_reason VARCHAR(255) NULL,
     status ENUM('pending', 'confirmed', 'seen', 'cancelled', 'no_show') NOT NULL DEFAULT 'confirmed',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -268,7 +267,7 @@ ON DUPLICATE KEY UPDATE dept_name = dept_name;
 INSERT INTO doctors (dept_id, full_name, specialization, bio, is_active) VALUES
 -- General Medicine doctors
 (1, 'Dr. John Smith', 'General Practitioner', 'Experienced GP with 10+ years in family medicine', 1),
-(1, 'Dr. Sarah Johnson', 'Internal Medicine', 'Specialist in internal medicine and chronic disease management', 1),
+(1, 'Dr. Sarah Johnson', 'General Practitioner', 'Specialist in internal medicine and chronic disease management', 1),
 -- Pediatrics doctors
 (2, 'Dr. Emily Chen', 'Pediatrician', 'Board-certified pediatrician specializing in child development', 1),
 (2, 'Dr. Michael Brown', 'Pediatric Cardiology', 'Pediatric cardiologist with expertise in congenital heart conditions', 1),
@@ -289,8 +288,12 @@ ON DUPLICATE KEY UPDATE full_name = full_name;
 -- ===========================================================
 -- SAMPLE SCHEDULE TEMPLATE
 -- ===========================================================
-INSERT INTO schedule_templates (template_name, dept_id, slot_duration, is_active)
-VALUES ('General Medicine Monthly Template', 1, 10, 1)
+INSERT INTO schedule_templates (template_name, dept_id, doctor_id, slot_duration, is_active)
+SELECT 'General Medicine Monthly Template', 1, d.doctor_id, 10, 1
+FROM doctors d
+WHERE d.dept_id = 1 AND d.is_active = 1
+ORDER BY d.doctor_id
+LIMIT 1
 ON DUPLICATE KEY UPDATE slot_duration = VALUES(slot_duration), is_active = VALUES(is_active);
 
 INSERT INTO template_days (template_id, day_of_week, is_working, start_time, end_time, break_start, break_end)

@@ -5,32 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Appointment — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
   <!-- NAVBAR -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="dashboard.html" class="navbar-brand">
-      <i class="fa-solid fa-hospital"></i> HAMS
+       HAMS
     </a>
     <div class="navbar-links">
       <a href="dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
+         Dashboard
       </a>
       <a href="book.html" class="active">
-        <i class="fa-solid fa-calendar-plus"></i> Book
+         Book
       </a>
       <a href="appointments.html">
-        <i class="fa-solid fa-calendar-check"></i> My Appointments
+         My Appointments
       </a>
       <a href="family.html">
-        <i class="fa-solid fa-people-group"></i> Family
+       Family
       </a>
       <div class="divider"></div>
+      <a href="profile.html" id="nav-username" class="navbar-user-link">Account</a>
       <a href="../php/logout.php">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
       </a>
+    </div>
+    <!-- Mobile nav dropdown -->
+    <div id="mobile-nav-dropdown" class="mobile-nav-dropdown">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="book.html" class="active">Book Appointment</a>
+      <a href="appointments.html">My Appointments</a>
+      <a href="family.html">Family</a>
+      <div class="mobile-nav-divider"></div>
+      <a href="profile.html" id="mobile-nav-username">Account</a>
+      <a href="../php/logout.php">Logout</a>
     </div>
   </nav>
 
@@ -111,6 +126,14 @@
              Time slot buttons appear after a date is picked.
              ===================================================== -->
         <div id="section-date" style="display:none;">
+          <div class="form-group">
+            <label for="filter_doctor_id">
+              <i class="fa-solid fa-user-doctor"></i> Filter by Doctor (Optional)
+            </label>
+            <select id="filter_doctor_id" class="form-control">
+              <option value="">— All doctors in department —</option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="slot_date">
               <i class="fa-solid fa-calendar"></i> Preferred Date
@@ -257,13 +280,13 @@
 
     // Set date input limits
     const now     = new Date();
-    const today   = now.toISOString().split('T')[0];
-    const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                      .toISOString().split('T')[0];
+    const today   = localToday();
+    const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const maxDateStr = `${maxDate.getFullYear()}-${String(maxDate.getMonth() + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
     let selectedSlotDoctor = null;
 
     document.getElementById('slot_date').min = today;
-    document.getElementById('slot_date').max = maxDate;
+    document.getElementById('slot_date').max = maxDateStr;
     
     // --- Step indicator helper ---
     // Call this when the user moves to a new step.
@@ -303,10 +326,7 @@
     // Filters an array of slots to remove any that have already passed
     // Only applied for slots on the current date
     function filterPassedSlots(slots, selectedDate) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      
-      // If selected date is today, filter out passed slots
-      if (selectedDate === todayStr) {
+      if (selectedDate === localToday()) {
         return slots.filter(slot => {
           const isAvailable = isSlotAvailable(slot.start_time, selectedDate);
           if (!isAvailable) {
@@ -328,6 +348,9 @@
       // --- Load departments into the dropdown ---
       try {
         const res   = await fetch('../php/get_departments.php');
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const depts = await res.json();
         const sel   = document.getElementById('dept_id');
 
@@ -339,7 +362,8 @@
           sel.appendChild(opt);
         });
       } catch (err) {
-        showAlert('Failed to load departments. Refresh the page.', 'error');
+        console.error('Failed to load departments:', err);
+        showAlert('Failed to load departments: ' + err.message + '. Refresh the page.', 'error');
       }
 
       // --- Load family profiles into the confirm step dropdown ---
@@ -366,7 +390,7 @@
     // ==========================================================
     // STEP 1 → 2: Department selected, show date picker
     // ==========================================================
-    document.getElementById('dept_id').addEventListener('change', function () {
+    document.getElementById('dept_id').addEventListener('change', async function () {
       // Reset everything below this step
       hide('section-date');
       hide('section-slots');
@@ -375,18 +399,30 @@
       document.getElementById('slot_id').value = '';
       document.getElementById('slot_date').value = '';
       document.getElementById('doctor_id').value = '';
+      document.getElementById('filter_doctor_id').innerHTML =
+        '<option value="">— All doctors in department —</option>';
 
       if (!this.value) return;
+
+      try {
+        const res = await fetch(`../php/get_doctors.php?dept_id=${this.value}`);
+        const doctors = await res.json();
+        const filterSel = document.getElementById('filter_doctor_id');
+        doctors.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.doctor_id;
+          opt.textContent = `${escapeHtml(d.full_name)}${d.specialization ? ' — ' + escapeHtml(d.specialization) : ''}`;
+          filterSel.appendChild(opt);
+        });
+      } catch (err) {
+        console.warn('Could not load doctors for filter:', err);
+      }
 
       setStep(2);
       show('section-date');
     });
 
-    // ==========================================================
-    // STEP 2: Date chosen, load available time slots
-    // WITH TIME RESTRICTION: Removes any passed time slots from the page
-    // ==========================================================
-    document.getElementById('slot_date').addEventListener('change', async function () {
+    async function loadSlotsForDate() {
       hide('section-slots');
       hide('section-doctor');
       hide('section-confirm');
@@ -394,22 +430,48 @@
       document.getElementById('doctor_id').value = '';
 
       const deptId = document.getElementById('dept_id').value;
-      if (!this.value || !deptId) return;
+      const dateVal = document.getElementById('slot_date').value;
+      const filterDoctorId = document.getElementById('filter_doctor_id').value;
+      if (!dateVal || !deptId) return;
 
       const grid = document.getElementById('slots-grid');
-      // Show loading indicator while fetching
       grid.innerHTML = '<span class="spinner"></span>';
       show('section-slots');
 
       try {
-        const res   = await fetch(`../php/get_slots.php?dept_id=${deptId}&date=${this.value}`);
-        let slots = await res.json();
+        let url = `../php/get_slots.php?dept_id=${deptId}&date=${dateVal}`;
+        if (filterDoctorId) url += `&doctor_id=${filterDoctorId}`;
+        const res   = await fetch(url);
+        const responseData = await res.json();
+        
+        // Handle status responses from get_slots.php
+        if (responseData.status && responseData.status !== 'available' && responseData.status !== 'few_slots') {
+          grid.innerHTML = '<div class="empty-state" style="padding:20px;"><div style="font-size:1.2rem;margin-bottom:8px;">' + (responseData.message || 'No slots available.') + '</div><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'slot_date\').value=\'\';document.getElementById(\'slot_date\').focus();"><i class="fa-solid fa-arrow-left"></i> Choose Another Date</button></div>';
+          return;
+        }
+        
+        // Get slots array - backward compat with old API (direct array)
+        let slots = Array.isArray(responseData) ? responseData : (responseData.slots || []);
+        
+        // Show availability status
+        const statusContainer = document.getElementById('slots-status');
+        if (responseData.status === 'few_slots') {
+          if (!statusContainer) {
+            const sc = document.createElement('div');
+            sc.id = 'slots-status';
+            sc.style.cssText = 'margin-bottom:12px;';
+            grid.parentNode.insertBefore(sc, grid);
+          }
+          document.getElementById('slots-status').innerHTML = '<div class="alert alert-warning" style="margin:0;"><i class="fa-solid fa-circle-exclamation"></i> <strong>Few slots left!</strong> Only ' + responseData.available_count + ' slot(s) available.</div>';
+        } else if (responseData.status === 'available' && statusContainer) {
+          statusContainer.innerHTML = '<div class="alert alert-info" style="margin:0;"><i class="fa-solid fa-circle-check"></i> <strong>Available</strong> ' + responseData.available_count + ' slot(s) for this date.</div>';
+        }
 
         // ==========================================================
         // TIME RESTRICTION IMPLEMENTATION:
         // Filter out any time slots that have already passed
         // ==========================================================
-        const selectedDate = this.value;
+        const selectedDate = dateVal;
         const originalCount = slots.length;
         
         slots = filterPassedSlots(slots, selectedDate);
@@ -442,7 +504,7 @@
             // ADDITIONAL SAFETY CHECK:
             // Double-check the slot hasn't passed just before booking
             // ==========================================================
-            const currentDate = new Date().toISOString().split('T')[0];
+            const currentDate = localToday();
             if (selectedDate === currentDate) {
               const [hours, minutes] = s.start_time.split(':');
               const now = new Date();
@@ -491,6 +553,13 @@
       } catch (err) {
         grid.innerHTML = '<p class="text-muted text-sm">Failed to load slots. Try again.</p>';
         console.error('Error loading slots:', err);
+      }
+    }
+
+    document.getElementById('slot_date').addEventListener('change', loadSlotsForDate);
+    document.getElementById('filter_doctor_id').addEventListener('change', function () {
+      if (document.getElementById('slot_date').value) {
+        loadSlotsForDate();
       }
     });
 
@@ -593,7 +662,7 @@
       // Ensure the selected slot hasn't passed during user interaction
       // ==========================================================
       const selectedDate = document.getElementById('slot_date').value;
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = localToday();
       
       if (selectedDate === todayStr) {
         // Get the selected slot time from the button text
@@ -639,7 +708,8 @@
         }
 
       } catch (err) {
-        showAlert('Network error. Check your connection and try again.', 'error');
+        console.error('Booking error:', err);
+        showAlert('Network error: ' + err.message + '. Check your connection and try again.', 'error');
         setLoading('confirm-btn', false);
       }
     }

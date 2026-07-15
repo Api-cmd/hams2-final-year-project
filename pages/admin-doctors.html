@@ -3,462 +3,218 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Doctors — HAMS2</title>
+  <title>Manage Doctors — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     .modal-overlay {
-      display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,0.45); z-index:200;
-      align-items:center; justify-content:center; padding:16px;
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 200; align-items: center; justify-content: center; padding: 16px;
     }
-    .modal-overlay.open { display:flex; }
+    .modal-overlay.open { display: flex; }
     .modal {
-      background:var(--white); border-radius:var(--radius);
-      width:100%; max-width:500px; box-shadow:var(--shadow-md);
+      background: var(--white); border-radius: var(--radius); width: 100%;
+      max-width: 480px; box-shadow: var(--shadow-md); overflow: hidden;
     }
-    .modal-header {
-      padding:16px 20px; border-bottom:1px solid var(--grey-200);
-      display:flex; align-items:center; justify-content:space-between;
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--grey-200); display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { margin: 0; }
+    .modal-body { padding: 20px; }
+    .modal-footer { padding: 14px 20px; border-top: 1px solid var(--grey-200); display: flex; justify-content: flex-end; gap: 10px; }
+    .btn-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--grey-400); line-height: 1; }
+    .btn-close:hover { color: var(--grey-900); }
+    @media (max-width: 640px) {
+      .modal { max-width: 100%; border-radius: 14px; margin: 12px; }
+      .modal-footer { flex-direction: column; }
+      .modal-footer .btn { width: 100%; }
     }
-    .modal-header h3 { margin:0; }
-    .modal-body  { padding:20px; }
-    .modal-footer {
-      padding:14px 20px; border-top:1px solid var(--grey-200);
-      display:flex; justify-content:flex-end; gap:10px;
-    }
-    .btn-close {
-      background:none; border:none; font-size:1.2rem;
-      cursor:pointer; color:var(--grey-400);
-    }
-    .btn-close:hover { color:var(--grey-900); }
   </style>
 </head>
 <body>
 
+  <!-- NAVBAR -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="admin-dashboard.html" class="navbar-brand">
-      <i class="fa-solid fa-hospital"></i> HAMS2 Admin
+      <i class="fa-solid fa-hospital"></i> HAMS Admin
     </a>
     <div class="navbar-links">
-      <a href="admin-dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
+      <a href="admin-dashboard.html" >
+         Dashboard
       </a>
       <a href="admin-users.html">
-        <i class="fa-solid fa-users"></i> Users
+        Users
       </a>
-      <a href="admin-doctors.html" class="active">
-        <i class="fa-solid fa-user-doctor"></i> Doctors
+      <a href="admin-doctors.html" class="active" >
+         Doctors
       </a>
       <a href="admin-departments.html">
-        <i class="fa-solid fa-building-columns"></i> Departments
+        Departments
+      </a>
+      <a href="admin-schedules.html">
+        Schedule Templates
       </a>
       <a href="admin-slots.html">
-        <i class="fa-solid fa-clock"></i> Slots
+        Time Slots
+      </a>
+      <a href="admin-appointments.html">
+        Appointments
       </a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
+      <a href="../php/logout.php" class="navbar-user-link">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
       </a>
     </div>
   </nav>
 
+
   <div class="page-wrapper">
     <aside class="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-label">Overview</div>
-        <a href="admin-dashboard.html">
-          <i class="fa-solid fa-gauge icon"></i> Dashboard
-        </a>
-        <a href="admin-appointments.html">
-          <i class="fa-solid fa-calendar-check icon"></i> All Appointments
-        </a>
+        <a href="admin-dashboard.html"><i class="fa-solid fa-gauge icon"></i> Dashboard</a>
+        <a href="admin-appointments.html"><i class="fa-solid fa-calendar-check icon"></i> All Appointments</a>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Manage</div>
-        <a href="admin-users.html">
-          <i class="fa-solid fa-users icon"></i> Users
-        </a>
-        <a href="admin-doctors.html" class="active">
-          <i class="fa-solid fa-user-doctor icon"></i> Doctors
-        </a>
-        <a href="admin-departments.html">
-          <i class="fa-solid fa-building-columns icon"></i> Departments
-        </a>
-        <a href="admin-slots.html">
-          <i class="fa-solid fa-clock icon"></i> Time Slots
-        </a>
+        <a href="admin-users.html"><i class="fa-solid fa-users icon"></i> Users</a>
+        <a href="admin-doctors.html" class="active"><i class="fa-solid fa-user-doctor icon"></i> Doctors</a>
+        <a href="admin-departments.html"><i class="fa-solid fa-building-columns icon"></i> Departments</a>
+        <a href="admin-schedules.html"><i class="fa-solid fa-calendar-alt icon"></i> Schedule Templates</a>
+        <a href="admin-slots.html"><i class="fa-solid fa-clock icon"></i> Time Slots</a>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Account</div>
-        <a href="../php/logout.php">
-          <i class="fa-solid fa-right-from-bracket icon"></i> Logout
-        </a>
+        <a href="../php/logout.php"><i class="fa-solid fa-right-from-bracket icon"></i> Logout</a>
       </div>
     </aside>
 
     <main class="main-content">
-
       <div class="page-header">
         <div>
           <h2>Manage Doctors</h2>
-          <p class="text-muted text-sm">
-            Add and manage doctor profiles. Patients can optionally choose their preferred doctor during booking.
-            If no doctor is chosen, the system auto-assigns one.
-          </p>
+          <p class="text-muted text-sm">Add and manage doctor profiles. Patients can optionally choose their preferred doctor during booking.</p>
         </div>
-        <button class="btn btn-primary" onclick="openModal()">
-          <i class="fa-solid fa-user-plus"></i> Add Doctor
-        </button>
+        <button class="btn btn-primary" onclick="openModal()"><i class="fa-solid fa-user-plus"></i> Add Doctor</button>
       </div>
 
       <div id="alert-box" class="alert" style="display:none;"></div>
 
-      <!-- Search bar -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-body" style="padding:12px 16px;">
           <div class="input-icon-wrap">
             <i class="fa-solid fa-magnifying-glass icon"></i>
-            <input type="text" id="search-input" class="form-control"
-                   placeholder="Search by name, department or specialization..."
-                   oninput="filterTable()">
+            <input type="text" id="search-input" class="form-control" placeholder="Search by name, department or specialization..." oninput="filterTable()">
           </div>
         </div>
       </div>
 
-      <!-- Doctors table -->
       <div class="card">
         <div class="card-body" style="padding:0;">
-
-          <div id="doc-loading"
-               style="padding:32px; text-align:center; color:var(--grey-400);">
-            <span class="spinner"></span>
-            <p style="margin-top:8px;">Loading doctors...</p>
-          </div>
-
+          <div id="doc-loading" style="padding:32px; text-align:center; color:var(--grey-400);"><span class="spinner"></span><p style="margin-top:8px;">Loading doctors...</p></div>
           <div id="doc-wrap" style="display:none;">
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Specialization</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="doc-tbody"></tbody>
-              </table>
-            </div>
+            <div class="table-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Department</th><th>Specialization</th><th>Status</th><th>Actions</th></tr></thead><tbody id="doc-tbody"></tbody></table></div>
           </div>
-
-          <div id="doc-empty" class="empty-state" style="display:none;">
-            <i class="fa-solid fa-user-doctor"
-               style="font-size:2.5rem; color:var(--grey-400);
-                      display:block; margin-bottom:12px;"></i>
-            <p>No doctors found. Add one using the button above.</p>
-          </div>
-
+          <div id="doc-empty" class="empty-state" style="display:none;"><i class="fa-solid fa-user-doctor" style="font-size:2.5rem; color:var(--grey-400); display:block; margin-bottom:12px;"></i><p>No doctors found.</p></div>
         </div>
       </div>
-
     </main>
   </div>
 
-  <!-- ADD / EDIT DOCTOR MODAL -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
-      <div class="modal-header">
-        <h3 id="modal-title">Add Doctor</h3>
-        <button class="btn-close" onclick="closeModal()">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
+      <div class="modal-header"><h3 id="modal-title">Add Doctor</h3><button class="btn-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="modal-body">
         <div id="modal-alert" class="alert alert-error" style="display:none;"></div>
-
         <input type="hidden" id="edit-doctor-id" value="">
-
-        <!-- Logic: In HAMS2, doctors don't need user accounts since they can't log in -->
-        <!-- We only store their profile information in the doctors table -->
-        <div class="form-group">
-          <label for="m-name">Full Name</label>
-          <input type="text" id="m-name" class="form-control"
-                 placeholder="Dr. John Smith">
-        </div>
-
-        <div class="form-group">
-          <label for="m-dept">Department</label>
-          <select id="m-dept" class="form-control">
-            <option value="">— Select department —</option>
-          </select>
-          <p class="form-hint">The department this doctor belongs to.</p>
-        </div>
-
-        <div class="form-group">
-          <label for="m-spec">Specialization</label>
-          <input type="text" id="m-spec" class="form-control"
-                 placeholder="e.g. Pediatrics, Cardiology">
-          <p class="form-hint">Optional — shown to patients when booking.</p>
-        </div>
-
-        <div class="form-group">
-          <label for="m-bio">Bio</label>
-          <textarea id="m-bio" class="form-control" rows="3"
-                    placeholder="Short professional background (optional)"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="m-active">Status</label>
-          <select id="m-active" class="form-control">
-            <option value="1">Active</option>
-            <option value="0">Disabled</option>
-          </select>
-          <p class="form-hint">Disabled doctors won't appear in patient booking options.</p>
-        </div>
-
+        <div class="form-group"><label for="m-name">Full Name</label><input type="text" id="m-name" class="form-control" placeholder="Dr. John Smith"></div>
+        <div class="form-group"><label for="m-dept">Department</label><select id="m-dept" class="form-control"><option value="">— Select department —</option></select></div>
+        <div class="form-group"><label for="m-spec">Specialization</label><input type="text" id="m-spec" class="form-control" placeholder="e.g. Pediatrics, Cardiology"></div>
+        <div class="form-group"><label for="m-bio">Bio</label><textarea id="m-bio" class="form-control" rows="3" placeholder="Short professional background (optional)"></textarea></div>
+        <div class="form-group"><label for="m-active">Status</label><select id="m-active" class="form-control"><option value="1">Active</option><option value="0">Disabled</option></select></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="modal-save-btn" onclick="saveDoctor()">
-          <i class="fa-solid fa-floppy-disk"></i> Save
-        </button>
-      </div>
+      <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="modal-save-btn" onclick="saveDoctor()"><i class="fa-solid fa-floppy-disk"></i> Save</button></div>
     </div>
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
-    // ===========================================================
-    // ADMIN DOCTORS PAGE JAVASCRIPT
-    // ===========================================================
-
     let allDoctors = [];
     let allDepartments = [];
+    fetch('../php/session_check.php').then(r => r.json()).then(d => { if (!d.logged_in || d.role !== 'admin') window.location.href = '../index.html?msg=access_denied'; });
 
-    // Session check - ensure only admin can access
-    fetch('../php/session_check.php')
-      .then(r => r.json())
-      .then(d => {
-        if (!d.logged_in || d.role !== 'admin') {
-          window.location.href = '../index.html?msg=access_denied';
-        }
-      });
-
-    // --- Load departments for the dropdown ---
     async function loadDepartments() {
       try {
         const res = await fetch('../php/admin_get_departments.php');
         allDepartments = await res.json();
-
         const sel = document.getElementById('m-dept');
         sel.innerHTML = '<option value="">— Select department —</option>';
-        allDepartments.forEach(dept => {
-          const opt = document.createElement('option');
-          opt.value = dept.dept_id;
-          opt.textContent = dept.dept_name;
-          sel.appendChild(opt);
-        });
-      } catch (err) {
-        console.error('Failed to load departments:', err);
-      }
+        allDepartments.forEach(dept => { const opt = document.createElement('option'); opt.value = dept.dept_id; opt.textContent = dept.dept_name; sel.appendChild(opt); });
+      } catch (err) { console.error('Failed to load departments:', err); }
     }
 
-    // --- Load doctors table ---
     async function loadDoctors() {
       try {
-        const res   = await fetch('../php/admin_get_doctors.php');
-        allDoctors  = await res.json();
-
+        const res = await fetch('../php/admin_get_doctors.php');
+        allDoctors = await res.json();
         document.getElementById('doc-loading').style.display = 'none';
         renderDoctors(allDoctors);
-      } catch (err) {
-        document.getElementById('doc-loading').style.display = 'none';
-        document.getElementById('doc-empty').style.display   = 'block';
-      }
+      } catch (err) { document.getElementById('doc-loading').style.display = 'none'; document.getElementById('doc-empty').style.display = 'block'; }
     }
 
-    // --- Render doctors into the table ---
     function renderDoctors(data) {
-      const tbody = document.getElementById('doc-tbody');
-      tbody.innerHTML = '';
-
-      if (!data.length) {
-        document.getElementById('doc-wrap').style.display = 'none';
-        document.getElementById('doc-empty').style.display = 'block';
-        return;
-      }
-
-      document.getElementById('doc-empty').style.display = 'none';
-      document.getElementById('doc-wrap').style.display = 'block';
-
+      const tbody = document.getElementById('doc-tbody'); tbody.innerHTML = '';
+      if (!data.length) { document.getElementById('doc-wrap').style.display = 'none'; document.getElementById('doc-empty').style.display = 'block'; return; }
+      document.getElementById('doc-empty').style.display = 'none'; document.getElementById('doc-wrap').style.display = 'block';
       data.forEach((d, i) => {
         const isActive = parseInt(d.is_active) === 1;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="text-muted">${i + 1}</td>
-          <td style="font-weight:600;">${escapeHtml(d.full_name)}</td>
-          <td>${escapeHtml(d.dept_name)}</td>
-          <td>${escapeHtml(d.specialization || '—')}</td>
-          <td>
-            <span class="badge ${isActive ? 'badge-seen' : 'badge-cancelled'}">
-              ${isActive ? 'Active' : 'Disabled'}
-            </span>
-          </td>
-          <td style="display:flex; gap:6px;">
-            <button class="btn btn-ghost btn-sm" onclick='editDoctor(${JSON.stringify(d)})'>
-              <i class="fa-solid fa-pen"></i> Edit
-            </button>
-            <button class="btn btn-ghost btn-sm"
-                    onclick="toggleDoctor(${d.doctor_id}, ${d.is_active}, '${escapeHtml(d.full_name)}', this)">
-              <i class="fa-solid fa-${isActive ? 'ban' : 'circle-check'}"></i>
-              ${isActive ? 'Disable' : 'Enable'}
-            </button>
-          </td>
-        `;
+        tr.innerHTML = `<td class="text-muted">${i+1}</td><td style="font-weight:600;">${escapeHtml(d.full_name)}</td><td>${escapeHtml(d.dept_name)}</td><td>${escapeHtml(d.specialization || '—')}</td><td><span class="badge ${isActive ? 'badge-seen' : 'badge-cancelled'}">${isActive ? 'Active' : 'Disabled'}</span></td><td><div style="display:flex;gap:6px;flex-wrap:nowrap;"><button class="btn btn-ghost btn-sm" onclick='editDoctor(${JSON.stringify(d)})'><i class="fa-solid fa-pen"></i> Edit</button><button class="btn btn-ghost btn-sm" onclick="toggleDoctor(${d.doctor_id}, ${d.is_active}, '${escapeHtml(d.full_name)}', this)"><i class="fa-solid fa-${isActive ? 'ban' : 'circle-check'}"></i> ${isActive ? 'Disable' : 'Enable'}</button></div></td>`;
         tbody.appendChild(tr);
       });
     }
 
-    // --- Client side search filter ---
     function filterTable() {
       const q = document.getElementById('search-input').value.toLowerCase();
-      const filtered = allDoctors.filter(d =>
-        d.full_name.toLowerCase().includes(q)       ||
-        (d.dept_name || '').toLowerCase().includes(q) ||
-        (d.specialization || '').toLowerCase().includes(q)
-      );
-      renderDoctors(filtered);
+      renderDoctors(allDoctors.filter(d => d.full_name.toLowerCase().includes(q) || (d.dept_name||'').toLowerCase().includes(q) || (d.specialization||'').toLowerCase().includes(q)));
     }
 
-    // --- Modal functions ---
     function openModal() {
-      // Reset form for adding new doctor
-      document.getElementById('edit-doctor-id').value = '';
-      document.getElementById('m-name').value = '';
-      document.getElementById('m-dept').value = '';
-      document.getElementById('m-spec').value = '';
-      document.getElementById('m-bio').value = '';
-      document.getElementById('m-active').value = '1';
-      document.getElementById('modal-title').textContent = 'Add Doctor';
-      document.getElementById('modal-alert').style.display = 'none';
-      document.getElementById('modal-overlay').classList.add('open');
+      document.getElementById('edit-doctor-id').value = ''; document.getElementById('m-name').value = ''; document.getElementById('m-dept').value = ''; document.getElementById('m-spec').value = ''; document.getElementById('m-bio').value = ''; document.getElementById('m-active').value = '1'; document.getElementById('modal-title').textContent = 'Add Doctor'; document.getElementById('modal-alert').style.display = 'none'; document.getElementById('modal-overlay').classList.add('open');
     }
-
-    function closeModal() {
-      document.getElementById('modal-overlay').classList.remove('open');
-    }
-
-    // --- Edit existing doctor ---
+    function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
     function editDoctor(d) {
-      // Logic: Populate modal with existing doctor data for editing
-      document.getElementById('edit-doctor-id').value = d.doctor_id;
-      document.getElementById('m-name').value = d.full_name;
-      document.getElementById('m-dept').value = d.dept_id;
-      document.getElementById('m-spec').value = d.specialization || '';
-      document.getElementById('m-bio').value = d.bio || '';
-      document.getElementById('m-active').value = d.is_active;
-      document.getElementById('modal-title').textContent = 'Edit Doctor';
-      document.getElementById('modal-alert').style.display = 'none';
-      document.getElementById('modal-overlay').classList.add('open');
+      document.getElementById('edit-doctor-id').value = d.doctor_id; document.getElementById('m-name').value = d.full_name; document.getElementById('m-dept').value = d.dept_id; document.getElementById('m-spec').value = d.specialization||''; document.getElementById('m-bio').value = d.bio||''; document.getElementById('m-active').value = d.is_active; document.getElementById('modal-title').textContent = 'Edit Doctor'; document.getElementById('modal-alert').style.display = 'none'; document.getElementById('modal-overlay').classList.add('open');
     }
 
-    // --- Save doctor (create or update) ---
     async function saveDoctor() {
-      const doctor_id = document.getElementById('edit-doctor-id').value || null;
-      const dept_id = document.getElementById('m-dept').value;
-      const full_name = document.getElementById('m-name').value.trim();
-      const specialization = document.getElementById('m-spec').value.trim();
-      const bio = document.getElementById('m-bio').value.trim();
-      const is_active = document.getElementById('m-active').value;
-
-      // Validation
-      if (!dept_id || !full_name) {
-        showAlert('Please select a department and enter a name.', 'error');
-        return;
-      }
-
-      const btn = document.getElementById('modal-save-btn');
-      const originalText = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Saving...';
-
+      const doctor_id = document.getElementById('edit-doctor-id').value||null, dept_id = document.getElementById('m-dept').value, full_name = document.getElementById('m-name').value.trim(), specialization = document.getElementById('m-spec').value.trim(), bio = document.getElementById('m-bio').value.trim(), is_active = document.getElementById('m-active').value;
+      if (!dept_id || !full_name) { showAlert('Please select a department and enter a name.', 'error'); return; }
+      const btn = document.getElementById('modal-save-btn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
       try {
-        const res = await fetch('../php/admin_save_doctor.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ doctor_id, dept_id, full_name, specialization, bio, is_active })
-        });
-
+        const res = await fetch('../php/admin_save_doctor.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctor_id, dept_id, full_name, specialization, bio, is_active }) });
         const data = await res.json();
-
-        if (data.success) {
-          closeModal();
-          loadDoctors(); // Reload table
-          showAlert(data.message, 'success');
-        } else {
-          showAlert(data.error || 'Failed to save doctor.', 'error');
-        }
-      } catch (err) {
-        showAlert('Network error. Please try again.', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-      }
+        if (data.success) { closeModal(); loadDoctors(); showAlert(data.message, 'success'); } else showAlert(data.error||'Failed to save doctor.', 'error');
+      } catch(err) { showAlert('Network error.', 'error'); }
+      finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save'; }
     }
 
-    // --- Toggle doctor active status ---
     async function toggleDoctor(doctorId, currentStatus, name, btn) {
-      const newStatus = currentStatus == 1 ? 0 : 1;
-      const action = newStatus == 1 ? 'enable' : 'disable';
-
-      if (!confirm(`Are you sure you want to ${action} ${name}?`)) {
-        return;
-      }
-
+      const newStatus = currentStatus == 1 ? 0 : 1; const action = newStatus == 1 ? 'enable' : 'disable';
+      if (!confirm(`Are you sure you want to ${action} ${name}?`)) return;
       btn.disabled = true;
-
       try {
-        // Logic: Update only the is_active field
-        const res = await fetch('../php/admin_save_doctor.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            doctor_id: doctorId,
-            dept_id: 0, // Not needed for status toggle, but required by validation
-            full_name: name, // Not needed for status toggle, but required by validation
-            is_active: newStatus
-          })
-        });
-
+        const res = await fetch('../php/admin_save_doctor.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctor_id: doctorId, dept_id: 0, full_name: name, is_active: newStatus }) });
         const data = await res.json();
-
-        if (data.success) {
-          loadDoctors(); // Reload table to show updated status
-        } else {
-          showAlert(data.error || 'Failed to update doctor status.', 'error');
-          btn.disabled = false;
-        }
-      } catch (err) {
-        showAlert('Network error. Please try again.', 'error');
-        btn.disabled = false;
-      }
+        if (data.success) loadDoctors(); else { showAlert(data.error||'Failed.', 'error'); btn.disabled = false; }
+      } catch(err) { showAlert('Network error.', 'error'); btn.disabled = false; }
     }
 
-    // --- Helper: Show alert in modal ---
-    function showAlert(message, type) {
-      const alert = document.getElementById('modal-alert');
-      alert.className = 'alert alert-' + type;
-      alert.textContent = message;
-      alert.style.display = 'block';
-    }
-
-    // Initialize
-    loadDepartments();
-    loadDoctors();
+    function showAlert(message, type) { const alert = document.getElementById('modal-alert'); alert.className = 'alert alert-' + type; alert.textContent = message; alert.style.display = 'block'; }
+    loadDepartments(); loadDoctors();
   </script>
-
 </body>
 </html>

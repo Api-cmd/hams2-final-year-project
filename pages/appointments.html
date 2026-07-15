@@ -5,89 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Appointments — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* Filter tab buttons — sit above the table */
-    .tab-bar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .tab-btn {
-      padding: 7px 16px;
-      border: 1.5px solid var(--grey-200);
-      border-radius: 20px;
-      background: var(--white);
-      color: var(--grey-700);
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    .tab-bar { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tab-btn { padding: 7px 16px; border: 1.5px solid var(--grey-200); border-radius: 20px; background: var(--white); color: var(--grey-700); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
     .tab-btn:hover { border-color: var(--blue); color: var(--blue); }
-    .tab-btn.active {
-      background: var(--blue);
-      border-color: var(--blue);
-      color: var(--white);
-    }
-
-    /* Detail panel shown below the table when a row is clicked */
-    .detail-panel {
-      display: none;
-      background: var(--blue-light);
-      border: 1px solid var(--grey-200);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-top: 16px;
-    }
+    .tab-btn.active { background: var(--blue); border-color: var(--blue); color: var(--white); }
+    .detail-panel { display: none; background: var(--blue-light); border: 1px solid var(--grey-200); border-radius: var(--radius); padding: 20px; margin-top: 16px; }
     .detail-panel.open { display: block; }
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .detail-item .label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--grey-400);
-      margin-bottom: 2px;
-    }
-    .detail-item .value {
-      font-size: 0.95rem;
-      color: var(--grey-900);
-      font-weight: 500;
-    }
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+    .detail-item .label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--grey-400); margin-bottom: 2px; }
+    .detail-item .value { font-size: 0.95rem; color: var(--grey-900); font-weight: 500; }
   </style>
 </head>
 <body>
 
+   <!-- ============================================================
+       NAVBAR
+       ============================================================ -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="dashboard.html" class="navbar-brand">
       <i class="fa-solid fa-hospital"></i> HAMS
     </a>
     <div class="navbar-links">
-      <a href="dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
-      </a>
-      <a href="book.html">
-        <i class="fa-solid fa-calendar-plus"></i> Book
-      </a>
-      <a href="appointments.html" class="active">
-        <i class="fa-solid fa-calendar-check"></i> My Appointments
-      </a>
-      <a href="family.html">
-        <i class="fa-solid fa-people-group"></i> Family
-      </a>
+      <a href="dashboard.html" >Dashboard</a>
+      <a href="book.html">Book Appointment</a>
+      <a href="appointments.html" class="active" >My Appointments</a>
+      <a href="family.html">Family</a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </a>
+      <a href="profile.html" id="nav-username" class="navbar-user-link">Account</a>
+      <a href="../php/logout.php" class="navbar-user-link">Logout</a>
+    </div>
+    <!-- Mobile nav dropdown (shown when hamburger is clicked on small screens) -->
+    <div id="mobile-nav-dropdown" class="mobile-nav-dropdown">
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="book.html">Book Appointment</a>
+      <a href="appointments.html">My Appointments</a>
+      <a href="family.html">Family</a>
+      <div class="mobile-nav-divider"></div>
+      <a href="profile.html" id="mobile-nav-username">Account</a>
+      <a href="../php/logout.php">Logout</a>
     </div>
   </nav>
+
 
   <div style="padding:28px 32px; max-width:1100px; margin:0 auto;">
 
@@ -96,49 +60,45 @@
         <h2>My Appointments</h2>
         <p class="text-muted text-sm">View, track, or cancel your appointments.</p>
       </div>
-      <a href="book.html" class="btn btn-primary">
-        <i class="fa-solid fa-calendar-plus"></i> Book New
-      </a>
+      <a href="book.html" class="btn btn-primary"><i class="fa-solid fa-calendar-plus"></i> Book New</a>
     </div>
 
     <div id="alert-box" class="alert" style="display:none;"></div>
 
-    <!-- Filter tabs -->
     <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('all', this)">
-        All
-      </button>
-      <button class="tab-btn" onclick="switchTab('upcoming', this)">
-        <i class="fa-solid fa-clock"></i> Upcoming
-      </button>
-      <button class="tab-btn" onclick="switchTab('past', this)">
-        <i class="fa-solid fa-circle-check"></i> Past
-      </button>
-      <button class="tab-btn" onclick="switchTab('cancelled', this)">
-        <i class="fa-solid fa-ban"></i> Cancelled
-      </button>
+      <button class="tab-btn active" onclick="switchTab('all', this)">All</button>
+      <button class="tab-btn" onclick="switchTab('upcoming', this)"><i class="fa-solid fa-clock"></i> Upcoming</button>
+      <button class="tab-btn" onclick="switchTab('completed', this)"><i class="fa-solid fa-circle-check"></i> Completed</button>
+      <button class="tab-btn" onclick="switchTab('cancelled', this)"><i class="fa-solid fa-ban"></i> Cancelled</button>
     </div>
 
-    <!-- Appointments table -->
+    <!-- Improved Toolbar: Search + Status Filter -->
+    <div class="appt-toolbar">
+      <div class="appt-search-wrap">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" id="appt-search" placeholder="Search by doctor, department, status or date..." oninput="filterAppointments()">
+      </div>
+      <select id="appt-status-filter" class="appt-filter-select" onchange="filterAppointments()">
+        <option value="all">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="seen">Seen</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="no_show">No Show</option>
+      </select>
+    </div>
+
     <div class="card">
       <div class="card-body" style="padding:0;">
-
-        <div id="appt-loading" style="padding:32px; text-align:center; color:var(--grey-400);">
-          <span class="spinner"></span>
-          <p style="margin-top:8px;">Loading appointments...</p>
-        </div>
-
+        <div id="appt-loading" style="padding:32px; text-align:center; color:var(--grey-400);"><span class="spinner"></span><p style="margin-top:8px;">Loading appointments...</p></div>
         <div id="appt-wrap" style="display:none;">
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>#</th>
                   <th>For</th>
                   <th>Doctor</th>
-                  <th>Department</th>
-                  <th>Date</th>
-                  <th>Time</th>
+                  <th>Date & Time</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -147,27 +107,13 @@
             </table>
           </div>
         </div>
-
-        <div id="appt-empty" class="empty-state" style="display:none;">
-          <i class="fa-solid fa-calendar-xmark"
-             style="font-size:2.5rem; color:var(--grey-400); display:block; margin-bottom:12px;"></i>
-          <p>No appointments found.</p>
-          <a href="book.html" class="btn btn-primary">Book an Appointment</a>
-        </div>
-
+        <div id="appt-error" class="alert alert-error" style="display:none; margin:16px;">Could not load appointments.</div>
+        <div id="appt-empty" class="empty-state" style="display:none;"><i class="fa-solid fa-calendar-xmark" style="font-size:2.5rem; color:var(--grey-400); display:block; margin-bottom:12px;"></i><p>No appointments found.</p><a href="book.html" class="btn btn-primary">Book an Appointment</a></div>
       </div>
     </div>
 
-    <!-- Detail panel — shown when a row is clicked -->
     <div class="detail-panel" id="detail-panel">
-      <div class="flex-between">
-        <h3 style="margin:0;">
-          <i class="fa-solid fa-circle-info"></i> Appointment Details
-        </h3>
-        <button class="btn btn-ghost btn-sm" onclick="closeDetail()">
-          <i class="fa-solid fa-xmark"></i> Close
-        </button>
-      </div>
+      <div class="flex-between"><h3 style="margin:0;"><i class="fa-solid fa-circle-info"></i> Appointment Details</h3><button class="btn btn-ghost btn-sm" onclick="closeDetail()"><i class="fa-solid fa-xmark"></i> Close</button></div>
       <div class="detail-grid" id="detail-grid"></div>
       <div style="margin-top:16px;" id="detail-actions"></div>
     </div>
@@ -175,188 +121,165 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
-    // ==========================================================
-    // MY APPOINTMENTS PAGE JAVASCRIPT
-    // ==========================================================
+    let currentTab = 'all';
+    let allAppointments = []; // Store all loaded appointments for client-side search
 
-    let currentTab = 'all';  // Track which tab is active
+    fetch('../php/session_check.php').then(r => r.json()).then(d => { if (!d.logged_in || d.role !== 'patient') window.location.href = '../index.html?msg=login_required'; });
 
-    // Session check
-    fetch('../php/session_check.php')
-      .then(r => r.json())
-      .then(d => {
-        if (!d.logged_in || d.role !== 'patient') {
-          window.location.href = '../index.html?msg=login_required';
-        }
-      });
-
-    // --- Switch tab and reload with matching filter ---
     function switchTab(tab, btn) {
       currentTab = tab;
-
-      //ina Update tab button styles
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
       closeDetail();
       loadAppointments(tab);
     }
 
-    // --- Load appointments from PHP ---
     async function loadAppointments(filter = 'all') {
-      // Show loading state
       document.getElementById('appt-loading').style.display = 'block';
-      document.getElementById('appt-wrap').style.display    = 'none';
-      document.getElementById('appt-empty').style.display   = 'none';
-
+      document.getElementById('appt-wrap').style.display = 'none';
+      document.getElementById('appt-empty').style.display = 'none';
+      document.getElementById('appt-error').style.display = 'none';
       try {
-        const res  = await fetch(`../php/get_appointments.php?status=${filter}&limit=100`);
-        const data = await res.json();
-
+        const res = await fetch(`../php/get_appointments.php?status=${filter}&limit=100`);
+        const data = await parseJsonResponse(res);
         document.getElementById('appt-loading').style.display = 'none';
-
-        if (!data.length) {
-          document.getElementById('appt-empty').style.display = 'block';
+        if (!res.ok || data.error) {
+          document.getElementById('appt-error').style.display = 'block';
+          document.getElementById('appt-error').textContent = data.error || 'Could not load appointments.';
           return;
         }
-
-        const tbody = document.getElementById('appt-tbody');
-        tbody.innerHTML = '';
-
-        data.forEach((a, i) => {
-          const forName = a.family_name || 'Myself';
-
-          // Only show cancel button if status allows cancellation
-          const canCancel = ['pending', 'confirmed'].includes(a.status);
-          const actionHtml = canCancel
-            ? `<button class="btn text-danger btn-sm"
-                 onclick="cancelAppt(${a.appt_id}, this)">
-                 <i class="fa-solid fa-ban"></i> Cancel
-               </button>`
-            : '—';
-
-          const tr = document.createElement('tr');
-          // Clicking anywhere on the row opens the detail panel
-          tr.style.cursor = 'pointer';
-          tr.onclick = () => showDetail(a);
-          // Display doctor name if available, otherwise show "Auto-assigned"
-          const doctorDisplay = a.doctor_name ? `Dr. ${escapeHtml(a.doctor_name)}` : '<span class="text-muted text-sm">Auto-assigned</span>';
-          tr.innerHTML = `
-            <td class="text-muted">${i + 1}</td>
-            <td>${escapeHtml(forName)}</td>
-            <td>${doctorDisplay}</td>
-            <td>${escapeHtml(a.dept_name)}</td>
-            <td>${formatDate(a.slot_date)}</td>
-            <td>${formatTime(a.start_time)}</td>
-            <td>${statusBadge(a.status)}</td>
-            <td onclick="event.stopPropagation()">
-              ${actionHtml}
-            </td>
-          `;
-          // stopPropagation on the action cell prevents the row
-          // click from firing when the cancel button is clicked
-          tbody.appendChild(tr);
-        });
-
-        document.getElementById('appt-wrap').style.display = 'block';
-
+        if (!Array.isArray(data) || !data.length) {
+          document.getElementById('appt-empty').style.display = 'block';
+          allAppointments = [];
+          return;
+        }
+        allAppointments = data;
+        renderAppointments(data);
       } catch (err) {
         document.getElementById('appt-loading').style.display = 'none';
-        document.getElementById('appt-empty').style.display   = 'block';
-        console.error('Load error:', err);
+        document.getElementById('appt-error').style.display = 'block';
       }
     }
 
-    // --- Show appointment detail panel ---
-    // Triggered by clicking a table row
+    function renderAppointments(data) {
+      const tbody = document.getElementById('appt-tbody');
+      tbody.innerHTML = '';
+
+      data.forEach((a, i) => {
+        const forName = a.family_name || 'Myself';
+        const canCancel = ['pending', 'confirmed'].includes(a.status);
+        const actionHtml = canCancel
+          ? `<button class="btn text-danger btn-sm" onclick="event.stopPropagation(); cancelAppt(${a.appt_id}, this)"><i class="fa-solid fa-ban"></i> Cancel</button>`
+          : '<span class="text-muted text-sm">—</span>';
+        const doctorDisplay = a.doctor_name
+          ? `Dr. ${escapeHtml(a.doctor_name)}`
+          : '<span class="text-muted text-sm">Auto-assigned</span>';
+
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = () => showDetail(a);
+
+        // Build combined date-time cell
+        const dateStr = formatDateLong(a.slot_date);
+        const timeStr = formatTime(a.start_time);
+
+        tr.innerHTML = `
+          <td>${escapeHtml(forName)}</td>
+          <td>${doctorDisplay}<br><span class="text-muted text-sm">${escapeHtml(a.dept_name)}</span></td>
+          <td>
+            <div class="datetime-cell">
+              <span class="date-part">${dateStr}</span>
+              <span class="time-part">${timeStr}</span>
+            </div>
+          </td>
+          <td>${statusBadge(a.status)}</td>
+          <td onclick="event.stopPropagation()">${actionHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('appt-wrap').style.display = 'block';
+    }
+
+    // Format date in long format: "17 July 2026"
+    function formatDateLong(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+    }
+
+    function filterAppointments() {
+      const searchTerm = document.getElementById('appt-search').value.toLowerCase().trim();
+      const statusFilter = document.getElementById('appt-status-filter').value;
+
+      let filtered = allAppointments;
+
+      // Apply status filter
+      if (statusFilter !== 'all') {
+        filtered = filtered.filter(a => a.status === statusFilter);
+      }
+
+      // Apply search filter
+      if (searchTerm) {
+        filtered = filtered.filter(a => {
+          const doctor = (a.doctor_name || '').toLowerCase();
+          const dept = (a.dept_name || '').toLowerCase();
+          const status = (a.status || '').toLowerCase();
+          const date = a.slot_date || '';
+          return doctor.includes(searchTerm) || dept.includes(searchTerm) || status.includes(searchTerm) || date.includes(searchTerm);
+        });
+      }
+
+      if (filtered.length === 0) {
+        document.getElementById('appt-wrap').style.display = 'none';
+        document.getElementById('appt-empty').style.display = 'block';
+      } else {
+        document.getElementById('appt-empty').style.display = 'none';
+        renderAppointments(filtered);
+      }
+    }
+
     function showDetail(appt) {
-      const grid    = document.getElementById('detail-grid');
+      const grid = document.getElementById('detail-grid');
       const actions = document.getElementById('detail-actions');
-
-      // Build detail items
-      // Display doctor name if available, otherwise show "Auto-assigned"
       const doctorDisplay = appt.doctor_name ? 'Dr. ' + appt.doctor_name : 'Auto-assigned';
+      const dateStr = formatDateLong(appt.slot_date);
       const items = [
-        { label: 'Appointment ID', value: '#' + appt.appt_id },
-        { label: 'Booked For',     value: appt.family_name || 'Myself' },
-        { label: 'Doctor',         value: doctorDisplay },
-        { label: 'Department',     value: appt.dept_name },
-        { label: 'Date',           value: formatDate(appt.slot_date) },
-        { label: 'Time',           value: formatTime(appt.start_time) + ' – ' + formatTime(appt.end_time) },
-        { label: 'Status',         value: statusBadge(appt.status) },
-        { label: 'Booked On',      value: new Date(appt.created_at).toLocaleDateString('en-GB') },
+        {label:'Appointment ID',value:'#'+appt.appt_id},
+        {label:'Booked For',value:appt.family_name||'Myself'},
+        {label:'Doctor',value:doctorDisplay},
+        {label:'Department',value:appt.dept_name},
+        {label:'Date & Time',value:dateStr + ' at ' + formatTime(appt.start_time)},
+        {label:'Status',value:statusBadge(appt.status)},
+        {label:'Booked On',value:new Date(appt.created_at).toLocaleDateString('en-GB')}
       ];
-
-      // Add notes row only if there are notes
-      if (appt.notes) {
-        items.push({ label: 'Your Notes', value: escapeHtml(appt.notes) });
-      }
-
-      // Add cancellation reason if cancelled
-      if (appt.cancellation_reason) {
-        items.push({ label: 'Cancellation Reason', value: escapeHtml(appt.cancellation_reason) });
-      }
-
-      grid.innerHTML = items.map(item => `
-        <div class="detail-item">
-          <div class="label">${item.label}</div>
-          <div class="value">${item.value}</div>
-        </div>
-      `).join('');
-
-      // Show cancel button in detail panel if applicable
+      if (appt.notes) items.push({label:'Your Notes',value:escapeHtml(appt.notes)});
+      if (appt.cancellation_reason) items.push({label:'Cancellation Reason',value:escapeHtml(appt.cancellation_reason)});
+      grid.innerHTML = items.map(item => `<div class="detail-item"><div class="label">${item.label}</div><div class="value">${item.value}</div></div>`).join('');
       const canCancel = ['pending', 'confirmed'].includes(appt.status);
-      actions.innerHTML = canCancel
-        ? `<button class="btn text-danger" onclick="cancelAppt(${appt.appt_id}, this)">
-             <i class="fa-solid fa-ban text-danger "></i> Cancel This Appointment
-           </button>`
-        : '';
-
-      // Open the panel
+      actions.innerHTML = canCancel ? `<button class="btn text-danger" onclick="cancelAppt(${appt.appt_id}, this)"><i class="fa-solid fa-ban"></i> Cancel This Appointment</button>` : '';
       document.getElementById('detail-panel').classList.add('open');
-      // Scroll down so the panel is visible
       document.getElementById('detail-panel').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function closeDetail() {
-      document.getElementById('detail-panel').classList.remove('open');
-    }
+    function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); }
 
-    // --- Cancel an appointment ---
     async function cancelAppt(apptId, btn) {
       if (!confirmAction('Are you sure you want to cancel this appointment?')) return;
-
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>';
-
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
       try {
-        const res  = await fetch('../php/cancel_appointment.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ appt_id: apptId }),
-        });
+        const res = await fetch('../php/cancel_appointment.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ appt_id: apptId }) });
         const data = await res.json();
-
-        if (data.success) {
-          showAlert('Appointment cancelled successfully.', 'success');
-          closeDetail();
-          loadAppointments(currentTab); // Refresh the table
-        } else {
-          showAlert(data.error || 'Cancellation failed.', 'error');
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-ban"></i> Cancel';
-        }
-      } catch (err) {
-        showAlert('Network error. Try again.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-ban"></i> Cancel';
-      }
+        if (data.success) { showAlert('Appointment cancelled.', 'success'); closeDetail(); loadAppointments(currentTab); }
+        else { showAlert(data.error||'Cancellation failed.', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-ban"></i> Cancel'; }
+      } catch (err) { showAlert('Network error.', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-ban"></i> Cancel'; }
     }
 
-    // Load all appointments on page open
     loadAppointments('all');
   </script>
-
 </body>
 </html>

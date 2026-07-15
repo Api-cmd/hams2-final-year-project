@@ -6,6 +6,7 @@ require_role('patient');
 
 $body    = json_decode(file_get_contents('php://input'), true);
 $appt_id = (int)($body['appt_id'] ?? 0);
+$reason  = clean($body['reason'] ?? '');
 
 if (!$appt_id) send_json(['error' => 'Invalid request.'], 400);
 
@@ -33,8 +34,8 @@ if (!in_array($appt['status'], ['pending', 'confirmed'])) {
 try {
     $pdo->beginTransaction();
 
-    $pdo->prepare("UPDATE appointments SET status='cancelled' WHERE appt_id=?")
-        ->execute([$appt_id]);
+    $pdo->prepare("UPDATE appointments SET status='cancelled', cancellation_reason=? WHERE appt_id=?")
+        ->execute([$reason ?: null, $appt_id]);
 
     // Reset slot to available for single-occupancy model
     $pdo->prepare(

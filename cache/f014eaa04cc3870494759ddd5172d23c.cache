@@ -1,1 +1,1 @@
-a:2:{s:5:"value";a:4:{s:8:"patients";i:1;s:11:"departments";i:12;s:5:"today";i:2;s:7:"pending";i:0;}s:7:"expires";i:1783681953;}
+a:2:{s:5:"value";a:5:{s:8:"patients";i:2;s:11:"departments";i:6;s:11:"total_appts";i:11;s:5:"today";i:4;s:7:"doctors";i:35;}s:7:"expires";i:1784094494;}

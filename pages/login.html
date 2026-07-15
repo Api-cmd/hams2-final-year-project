@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!--
+    viewport meta tag: makes the page look correct on mobile phones.
+    Without this, phones zoom out and show a tiny desktop version.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — HAMS</title>
+
+  <!-- Our CSS file. The path ../css/ goes one folder up then into css/ -->
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body>
+
+  
+  <!-- Login Form Section (Visible by default) -->
+  <div id="login-section" class="page-center" style="display:flex;">
+
+    <div class="auth-card">
+
+      <!-- Logo / Branding -->
+      <div class="logo">
+        <span class="icon"><i class="fas fa-hospital-user"></i></span>
+        <h1>HAMS</h1>
+        <p>Health Appointment Management System</p>
+      </div>
+
+      <!--
+        Alert box — hidden by default.
+        JavaScript shows it when PHP sends back an error or
+        success message via the URL (e.g. ?msg=logged_out).
+        We read the URL with JS instead of PHP on this page.
+      -->
+      <div id="alert-box" class="alert" style="display:none;"></div>
+
+      <!--
+        The form sends data to php/login.php when submitted.
+        method="POST" means the email/password go in the
+        request body — NOT visible in the URL (safer than GET).
+      -->
+      <form id="login-form" action="../php/login.php" method="POST" novalidate>
+
+        <!-- Email field -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-icon-wrap">
+            <span class="icon"><i class="fas fa-envelope"></i></span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-control"
+              placeholder="yourname@email.com"
+              autocomplete="email"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Password field -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-icon-wrap">
+            <span class="icon"><i class="fas fa-lock"></i></span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-control"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+            <!--
+              This button toggles the password between hidden (*****)
+              and visible text. Handled by JavaScript below.
+            -->
+            <button type="button" class="toggle-pw" onclick="togglePassword()" title="Show/hide password">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit button -->
+        <div class="form-group" style="margin-top:24px;">
+          <button type="submit" class="btn btn-primary btn-block" id="login-btn">
+            Sign In
+          </button>
+        </div>
+
+      </form>
+
+      <hr class="divider">
+
+      <!-- Link to registration page -->
+      <p class="text-center text-sm">
+        Don't have an account?
+        <a href="register.html">Register here</a>
+      </p>
+
+      <!-- Back to landing link -->
+      <p class="text-center text-sm" style="margin-top: 12px;">
+        <a href="../index.html">← Back to Home</a>
+      </p>
+
+    </div><!-- end auth-card -->
+
+    </div><!-- end login-section -->
+
+  </div><!-- end page-center -->
+
+  <script src="../js/main.js"></script>
+  <script>
+    // ===========================================================
+    // LANDING PAGE & LOGIN PAGE JAVASCRIPT
+    // ===========================================================
+
+    // --- Navigation functions ---
+    function goToLanding() {
+      document.getElementById('landing-section').style.display = 'flex';
+      document.getElementById('login-section').style.display = 'none';
+    }
+
+    function goToLogin() {
+      document.getElementById('landing-section').style.display = 'none';
+      document.getElementById('login-section').style.display = 'flex';
+    }
+
+    function goToRegister() {
+      window.location.href = 'register.html';
+    }
+
+    function scrollToFeatures() {
+      const featuresSection = document.getElementById('features');
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- Show message from URL parameter ---
+    // When PHP redirects here after logout or access denied,
+    // it adds ?msg=logged_out to the URL.
+    // We read that here and show a matching alert.
+    (function () {
+      // URLSearchParams reads the query string from the URL
+      const params = new URLSearchParams(window.location.search);
+      const msg    = params.get('msg');
+      const box    = document.getElementById('alert-box');
+
+      const messages = {
+        'logged_out'            : { type: 'success', text: 'You have been logged out successfully.' },
+        'registered'            : { type: 'success', text: 'Registration successful! You can now log in.' },
+        'login_required'        : { type: 'info',    text: 'Please log in to access that page.' },
+        'access_denied'         : { type: 'error',   text: 'You do not have permission to access that page.' },
+        'login_failed'          : { type: 'error',   text: 'Invalid email or password. Please try again.' },
+        'too_many_attempts_ip'  : { type: 'error',   text: 'Too many login attempts from your IP address. Please wait 10 minutes before trying again.' },
+        'too_many_attempts_email': { type: 'error',   text: 'Too many failed attempts for this account. Please wait 10 minutes before trying again.' },
+      };
+
+      if (msg && messages[msg]) {
+        const m = messages[msg];
+        box.className   = 'alert alert-' + m.type;
+        box.textContent = m.text;
+        box.style.display = 'block';
+        goToLogin();  // Show login form if there's a message
+      }
+    })();
+
+    // --- Toggle password visibility ---
+    function togglePassword() {
+      const input = document.getElementById('password');
+      // If type is 'password' characters show as dots, switch to 'text' to reveal
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // --- Client-side form validation ---
+    // This runs BEFORE the form is sent to PHP.
+    // It gives the user instant feedback without a page reload.
+    // PHP also validates on the server — both are needed.
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const box      = document.getElementById('alert-box');
+
+      // Simple check: are both fields filled?
+      if (!email || !password) {
+        e.preventDefault();  // Stop the form from submitting to PHP
+        box.className     = 'alert alert-error';
+        box.textContent   = 'Please enter your email and password.';
+        box.style.display = 'block';
+        return;
+      }
+
+      // If validation passes, show a loading state on the button
+      // so the user knows something is happening
+      document.getElementById('login-btn').textContent = 'Signing in...';
+      document.getElementById('login-btn').disabled    = true;
+    });
+  </script>
+
+</body>
+</html>

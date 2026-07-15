@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Departments — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     .modal-overlay {
@@ -36,29 +37,43 @@
 </head>
 <body>
 
+  <!-- NAVBAR -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="admin-dashboard.html" class="navbar-brand">
       <i class="fa-solid fa-hospital"></i> HAMS Admin
     </a>
     <div class="navbar-links">
-      <a href="admin-dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
+      <a href="admin-dashboard.html" >
+         Dashboard
       </a>
       <a href="admin-users.html">
-        <i class="fa-solid fa-users"></i> Users
+        Users
       </a>
       <a href="admin-doctors.html">
-        <i class="fa-solid fa-user-doctor"></i> Doctors
+         Doctors
       </a>
-      <a href="admin-departments.html" class="active">
-        <i class="fa-solid fa-building-columns"></i> Departments
+      <a href="admin-departments.html" class="active" >
+        Departments
+      </a>
+      <a href="admin-schedules.html">
+        Schedule Templates
+      </a>
+      <a href="admin-slots.html">
+        Time Slots
+      </a>
+      <a href="admin-appointments.html">
+        Appointments
       </a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
+      <a href="../php/logout.php" class="navbar-user-link">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
       </a>
     </div>
   </nav>
+
 
   <div class="page-wrapper">
     <aside class="sidebar">
@@ -81,6 +96,9 @@
         </a>
         <a href="admin-departments.html" class="active">
           <i class="fa-solid fa-building-columns icon"></i> Departments
+        </a>
+        <a href="admin-schedules.html">
+          <i class="fa-solid fa-calendar-alt icon"></i> Schedule Templates
         </a>
         <a href="admin-slots.html">
           <i class="fa-solid fa-clock icon"></i> Time Slots
@@ -188,6 +206,7 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
 
     fetch('../php/session_check.php')

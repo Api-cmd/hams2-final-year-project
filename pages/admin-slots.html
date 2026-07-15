@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Time Slots — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     .modal-overlay {
@@ -35,29 +36,43 @@
 </head>
 <body>
 
+ <!-- NAVBAR -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="admin-dashboard.html" class="navbar-brand">
       <i class="fa-solid fa-hospital"></i> HAMS Admin
     </a>
     <div class="navbar-links">
-      <a href="admin-dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
+      <a href="admin-dashboard.html" >
+         Dashboard
       </a>
       <a href="admin-users.html">
-        <i class="fa-solid fa-users"></i> Users
+        Users
       </a>
       <a href="admin-doctors.html">
-        <i class="fa-solid fa-user-doctor"></i> Doctors
+         Doctors
       </a>
-      <a href="admin-slots.html" class="active">
-        <i class="fa-solid fa-clock"></i> Slots
+      <a href="admin-departments.html">
+        Departments
+      </a>
+      <a href="admin-schedules.html">
+        Schedule Templates
+      </a>
+      <a href="admin-slots.html" class="active" >
+        Time Slots
+      </a>
+      <a href="admin-appointments.html">
+        Appointments
       </a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
+      <a href="../php/logout.php" class="navbar-user-link">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
       </a>
     </div>
   </nav>
+
 
   <div class="page-wrapper">
     <aside class="sidebar">
@@ -81,6 +96,9 @@
         <a href="admin-departments.html">
           <i class="fa-solid fa-building-columns icon"></i> Departments
         </a>
+        <a href="admin-schedules.html">
+          <i class="fa-solid fa-calendar-alt icon"></i> Schedule Templates
+        </a>
         <a href="admin-slots.html" class="active">
           <i class="fa-solid fa-clock icon"></i> Time Slots
         </a>
@@ -98,10 +116,10 @@
       <div class="page-header">
         <div>
           <h2>Manage Time Slots</h2>
-          <p class="text-muted text-sm">Review and manage appointment slots by doctor and department. Manual slot creation is reserved for overrides or temporary coverage.</p>
+          <p class="text-muted text-sm">Review and manage appointment slots by doctor and department. Manual slot creation is for overrides or temporary coverage only.</p>
         </div>
         <button class="btn btn-primary" onclick="openModal()">
-          <i class="fa-solid fa-plus"></i> Create Override Slots
+          <i class="fa-solid fa-plus"></i> Add Manual Slots
         </button>
       </div>
 
@@ -140,12 +158,11 @@
               <table>
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Department</th>
                     <th>Doctor</th>
                     <th>Date</th>
                     <th>Start</th>
                     <th>End</th>
+                    <th>Template</th>
                     <th>Booked</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -172,7 +189,7 @@
     <div class="modal">
 
       <div class="modal-header">
-        <h3>Create Override Slots</h3>
+        <h3>Add Manual Slots</h3>
         <button class="btn-close" onclick="closeModal()">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -183,24 +200,23 @@
 
         <!--
           Bulk slot generation:
-          Admin picks a department, a date, start time, end time,
-          and duration. PHP generates all slots in that range.
-          e.g. 08:00 to 12:00 in 30-min slots = 8 slots created at once.
-          In HAMS2, slots are department-based, not doctor-specific.
-          Patients can optionally choose a doctor when booking.
+          Pick a doctor (single doctor) OR a department (all active doctors).
+          PHP generates time_slots for each applicable doctor.
         -->
         <div class="form-row">
           <div class="form-group">
-            <label for="m-doctor">Doctor</label>
+            <label for="m-doctor">Doctor (optional)</label>
             <select id="m-doctor" class="form-control">
-              <option value="">— Select a doctor —</option>
+              <option value="">— All doctors in department —</option>
             </select>
+            <p class="form-hint">Leave empty when using department scope.</p>
           </div>
           <div class="form-group">
             <label for="m-dept">Department</label>
             <select id="m-dept" class="form-control">
               <option value="">— Select a department —</option>
             </select>
+            <p class="form-hint">Required when no doctor is selected.</p>
           </div>
         </div>
 
@@ -246,6 +262,7 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
     // ==========================================================
     // ADMIN TIME SLOTS PAGE JAVASCRIPT
@@ -261,10 +278,11 @@
 
     // Disable past dates for slot creation (allow today onwards)
     (function() {
-      const today = new Date().toISOString().split('T')[0];
       const mDateEl = document.getElementById('m-date');
-      if (mDateEl) mDateEl.setAttribute('min', today);
+      if (mDateEl) mDateEl.setAttribute('min', localToday());
     })();
+
+    const doctorDeptMap = {};
 
     // Load doctors and departments into the filter dropdowns and the modal form.
     async function loadDepartments() {
@@ -295,6 +313,8 @@
         });
 
         doctors.forEach(d => {
+          doctorDeptMap[d.doctor_id] = d.dept_id;
+
           const opt = document.createElement('option');
           opt.value = d.doctor_id;
           opt.textContent = `${d.full_name} (${d.dept_name || 'Unknown dept'})`;
@@ -304,6 +324,23 @@
           opt2.value = d.doctor_id;
           opt2.textContent = `${d.full_name} — ${d.dept_name || 'Department unavailable'}`;
           modalDoc.appendChild(opt2);
+        });
+
+        document.getElementById('m-doctor').addEventListener('change', function () {
+          const deptEl = document.getElementById('m-dept');
+          if (this.value && doctorDeptMap[this.value]) {
+            deptEl.value = String(doctorDeptMap[this.value]);
+          }
+        });
+
+        document.getElementById('m-dept').addEventListener('change', function () {
+          const docEl = document.getElementById('m-doctor');
+          if (docEl.value) {
+            const docDept = doctorDeptMap[docEl.value];
+            if (docDept && String(docDept) !== this.value) {
+              docEl.value = '';
+            }
+          }
         });
       } catch (err) {
         console.error('Could not load departments or doctors:', err);
@@ -340,15 +377,19 @@
         const tbody = document.getElementById('slots-tbody');
         tbody.innerHTML = '';
 
-        slots.forEach((s, i) => {
+        slots.forEach((s) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td class="text-muted">${i + 1}</td>
-            <td>${escapeHtml(s.dept_name)}</td>
-            <td>${escapeHtml(s.doctor_name || '—')}</td>
+            <td>
+              ${escapeHtml(s.doctor_name || '—')}<br>
+              <span class="text-muted text-sm">${escapeHtml(s.dept_name)}</span>
+            </td>
             <td>${formatDate(s.slot_date)}</td>
             <td>${formatTime(s.start_time)}</td>
             <td>${formatTime(s.end_time)}</td>
+            <td>
+              <span class="text-muted text-sm">${escapeHtml(s.template_name || 'Manual')}</span>
+            </td>
             <td>
               <span class="badge ${s.is_booked == 0 ? 'badge-seen' : 'badge-no-show'}">
                 ${s.is_booked == 0 ? 'Available' : 'Booked'}
@@ -431,19 +472,20 @@
     });
 
     // --- Generate and save slots ---
-    // Logic: In HAMS2, slots are created for departments, not doctors
     async function saveSlots() {
-      const dept_id   = document.getElementById('m-dept').value;
       const doctor_id = document.getElementById('m-doctor').value;
+      let dept_id     = document.getElementById('m-dept').value;
       const date      = document.getElementById('m-date').value;
       const start     = document.getElementById('m-start').value;
       const end       = document.getElementById('m-end').value;
       const duration  = document.getElementById('m-duration').value;
-      const alertBox  = document.getElementById('modal-alert');
 
       if (!doctor_id && !dept_id) {
-        showToast('Choose a doctor or department for the slots.', 'error', 4000);
+        showToast('Choose a department, or pick a doctor for a single-doctor override.', 'error', 4000);
         return;
+      }
+      if (doctor_id && doctorDeptMap[doctor_id]) {
+        dept_id = String(doctorDeptMap[doctor_id]);
       }
       if (!date || !start || !end) {
         showToast('Date and time range are required.', 'error', 4000);
@@ -456,14 +498,14 @@
       }
 
       // Prevent creating slots in the past for today's date
-      const selectedDate = date; // YYYY-MM-DD
-      const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const selectedDate = date;
+      const today = localToday();
       if (selectedDate === today) {
         // compare times
         const [sH, sM] = start.split(':').map(Number);
-        const startDate = new Date(); startDate.setHours(sH, sM, 0, 0);
-        if (startDate <= now) {
+        const startDate = new Date();
+        startDate.setHours(sH, sM, 0, 0);
+        if (startDate <= new Date()) {
           showToast('Start time is in the past. Choose a future time.', 'error', 5000);
           return;
         }
@@ -477,24 +519,23 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dept_id, doctor_id, date, start, end, duration }),
         });
-        const data = await res.json();
+        const data = await parseJsonResponse(res);
 
         if (res.status === 403) {
           showToast(data.error || 'Access denied. Please log in as admin.', 'error', 6000);
-          // Redirect to login after short delay
           setTimeout(() => { window.location.href = '../index.html?msg=access_denied'; }, 1800);
           return;
         }
 
         if (data.success) {
           closeModal();
-          showToast(`${data.created} slot(s) created successfully.`, 'success', 3500);
+          showToast(data.message || `${data.created} slot(s) created successfully.`, 'success', 3500);
           loadSlots();
         } else {
           showToast(data.error || 'Failed to create slots.', 'error', 5000);
         }
       } catch (err) {
-        showToast('Network error. Try again.', 'error', 5000);
+        showToast(err.message || 'Network error. Try again.', 'error', 5000);
       }
 
       setLoading('modal-save-btn', false);
@@ -516,7 +557,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slot_id: slotId, toggle_active: currentActive == 1 ? 0 : 1 }),
         });
-        const data = await res.json();
+        const data = await parseJsonResponse(res);
 
         if (res.status === 403) {
           showToast(data.error || 'Access denied. Please log in as admin.', 'error', 5000);
@@ -535,7 +576,7 @@
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = origHTML;
-        showToast('Network error. Try again.', 'error', 4000);
+        showToast(err.message || 'Network error. Try again.', 'error', 4000);
       }
     }
 

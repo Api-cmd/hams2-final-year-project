@@ -1,330 +1,1209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <!--
-    viewport meta tag: makes the page look correct on mobile phones.
-    Without this, phones zoom out and show a tiny desktop version.
-  -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — HAMS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>HAMS - Health Appointment Management System</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <style>
+        /* ============================
+               RESET & BASE
+             ============================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <!-- Our CSS file. The path ../css/ goes one folder up then into css/ -->
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+        body {
+            font-family: gliroy, 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--grey-100);
+            color: var(--grey-700);
+            font-size: 18px;
+            line-height: 1.75;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--blue);
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--blue-dark);
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Gilroy-Bold', 'Roboto', sans-serif;
+            color: var(--grey-900);
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ============================
+               HEADER / TOP BAR
+            ============================ */
+        #Top_bar {
+            background-color: var(--white);
+            padding: 10px 0;
+            position: relative;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #Top_bar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        .menu_wrapper {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .menu_wrapper nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .menu_wrapper nav ul li a {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--grey-900);
+            padding: 5px 0;
+            transition: color 0.2s;
+        }
+
+        .menu_wrapper nav ul li a:hover {
+            color: var(--blue);
+        }
+
+        
+        .top_bar_right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .top_bar_right .search_button {
+            cursor: pointer;
+            color: var(--grey-900);
+            font-size: 20px;
+        }
+
+        .wpml-languages {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .wpml-languages .active {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            color: var(--grey-900);
+        }
+
+        .wpml-languages .active img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .wpml-languages .wpml-lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0px 10px 30px rgba(42, 32, 106, 0.15);
+            padding: 10px 0;
+            min-width: 120px;
+            list-style: none;
+            z-index: 100;
+        }
+
+        .wpml-languages:hover .wpml-lang-dropdown {
+            display: block;
+        }
+
+        .wpml-lang-dropdown li a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            color: var(--grey-900);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .wpml-lang-dropdown li a:hover {
+            background: var(--grey-100);
+        }
+
+        .wpml-lang-dropdown li a img {
+            width: 18px;
+            height: 12px;
+        }
+
+        .responsive-menu-toggle {
+            display: none;
+            font-size: 24px;
+            color: var(--grey-900);
+            cursor: pointer;
+        }
+
+        /* ============================
+               HERO SECTION
+            ============================ */
+        .hero-section {
+            background: linear-gradient(135deg, var(--grey-900) 0%, #1a6fc4 100%);
+            padding: 80px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section .container {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+
+        .hero-content {
+            flex: 1 1 50%;
+            color: var(--white);
+        }
+
+        .hero-content h1 {
+            font-size: 56px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        .hero-content p {
+            font-size: 20px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+
+        .hero-content .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #1a6fc4;
+            color: var(--white);
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 18px;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hero-content .button:hover {
+            background: #145aa3;
+            color: var(--white);
+        }
+
+        .hero-content .button i {
+            font-size: 20px;
+        }
+
+        .hero-image {
+            flex: 1 1 40%;
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            
+        }
+
+        /* ============================
+               SECTION COMMON
+            ============================ */
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-dark {
+            background: var(--grey-900);
+            color: var(--white);
+        }
+
+        .section-dark h2,
+        .section-dark h3 {
+            color: var(--white);
+        }
+
+        .section-dark p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--grey-900);
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--grey-700);
+            margin-bottom: 40px;
+        }
+
+        /* ============================
+               BENEFITS & INNOVATIONS
+            ============================ */
+        .benefits-intro {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            text-align: center;
+        }
+
+        .benefits-intro p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--grey-700);
+            margin-bottom: 20px;
+        }
+
+        .benefits-grid-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-top: 30px;
+        }
+
+        .benefits-column {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 30px 25px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .benefits-column h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--grey-900);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--blue);
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px 20px;
+        }
+
+        .benefits-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--grey-700);
+            padding: 6px 0;
+        }
+
+        .benefits-list li i {
+            color: var(--blue);
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* For Innovations - 3 columns, 5 items each = 15 items */
+        .innovations-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px 20px;
+        }
+
+        .innovations-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--grey-700);
+            padding: 6px 0;
+        }
+
+        .innovations-list li i {
+            color: var(--blue);
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ============================
+               FEATURES (ALTERNATING)
+            ============================ */
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            margin-bottom: 80px;
+            flex-wrap: wrap;
+        }
+
+        .feature-row.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .feature-text {
+            flex: 1 1 45%;
+        }
+
+        .feature-text h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--grey-900);
+        }
+
+        .feature-text p {
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--grey-700);
+        }
+
+        .feature-image {
+            flex: 1 1 45%;
+            text-align: center;
+        }
+
+        .feature-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: var(--white);
+            padding: 10px;
+        }
+
+        /* ============================
+               ACCORDION / COLLAPSIBLE
+            ============================ */
+        .accordion-wrapper {
+            margin-top: 40px;
+        }
+
+        .accordion-item {
+            background: var(--white);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .accordion-title {
+            padding: 20px 25px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--grey-900);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--white);
+            transition: background 0.2s;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .accordion-title:hover {
+            background: var(--grey-100);
+        }
+
+        .accordion-title i {
+            transition: transform 0.3s;
+            font-size: 18px;
+            color: var(--blue);
+        }
+
+        .accordion-title.active i {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            padding: 0 25px;
+        }
+
+        .accordion-content.open {
+            max-height: 1200px;
+            padding: 0 25px 25px;
+        }
+
+        .accordion-content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .accordion-content-grid h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--grey-900);
+        }
+
+        .accordion-content-grid p {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--grey-700);
+        }
+
+        /* ============================
+               CTA SECTION
+            ============================ */
+        .cta-section {
+            background: linear-gradient(135deg, var(--grey-900) 0%, #1a3a6b 100%);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 38px;
+            color: var(--white);
+            margin-bottom: 15px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .cta-section .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #ef6b6d;
+            color: var(--white);
+            padding: 16px 36px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 18px;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-section .button:hover {
+            background: rgba(239, 107, 109, 0.85);
+            color: var(--white);
+        }
+
+        /* ============================
+               FOOTER
+            ============================ */
+        #Footer {
+            background: var(--grey-900);
+            color: var(--grey-400);
+            padding: 60px 0 30px;
+        }
+
+        #Footer .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 40px;
+        }
+
+        #Footer h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        #Footer ul {
+            list-style: none;
+        }
+
+        #Footer ul li {
+            margin-bottom: 10px;
+        }
+
+        #Footer ul li a {
+            color: var(--grey-400);
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        #Footer ul li a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 40px;
+            padding-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-bottom .copyright {
+            font-size: 14px;
+            color: var(--grey-400);
+        }
+
+        .footer-bottom .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-bottom .social-links a {
+            color: var(--grey-400);
+            font-size: 20px;
+            transition: color 0.2s;
+        }
+
+        .footer-bottom .social-links a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom .legal-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px 25px;
+        }
+
+        .footer-bottom .legal-links a {
+            font-size: 14px;
+            color: var(--grey-400);
+        }
+
+        .footer-bottom .legal-links a:hover {
+            color: var(--white);
+        }
+
+        /* ============================
+               RESPONSIVE
+            ============================ */
+        @media (max-width: 1024px) {
+            .hero-content h1 {
+                font-size: 42px;
+            }
+
+            .hero-content p {
+                font-size: 18px;
+            }
+
+            .feature-row {
+                gap: 30px;
+                margin-bottom: 50px;
+            }
+
+            .feature-text h3 {
+                font-size: 24px;
+            }
+
+            .benefits-list {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .innovations-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            /* Header */
+            .menu_wrapper nav ul {
+                display: none;
+                flex-direction: column;
+                background: #fff;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 8px 8px;
+            }
+
+            .menu_wrapper nav ul.open {
+                display: flex;
+            }
+
+            .responsive-menu-toggle {
+                display: block;
+            }
+
+            /* Hero */
+            .hero-section {
+                padding: 50px 0 60px;
+            }
+
+            .hero-section .container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-content h1 {
+                font-size: 32px;
+            }
+
+            .hero-content p {
+                font-size: 16px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-image {
+                margin-top: 20px;
+            }
+
+            /* Sections */
+            .section {
+                padding: 50px 0;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            /* Benefits Grid */
+            .benefits-grid-wrapper {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .benefits-list {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .innovations-list {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* Features */
+            .feature-row {
+                flex-direction: column !important;
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+
+            .feature-text h3 {
+                font-size: 22px;
+            }
+
+            .feature-text p {
+                font-size: 15px;
+            }
+
+            /* Accordion */
+            .accordion-title {
+                font-size: 17px;
+                padding: 16px 20px;
+            }
+
+            .accordion-content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* CTA */
+            .cta-section h2 {
+                font-size: 28px;
+            }
+
+            .cta-section p {
+                font-size: 16px;
+            }
+
+            /* Footer */
+            #Footer .container {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom .legal-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 26px;
+            }
+
+            .benefits-list {
+                grid-template-columns: 1fr;
+            }
+
+            .innovations-list {
+                grid-template-columns: 1fr;
+            }
+
+            .accordion-content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #Footer .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Utility */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .mb-40 {
+            margin-bottom: 40px;
+        }
+    </style>
 </head>
 <body>
 
-  <!--
-    page-center: a CSS class we wrote that uses flexbox to
-    centre the login card both horizontally and vertically
-    on the full screen height.
-  -->
-  <!-- Landing Page Section (hidden) -->
-  <div id="landing-section" class="landing-page" style="display:none;">
-    <!-- Navigation Bar -->
-    <nav class="landing-navbar">
-      <div class="navbar-container">
-        <div class="navbar-brand">
-          <i class="fas fa-hospital-user"></i>
-          <span>HAMS</span>
+    <!-- ============================
+    HEADER
+    ============================ -->
+    <header id="Top_bar">
+        <div class="container">
+            <div class="logo">
+                    <a href="index.html" class="navbar-brand"><i class="fa-solid fa-hospital"></i> HAMS</a>
+            </div>
+            <div class="menu_wrapper">
+                <nav>
+                    <ul id="main-menu">
+                        <li><a href="#">About Us</a></li>
+                         <li><a href="#">How it works</a></li>
+                        <li><a href="pages/register.html">Register</a></li>
+                       
+                        
+                        <li><a href="pages/login.html">Sign in</a></li>
+                    </ul>
+                </nav>
+                <div class="responsive-menu-toggle" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+           
         </div>
-        <div class="navbar-actions">
-          <button class="btn btn-ghost" onclick="goToLogin()">Sign In</button>
-          <button class="btn btn-primary" onclick="goToRegister()">Register</button>
-        </div>
-      </div>
-    </nav>
+    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Health Appointment Management System</h1>
-        <p class="hero-subtitle">Streamline your healthcare experience with our modern appointment management solution</p>
-        <div class="hero-actions">
-          <button class="btn btn-primary btn-lg" onclick="goToLogin()">Get Started</button>
-          <button class="btn btn-secondary btn-lg" onclick="scrollToFeatures()">Learn More</button>
+    <!-- ============================
+    HERO SECTION
+    ============================ -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Health Appointment Management System</h1>
+                <p>The e-Appointment system allows patients to conveniently schedule appointments with family physicians, hospitals, vaccination centers, and dental clinics via mobile applications, the web or phone lines, eliminating the need for physical visits to book appointments.</p>
+                <a href="pages/login.html" class="button">
+                    <i class="fa-solid fa-calendar-plus"></i> Book an appointment
+                </a>
+            </div>
+            <div class="hero-image">
+                <img src="https://www.tigahealth.com/wp-content/uploads/2024/04/e-appointment.jpg" alt="e-Appointment">
+            </div>
         </div>
-      </div>
-      <div class="hero-image">
-    <img src="pic/download (2).jpg" alt="My Photo">
+    </section>
+
+    <!-- ============================
+    BENEFITS & INNOVATIONS
+    ============================ -->
+    <section class="section">
+        <div class="container">
+            <div class="benefits-intro">
+                <h2 class="section-title">Benefits and Innovations</h2>
+                <p>HAMS allows patients to make online appointments with hospitals and health centers
+                 <p>System enables healthcare managers and providers to schedule physicians and facilities online and manage resources efficiently. It also effectively manages cancellations or rescheduling and improves the quality and efficiency of healthcare service delivery through centralized appointment management.</p>
+            </div>
+
+            <div class="benefits-grid-wrapper">
+                <!-- Benefits Column -->
+                <div class="benefits-column">
+                    <h3>Benefits</h3>
+                    <ul class="benefits-list">
+                        <li><i class="fas fa-circl"></i> 24/7 Online Appointment Opportunity</li>
+                        <li><i class="fas fa-circl"></i> Centralized Appointment Data</li>
+                        <li><i class="fas fa-circl"></i> Reduced Waiting Times</li>
+                        <li><i class="fas fa-circl"></i> Improved Patient Engagement</li>
+                        <li><i class="fas fa-circl"></i> Time and Cost Savings</li>
+                        <li><i class="fas fa-circl"></i> Increased Patient Trust &amp; Loyalty</li>
+                        <li><i class="fas fa-circl"></i> Data Integrity &amp; Security</li>
+                        
+                    </ul>
+                </div>
+
+                <!-- Innovations Column -->
+                <div class="benefits-column">
+<h3>Innovations</h3>
+<ul class="innovations-list">
+    <li>Digital Appointment Booking</li>
+    <li>Real-Time Time Slot Availability</li>
+    <li>Department-Based Doctor Scheduling</li>
+    <li>Automated Appointment Management</li>
+    <li>Family Member Appointment Booking</li>
+</ul>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================
+    FEATURES (ALTERNATING)
+    ============================ -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="text-center mb-40">
+                <h2 class="section-title">Key Features</h2>
+            </div>
+
+
+
+       
+<!-- Feature 1 -->
+<div class="feature-row">
+    <div class="feature-text">
+        <h3>Online Appointment Booking</h3>
+        <p>HAMS enables patients to book healthcare appointments online at any time. Patients simply select a department, choose an available doctor, pick a convenient date and time slot, and submit their appointment request through an easy-to-use interface.</p>
+    </div>
+    <div class="feature-image">
+       <img src="https://www.tigahealth.com/wp-content/uploads/2024/04/Centralized-Scheduling-Calendar-.png" alt="Centralized Scheduling">
+             </div>
 </div>
+
+
+
+<!-- Feature 3 -->
+<div class="feature-row reverse">
+    <div class="feature-text">
+        <h3>Smart Time Slot Management</h3>
+        <p>Available appointment slots are generated based on each doctor's working schedule. Patients can only select available time slots, preventing scheduling conflicts and reducing double bookings.</p>
+    </div>
+    <div class="feature-image">
+           <img src="https://www.tigahealth.com/wp-content/uploads/2024/04/Appointment-Type-Flexibility-.png" alt="Appointment Flexibility">
+                </div>
+</div>
+
+
+<!-- Feature 9 -->
+<div class="feature-row">
+    <div class="feature-text">
+        <h3>Secure User Authentication</h3>
+        <p>The system protects sensitive healthcare information through secure login, encrypted passwords, role-based access control, and session management, ensuring that only authorized users can access system resources.</p>
+    </div>
+    <div class="feature-image">
+        <img src="images/Secure-Flexible-and-Scalable-System.png" alt="Secure Authentication">
+    </div>
+</div>
+
+<!-- Feature 10 -->
+<div class="feature-row reverse">
+    <div class="feature-text">
+        <h3>Responsive Web Access</h3>
+        <p>HAMS is fully responsive and accessible from desktops, laptops, tablets, and smartphones, allowing patients and administrators to use the system anytime and anywhere through a modern web browser.</p>
+    </div>
+    <div class="feature-image">
+          <img src="https://www.tigahealth.com/wp-content/uploads/2024/04/Multi-Platform-Accessibility-.png" alt="Multichannel Access">
+                </div>
+
+                <!-- Feature 5 -->
+<div class="feature-row">
+    <div class="feature-text">
+        <h3>Family Member Appointment Booking</h3>
+        <p>Patients can create profiles for family members, such as parents, spouses, or children, allowing them to conveniently manage and book appointments for their loved ones from a single account.</p>
+    </div>
+    <div class="feature-image">
+        <img src="" alt="">
+    </div>
+</div>
+
+</div>
+
     </section>
 
-    <!-- Features Section -->
-    <section class="features-section" id="features">
-      <div class="section-container">
-        <h2>Why Choose HAMS?</h2>
-        <p class="section-subtitle">Modern features designed for your healthcare needs</p>
-        
-        <div class="features-container">
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="fas fa-clock"></i>
+    <!-- ============================
+    ACCORDION (BENEFITS BY STAKEHOLDER)
+    ============================ -->
+    <section class="section" style="background: var(--grey-100);">
+        <div class="container">
+            <div class="text-center mb-40">
+                <h2 class="section-title">Benefits by Stakeholder</h2>
             </div>
-            <div class="feature-text">
-              <h3>Easy Scheduling</h3>
-              <p>Book appointments in minutes with our intuitive and user-friendly interface. No complicated forms or endless waiting.</p>
-            </div>
-          </div>
 
-             
-          <div class="feature-item">
-            <!--
-            <div class="feature-icon">
+            <div class="accordion-wrapper">
 
-              <i class="fas fa-bell"></i>
-            </div>
-         
-            <div class="feature-text">
-              <h3>Smart Notifications</h3>
-              <p>Receive instant reminders and updates about your upcoming appointments. Never miss an important medical visit.</p>
-            </div>
-            -->
-          </div>
+                <!-- Accordion 1 -->
+                <div class="accordion-item">
+                    <button class="accordion-title active" onclick="toggleAccordion(this)">
+                        <span>Benefits for Patients</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="accordion-content open">
+                        <div class="accordion-content-grid">
+                           
+                            <div>
+                                <h4>Time Saving</h4>
+                                <p>Appointments can be easily made electronically, saving patients time by reducing waiting times.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="fas fa-lock"></i>
-            </div>
-            <div class="feature-text">
-              <h3>Secure & Private</h3>
-              <p>Your health information is protected with industry-standard security protocols and encryption technology.</p>
-            </div>
-          </div>
+                <!-- Accordion 2
+                <div class="accordion-item">
+                    <button class="accordion-title" onclick="toggleAccordion(this)">
+                        <span>Benefits for Health Professionals</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-content-grid">
+                            <div>
+                                <h4>Increased Flexibility &amp; Efficiency</h4>
+                                <p>Doctors quickly create and update appointment schedules, providing a more flexible and efficient workflow.</p>
+                            </div>
+                            <div>
+                                <h4>Efficient Coordination &amp; Planning</h4>
+                                <p>Facilitates coordination and planning so that all healthcare professionals can work together harmoniously.</p>
+                            </div>
+                            <div>
+                                <h4>More Time for Patient Care</h4>
+                                <p>Promotes allocating more time to patient care by streamlining administrative tasks and automating documentation processes.</p>
+                            </div>
+                            <div>
+                                <h4>Operational Efficiency</h4>
+                                <p>Centralized appointment management improves time management for healthcare professionals, enhancing operational efficiency.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 -->
 
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="fas fa-stethoscope"></i>
-            </div>
-            <div class="feature-text">
-              <h3>Professional Support</h3>
-              <p>Access dedicated support from our healthcare specialists. We're here to help you manage your appointments effectively.</p>
-            </div>
-          </div>
+                <!-- Accordion 3 -->
+                <div class="accordion-item">
+                    <button class="accordion-title" onclick="toggleAccordion(this)">
+                        <span>Benefits for Healthcare Systems &amp; Authorities</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-content-grid">
+                           
+                            <div>
+                                <h4>Efficient Healthcare Management</h4>
+                                <p>Thanks to resource and time optimization, healthcare delivery is managed more efficiently.</p>
+                            </div>
+                            <div>
+                                <h4>Improved Public Health Management</h4>
+                                <p>Effective appointment management across the entire health system improves public health management outcomes.</p>
+                            </div>
+                            <div>
+                                <h4>Advanced Quality of Healthcare</h4>
+                                <p>Improves the quality of healthcare services by providing diverse communication channels, digital calendars, various appointment types and multilingual support.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="fas fa-chart-line"></i>
             </div>
-            <div class="feature-text">
-              <h3>Track History</h3>
-              <p>Keep a complete history of all your medical appointments and consultations in one secure location.</p>
-            </div>
-          </div>
-
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="fas fa-mobile-alt"></i>
-            </div>
-            <div class="feature-text">
-              <h3>Mobile Ready</h3>
-              <p>Manage your appointments anytime, anywhere. Full support for desktop, tablet, and mobile devices.</p>
-            </div>
-          </div>
         </div>
-      </div>
     </section>
 
-    <!-- CTA Section -->
+    <!-- ============================
+    CTA SECTION
+    ============================ -->
     <section class="cta-section">
-      <div class="cta-content">
-        <h2>Ready to Manage Your Appointments?</h2>
-        <p>Join thousands of users who trust HAMS with their healthcare management</p>
-        <button class="btn btn-primary btn-lg" onclick="goToRegister()">Create Your Account Today</button>
-      </div>
+        <div class="container">
+            <h2>Fast, Secure, Seamless: <br>Easy Access to Healthcare appointment with HAMS</h2>
+             <a href="pages/login.html" class="">
+                book an appointment now <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="landing-footer">
-      <div class="footer-content">
-        <p>&copy; 2026 Health Appointment Management System. All rights reserved.</p>
-      </div>
+    <!-- ============================
+    FOOTER
+    ============================ 
+    <footer id="Footer">
+        <div class="container">
+            <div>
+                <h3>About Us</h3>
+                <ul>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Awards</a></li>
+                    <li><a href="#">Success Stories</a></li>
+                    <li><a href="#">Our Standards</a></li>
+                    <li><a href="#">Green Information</a></li>
+                    <li><a href="#">Commitment to Equality</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Products</h3>
+                <ul>
+                    <li><a href="#">Interoperability</a></li>
+                    <li><a href="#">Patient Engagement</a></li>
+                    <li><a href="#">Prescription &amp; Medicine</a></li>
+                    <li><a href="#">Drug Traceability</a></li>
+                    <li><a href="#">AI &amp; Analytics</a></li>
+                    <li><a href="#">Population Health</a></li>
+                    <li><a href="#">Personalized Healthcare</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="#">News</a></li>
+                    <li><a href="#">Blogs</a></li>
+                    <li><a href="#">Insights</a></li>
+                    <li><a href="#">Newsletters</a></li>
+                </ul>
+                <h3 style="margin-top: 25px;">Contact</h3>
+                <ul>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Partner with Us</a></li>
+                    <li><a href="#">Request a Demo</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Locations</h3>
+                <ul>
+                    <li><a href="#">Türkiye, Ankara Next Level | HQ</a></li>
+                    <li><a href="#">Türkiye, Ankara Technopark | R&amp;D</a></li>
+                    <li><a href="#">United Kingdom, Warwick</a></li>
+                    <li><a href="#">Qatar, Doha</a></li>
+                    <li><a href="#">Qatar, Free Zone</a></li>
+                    <li><a href="#">Saudi Arabia, Riyadh</a></li>
+                    <li><a href="#">Estonia, Tallin</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="footer-bottom">
+                <div class="legal-links">
+                    <a href="#">Cookie Policy</a>
+                    <a href="#">Privacy Notice</a>
+                    <a href="#">Clarification Notice</a>
+                    <a href="#">Application Form</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+                <div class="copyright">
+                    © 2025 Tiga Healthcare Technologies. All Rights Reserved.
+                </div>
+                <div class="social-links">
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
     </footer>
-  </div>
+    -->
 
-  <!-- Login Form Section (Visible by default) -->
-  <div id="login-section" class="page-center" style="display:flex;">
+    <!-- ============================
+    SCRIPTS
+    ============================ -->
+    <script>
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.querySelector('#main-menu');
+            menu.classList.toggle('open');
+        }
 
-    <div class="auth-card">
+        // Accordion Toggle
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const isOpen = content.classList.contains('open');
 
-      <!-- Logo / Branding -->
-      <div class="logo">
-        <span class="icon"><i class="fas fa-hospital-user"></i></span>
-        <h1>HAMS</h1>
-        <p>Health Appointment Management System</p>
-      </div>
+            const wrapper = button.closest('.accordion-wrapper');
+            const allContents = wrapper.querySelectorAll('.accordion-content');
+            const allButtons = wrapper.querySelectorAll('.accordion-title');
 
-      <!--
-        Alert box — hidden by default.
-        JavaScript shows it when PHP sends back an error or
-        success message via the URL (e.g. ?msg=logged_out).
-        We read the URL with JS instead of PHP on this page.
-      -->
-      <div id="alert-box" class="alert" style="display:none;"></div>
+            allContents.forEach(c => c.classList.remove('open'));
+            allButtons.forEach(b => b.classList.remove('active'));
 
-      <!--
-        The form sends data to php/login.php when submitted.
-        method="POST" means the email/password go in the
-        request body — NOT visible in the URL (safer than GET).
-      -->
-      <form id="login-form" action="php/login.php" method="POST" novalidate>
+            if (!isOpen) {
+                content.classList.add('open');
+                button.classList.add('active');
+            }
+        }
 
-        <!-- Email field -->
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <div class="input-icon-wrap">
-            <span class="icon"><i class="fas fa-envelope"></i></span>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              class="form-control"
-              placeholder="yourname@email.com"
-              autocomplete="email"
-              required
-            >
-          </div>
-        </div>
-
-        <!-- Password field -->
-        <div class="form-group">
-          <label for="password">Password</label>
-          <div class="input-icon-wrap">
-            <span class="icon"><i class="fas fa-lock"></i></span>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              class="form-control"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-              required
-            >
-            <!--
-              This button toggles the password between hidden (*****)
-              and visible text. Handled by JavaScript below.
-            -->
-            <button type="button" class="toggle-pw" onclick="togglePassword()" title="Show/hide password">
-              <i class="fas fa-eye"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Submit button -->
-        <div class="form-group" style="margin-top:24px;">
-          <button type="submit" class="btn btn-primary btn-block" id="login-btn">
-            Sign In
-          </button>
-        </div>
-
-      </form>
-
-      <hr class="divider">
-
-      <!-- Link to registration page -->
-      <p class="text-center text-sm">
-        Don't have an account?
-        <a href="#" onclick="goToRegister(); return false;">Register here</a>
-      </p>
-
-      <!-- Back to landing link -->
-      <p class="text-center text-sm" style="margin-top: 12px;">
-        <a href="#" onclick="goToLanding(); return false;">← Back to Home</a>
-      </p>
-
-    </div><!-- end auth-card -->
-
-    </div><!-- end login-section -->
-
-  </div><!-- end page-center -->
-
-  <script src="js/main.js"></script>
-  <script>
-    // ===========================================================
-    // LANDING PAGE & LOGIN PAGE JAVASCRIPT
-    // ===========================================================
-
-    // --- Navigation functions ---
-    function goToLanding() {
-      document.getElementById('landing-section').style.display = 'flex';
-      document.getElementById('login-section').style.display = 'none';
-    }
-
-    function goToLogin() {
-      document.getElementById('landing-section').style.display = 'none';
-      document.getElementById('login-section').style.display = 'flex';
-    }
-
-    function goToRegister() {
-      window.location.href = 'pages/register.html';
-    }
-
-    function scrollToFeatures() {
-      const featuresSection = document.getElementById('features');
-      featuresSection.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // --- Show message from URL parameter ---
-    // When PHP redirects here after logout or access denied,
-    // it adds ?msg=logged_out to the URL.
-    // We read that here and show a matching alert.
-    (function () {
-      // URLSearchParams reads the query string from the URL
-      const params = new URLSearchParams(window.location.search);
-      const msg    = params.get('msg');
-      const box    = document.getElementById('alert-box');
-
-      const messages = {
-        'logged_out'            : { type: 'success', text: 'You have been logged out successfully.' },
-        'registered'            : { type: 'success', text: 'Registration successful! You can now log in.' },
-        'login_required'        : { type: 'info',    text: 'Please log in to access that page.' },
-        'access_denied'         : { type: 'error',   text: 'You do not have permission to access that page.' },
-        'login_failed'          : { type: 'error',   text: 'Invalid email or password. Please try again.' },
-        'too_many_attempts_ip'  : { type: 'error',   text: 'Too many login attempts from your IP address. Please wait 10 minutes before trying again.' },
-        'too_many_attempts_email': { type: 'error',   text: 'Too many failed attempts for this account. Please wait 10 minutes before trying again.' },
-      };
-
-      if (msg && messages[msg]) {
-        const m = messages[msg];
-        box.className   = 'alert alert-' + m.type;
-        box.textContent = m.text;
-        box.style.display = 'block';
-        goToLogin();  // Show login form if there's a message
-      }
-    })();
-
-    // --- Toggle password visibility ---
-    function togglePassword() {
-      const input = document.getElementById('password');
-      // If type is 'password' characters show as dots, switch to 'text' to reveal
-      input.type = input.type === 'password' ? 'text' : 'password';
-    }
-
-    // --- Client-side form validation ---
-    // This runs BEFORE the form is sent to PHP.
-    // It gives the user instant feedback without a page reload.
-    // PHP also validates on the server — both are needed.
-    document.getElementById('login-form').addEventListener('submit', function (e) {
-      const email    = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const box      = document.getElementById('alert-box');
-
-      // Simple check: are both fields filled?
-      if (!email || !password) {
-        e.preventDefault();  // Stop the form from submitting to PHP
-        box.className     = 'alert alert-error';
-        box.textContent   = 'Please enter your email and password.';
-        box.style.display = 'block';
-        return;
-      }
-
-      // If validation passes, show a loading state on the button
-      // so the user knows something is happening
-      document.getElementById('login-btn').textContent = 'Signing in...';
-      document.getElementById('login-btn').disabled    = true;
-    });
-  </script>
+        document.addEventListener('click', function(event) {
+            const menu = document.querySelector('#main-menu');
+            const toggle = document.querySelector('.responsive-menu-toggle');
+            const isClickInside = menu.contains(event.target) || toggle.contains(event.target);
+            if (!isClickInside && menu.classList.contains('open')) {
+                menu.classList.remove('open');
+            }
+        });
+    </script>
 
 </body>
 </html>

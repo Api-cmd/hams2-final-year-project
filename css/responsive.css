@@ -1,0 +1,693 @@
+/* ============================================================
+   responsive.css — Mobile-First Responsive Enhancements
+   Overrides and extends style.css for all screen sizes.
+   ============================================================ */
+
+/* ─── CORE VARIABLES & RESET ─── */
+:root {
+  --sidebar-width: 240px;
+  --navbar-height: 56px;
+  --touch-target: 44px; /* minimum touch target */
+}
+
+/* ─── MOBILE-FIRST BASE ─── */
+html { font-size: 15px; }
+@media (max-width: 768px) { html { font-size: 14px; } }
+@media (max-width: 480px) { html { font-size: 13px; } }
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── HAMBURGER / SIDEBAR TOGGLE ─── */
+.sidebar-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-size: 1.4rem;
+  padding: 8px 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-toggle:hover { background: rgba(255,255,255,0.15); }
+
+/* ─── SIDEBAR OVERLAY ─── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 98;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.sidebar-overlay.visible {
+  display: block;
+  opacity: 1;
+}
+.sidebar-overlay.closing {
+  opacity: 0;
+}
+
+/* ─── MODIFIED SIDEBAR ─── */
+.sidebar {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+  z-index: 99;
+}
+
+/* ─── RESPONSIVE NAVBAR ─── */
+.navbar {
+  height: var(--navbar-height);
+  padding: 0 12px;
+  gap: 8px;
+}
+.navbar-brand { font-size: 1.1rem; gap: 6px; white-space: nowrap; }
+.navbar-brand i { font-size: 1.2rem; }
+.navbar-links { display: flex; align-items: center; gap: 2px; }
+.navbar-links a {
+  padding: 8px 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.navbar-links .divider { margin: 0 4px; }
+
+/* ─── MAIN CONTENT RESPONSIVE ─── */
+.main-content {
+  padding: 20px 16px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.page-center { padding: 16px; }
+
+/* ─── PAGE HEADER ─── */
+.page-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.page-header h2 { font-size: 1.3rem; }
+
+/* ─── STATS GRID ─── */
+.stats-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card { padding: 16px; }
+.stat-card .stat-value { font-size: 1.6rem; }
+.stat-card .stat-label { font-size: 0.72rem; }
+
+/* ─── CARDS ─── */
+.card-header { padding: 14px 16px; flex-wrap: wrap; }
+.card-header h3 { font-size: 0.95rem; }
+.card-body { padding: 16px; }
+
+/* ─── RESPONSIVE TABLES → CARDS ON MOBILE ─── */
+.table-wrap { border-radius: 8px; }
+
+/* On screens < 768px, convert tables to card layout */
+@media (max-width: 767px) {
+  /* Force table to behave as cards */
+  .table-responsive-cards table,
+  .table-responsive-cards thead,
+  .table-responsive-cards tbody,
+  .table-responsive-cards th,
+  .table-responsive-cards td,
+  .table-responsive-cards tr {
+    display: block;
+  }
+  
+  .table-responsive-cards thead { display: none; }
+  
+  .table-responsive-cards tr {
+    background: var(--white);
+    border: 1px solid var(--grey-200);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .table-responsive-cards tr:hover { background: var(--white); }
+  
+  .table-responsive-cards td {
+    padding: 6px 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    min-height: 32px;
+  }
+  
+  .table-responsive-cards td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--grey-600);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+  
+  .table-responsive-cards td:last-child { border-bottom: none; padding-bottom: 0; }
+  .table-responsive-cards td:first-child { padding-top: 0; }
+  
+  .table-responsive-cards .text-muted { font-size: 0.82rem; }
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  min-height: var(--touch-target);
+  justify-content: center;
+  white-space: normal;
+  word-break: break-word;
+}
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; min-height: 36px; }
+.btn-lg { padding: 12px 28px; font-size: 0.95rem; }
+.btn-block-mobile { width: 100%; justify-content: center; }
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.button-group .btn { flex: 1 1 auto; }
+
+/* ─── FORMS ─── */
+.form-group { margin-bottom: 16px; }
+.form-group label { font-size: 0.85rem; margin-bottom: 5px; }
+.form-control {
+  padding: 11px 14px;
+  font-size: 16px; /* prevents iOS zoom */
+  min-height: var(--touch-target);
+}
+
+/* Select with custom arrow */
+select.form-control {
+  padding-right: 36px;
+  background-position: right 12px center;
+  background-size: 11px 7px;
+}
+
+/* Make checkboxes bigger on mobile */
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  cursor: pointer;
+}
+
+/* Input icons */
+.input-icon-wrap .form-control { padding-left: 40px; }
+.input-icon-wrap .icon { left: 14px; font-size: 1rem; }
+
+/* ─── MODALS ─── */
+.confirm-box {
+  width: 90vw;
+  max-width: 480px;
+  padding: 24px 20px;
+}
+
+@media (max-width: 640px) {
+  .confirm-box {
+    width: 94vw;
+    max-width: none;
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+  .confirm-box .confirm-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .confirm-box .confirm-actions .btn {
+    width: 100%;
+    min-height: var(--touch-target);
+  }
+  .confirm-box h3 { font-size: 1.1rem; }
+}
+
+/* ─── RESPONSIVE GRID UTILITIES ─── */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+
+@media (max-width: 1023px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 767px)  { .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+/* ─── QUICK LINKS ─── */
+.quick-links { grid-template-columns: repeat(2, 1fr); }
+
+/* ─── STEP INDICATOR (Booking) ─── */
+.step-indicator { flex-wrap: nowrap; margin-bottom: 20px; }
+.step { font-size: 0.72rem; flex-direction: column; gap: 4px; text-align: center; }
+.step .num { width: 22px; height: 22px; font-size: 0.72rem; }
+.step span { display: none; } /* hide label text on mobile */
+.step.active span { display: inline; }
+.step-line { min-width: 16px; max-width: 32px; }
+
+/* ─── SLOTS GRID ─── */
+.slots-grid { gap: 6px; }
+.slot-btn {
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  min-width: 60px;
+  min-height: var(--touch-target);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── RESPONSIVE NAVIGATION SYSTEM ─── */
+@media (max-width: 1023px) {
+  /* Show hamburger */
+  .sidebar-toggle { display: flex; }
+  
+  /* Navbar adjustments */
+  .navbar-links a:not(.navbar-user-link) { display: none; }
+  .navbar-links .divider { display: none; }
+  .navbar-user-link { display: flex !important; }
+  
+  /* Sidebar becomes off-canvas */
+  .sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    z-index: 99;
+    box-shadow: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  
+  /* Page wrapper adjustments */
+  .page-wrapper {
+    min-height: calc(100vh - var(--navbar-height));
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+    padding: 16px 14px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Single column stats */
+  .stats-grid { grid-template-columns: 1fr; }
+  
+  /* Quick links single column */
+  .quick-links { grid-template-columns: 1fr; }
+  
+  /* Page header adjustments */
+  .page-header { margin-bottom: 16px; }
+  .page-header h2 { font-size: 1.2rem; }
+  
+  /* Auth card adjustments */
+  .auth-card {
+    padding: 28px 20px;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+  .auth-card .logo .icon { font-size: 2.4rem; }
+  .auth-card .logo h1 { font-size: 1.2rem; }
+  
+  /* Button groups stack */
+  .button-group.stack-mobile { flex-direction: column; }
+  .button-group.stack-mobile .btn { width: 100%; }
+  
+  /* Inline editors full width */
+  .form-row { grid-template-columns: 1fr; }
+  .form-row-3 { grid-template-columns: 1fr; }
+  .form-row-4 { grid-template-columns: 1fr; }
+  .effective-date-row { grid-template-columns: 1fr; }
+  
+  /* Step indicator compact */
+  .step-indicator { gap: 0; }
+  .step-line { min-width: 12px; max-width: 20px; }
+}
+
+/* ─── RESPONSIVE AUTH CARD (Login/Register) ─── */
+@media (max-width: 480px) {
+  .auth-card { padding: 24px 16px; border-radius: 10px; }
+}
+
+/* ─── BLANK STATE ─── */
+.empty-state { padding: 32px 16px; }
+.empty-state .icon { font-size: 2.2rem; }
+
+/* ─── NOTIFICATION TOASTS ─── */
+@media (max-width: 640px) {
+  .notifications-container.top-right {
+    width: calc(100% - 24px);
+    top: 10px;
+  }
+  .notification { min-width: 0; padding: 10px 12px; }
+}
+
+/* ─── RESPONSIVE LANDING PAGE ─── */
+@media (max-width: 767px) {
+  .hero { padding: 32px 16px; min-height: auto; }
+  .hero-content h1 { font-size: 1.5rem; }
+  .hero-subtitle { font-size: 0.95rem; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn { width: 100%; min-height: var(--touch-target); }
+  .hero-image { display: none; }
+  
+  .features-section { padding: 48px 16px; }
+  .features-grid { grid-template-columns: 1fr; gap: 16px; }
+  .section-container h2 { font-size: 1.4rem; }
+  
+  .cta-section { padding: 48px 16px; }
+  .cta-content h2 { font-size: 1.4rem; }
+  
+  .landing-navbar { height: auto; padding: 10px 12px; }
+  .navbar-container { flex-direction: row; gap: 8px; }
+  .navbar-actions { gap: 8px; }
+  .navbar-actions .btn { font-size: 0.82rem; padding: 8px 12px; }
+}
+
+/* ─── RESPONSIVE TEMPLATES (admin-schedules) ─── */
+@media (max-width: 1023px) {
+  .template-card .stat-badges { grid-template-columns: repeat(2, 1fr); }
+  .template-card .card-footer { flex-direction: column; gap: 12px; }
+}
+
+@media (max-width: 640px) {
+  .generate-range-select { width: 100%; }
+  .generate-range-select select { flex: 1; }
+  .template-card .card-footer > div:first-child { width: 100%; }
+  .template-card .card-footer > div:first-child .btn { flex: 1; }
+}
+
+/* ─── RESPONSIVE OVERRIDE EDITOR ─── */
+@media (min-width: 768px) {
+  .override-form .form-group { margin-bottom: 12px; }
+}
+@media (max-width: 767px) {
+  .override-type-select { grid-template-columns: 1fr; }
+  .override-session-row { flex-wrap: wrap; }
+  .override-session-row input { flex: 1 1 40%; }
+  .override-session-row .form-control { min-width: 0; }
+}
+
+/* ─── RESPONSIVE AUDIT LOG ─── */
+.audit-log-toolbar { flex-wrap: wrap; }
+.audit-log-toolbar .form-group { min-width: 140px !important; flex: 1; }
+@media (max-width: 640px) {
+  .audit-log-toolbar { flex-direction: column; gap: 8px; }
+  .audit-log-toolbar .form-group { width: 100%; }
+}
+
+/* ─── TAB BARS ─── */
+@media (max-width: 640px) {
+  .tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 0; flex-wrap: nowrap; }
+  .tab-bar .tab { 
+    padding: 10px 14px; 
+    font-size: 0.82rem; 
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+/* ─── RESPONSIVE CALENDAR MINI ─── */
+.cal-mini { padding: 10px; }
+.cal-mini .cal-grid { gap: 1px; }
+.cal-mini .cal-grid .cal-day { padding: 3px 0; font-size: 0.7rem; }
+.cal-mini .cal-legend { gap: 8px; }
+.cal-mini .cal-legend .legend-item { font-size: 0.68rem; }
+
+/* ─── CARD FILTERS ─── */
+.card-body > div[style*="flex"] {
+  flex-wrap: wrap;
+}
+.card-body > div[style*="flex"] > * {
+  min-width: 0;
+}
+
+/* ─── RESPONSIVE GLOBAL HOLIDAYS ─── */
+@media (max-width: 767px) {
+  .global-holiday-toolbar { display: flex; flex-direction: column; gap: 10px; }
+  .global-holiday-toolbar .form-group { width: 100%; }
+  .global-holiday-toolbar .btn { width: 100%; }
+  .global-holiday-item { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px;
+    padding: 12px;
+  }
+  .global-holiday-item > div { width: 100%; }
+  .global-holiday-item button { width: 100%; }
+}
+
+/* ─── SECTION HEADERS ─── */
+.section-header { margin-bottom: 12px; }
+
+/* ─── HOLIDAY LIST ─── */
+.holiday-list .holiday-row {
+  display: grid;
+  gap: 8px;
+  align-items: center;
+}
+@media (max-width: 640px) {
+  .holiday-table .holiday-row { 
+    grid-template-columns: 1fr 1fr auto; 
+    gap: 8px;
+    padding: 10px 0;
+  }
+}
+
+/* ─── RESPONSIVE EXCEPTION CARDS ─── */
+.exception-card { padding: 12px; }
+.exception-header { flex-wrap: wrap; gap: 8px; }
+
+/* ─── SESSION STATS ─── */
+@media (max-width: 640px) {
+  .session-stats { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+}
+
+/* ─── RESPONSIVE DAY ROWS ─── */
+@media (max-width: 767px) {
+  .day-row { display: flex; flex-direction: column; gap: 6px; }
+  .session-group { padding: 10px; }
+  .session-row { flex-wrap: wrap; }
+  .session-row input[type="time"] { width: calc(50% - 20px); min-width: 80px; }
+  .session-row .session-name-input { width: 100%; }
+  .session-row .session-label { min-width: auto; }
+}
+
+/* ─── FIX FOR HORIZONTAL OVERFLOW ─── */
+img, video, iframe, canvas { max-width: 100%; height: auto; }
+pre, code { white-space: pre-wrap; word-break: break-word; }
+svg { max-width: 100%; }
+
+/* ─── RESPONSIVE FLEX HELPERS ─── */
+@media (max-width: 767px) {
+  .flex-mobile-col { flex-direction: column !important; }
+  .flex-mobile-wrap { flex-wrap: wrap !important; }
+  .gap-mobile-8 { gap: 8px !important; }
+}
+
+/* ─── IMPROVED TOUCH TARGETS ─── */
+button, .btn, a, select, input[type="checkbox"], input[type="radio"] {
+  cursor: pointer;
+}
+a { min-height: auto; }
+.navbar-links a, .sidebar a { min-height: var(--touch-target); display: flex; align-items: center; }
+
+/* ─── SIDEBAR LINK ADJUSTMENTS ─── */
+.sidebar a { padding: 10px 20px; font-size: 0.9rem; }
+.sidebar-label { padding: 0 20px; }
+
+/* ─── RESPONSIVE ICON BUTTONS ─── */
+.btn-icon { width: 38px; height: 38px; }
+.btn-icon-sm { width: 32px; height: 32px; }
+
+/* ─── CONFIRMATION MODAL ENHANCEMENTS ─── */
+.confirm-box .confirm-detail { padding: 12px; }
+.confirm-box .confirm-detail .detail-name { font-size: 0.9rem; }
+.confirm-box .confirm-detail .detail-note { font-size: 0.8rem; }
+
+/* ─── BOOKING PAGE ENHANCEMENTS ─── */
+@media (max-width: 640px) {
+  .step-indicator { 
+    overflow-x: auto; 
+    gap: 4px;
+    padding-bottom: 4px;
+  }
+}
+
+/* ─── ALERTS ─── */
+.alert { padding: 10px 14px; font-size: 0.85rem; }
+
+/* ─── AUTH CARD LOGO ─── */
+.auth-card .logo { margin-bottom: 24px; }
+.auth-card .logo .icon { font-size: 2.6rem; }
+
+/* ─── PASSWORD TOGGLE ─── */
+.input-icon-wrap .toggle-pw { padding: 8px; min-height: var(--touch-target); }
+
+/* ─── GENERATE RANGE CONTAINER ─── */
+.generate-range-select {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.generate-range-select select { flex: 1; max-width: 120px; }
+
+/* ─── RESPONSIVE FILTER CARD ─── */
+@media (max-width: 640px) {
+  .card-body > div[style*="flex"] > .form-group {
+    width: 100%;
+    min-width: 0 !important;
+  }
+  .card-body > div[style*="flex"] > .form-group .form-control { width: 100%; }
+}
+
+/* ─── RESPONSIVE APPOINTMENT TABLE ─── */
+@media (max-width: 767px) {
+  #appt-tbody tr {
+    position: relative;
+  }
+  #appt-tbody td {
+    flex-wrap: wrap;
+  }
+  #appt-tbody td:last-child {
+    width: 100%;
+  }
+  #appt-tbody td select.form-control {
+    width: 100% !important;
+    padding: 8px 10px;
+  }
+}
+
+/* ─── AUTO-ASSIGNED TEXT ─── */
+.text-muted.text-sm { font-size: 0.8rem; }
+
+/* ─── MOBILE NAV DROPDOWN (Patient Pages) ─── */
+.mobile-nav-dropdown {
+  display: none;
+  position: fixed;
+  top: var(--navbar-height, 56px);
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--grey-200);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 99;
+  padding: 8px 0;
+  max-height: calc(100vh - var(--navbar-height, 56px));
+  overflow-y: auto;
+  animation: mobileNavFadeIn 200ms ease;
+}
+
+.mobile-nav-dropdown.open {
+  display: block;
+}
+
+.mobile-nav-dropdown a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: var(--grey-700);
+  font-size: 0.92rem;
+  text-decoration: none;
+  transition: background 0.15s;
+  min-height: var(--touch-target);
+}
+
+.mobile-nav-dropdown a:hover,
+.mobile-nav-dropdown a.active {
+  background: var(--blue-light);
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.mobile-nav-divider {
+  height: 1px;
+  background: var(--grey-200);
+  margin: 6px 12px;
+}
+
+@keyframes mobileNavFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Only show hamburger on mobile for patient pages that have mobile-nav-dropdown */
+.mobile-nav-dropdown ~ .navbar-links .sidebar-toggle {
+  display: flex;
+}
+
+@media (max-width: 1023px) {
+  /* Show hamburger only on pages that have the mobile nav dropdown */
+  .mobile-nav-dropdown ~ .navbar-links .sidebar-toggle,
+  .navbar:has(.mobile-nav-dropdown) .sidebar-toggle {
+    display: flex;
+  }
+  
+  /* On pages WITH mobile nav dropdown, remove overlap: hide the original issue */
+  .navbar:has(.mobile-nav-dropdown) .navbar-links a:not(.navbar-user-link) {
+    display: none;
+  }
+  .navbar:has(.mobile-nav-dropdown) .navbar-links .divider {
+    display: none;
+  }
+  .navbar:has(.mobile-nav-dropdown) .navbar-user-link {
+    display: flex !important;
+  }
+}
+
+/* ─── SIDEBAR PROPER OFFCANVAS ON BOTH TABLET AND MOBILE ─── */
+@media (max-width: 1023px) {
+  .page-wrapper { position: relative; }
+  .sidebar {
+    position: fixed;
+    top: var(--navbar-height, 56px);
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 99;
+    overflow-y: auto;
+    border-right: none;
+    box-shadow: none;
+  }
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+  }
+}
+
+/* ─── FIX STICKY NAVBAR ON MOBILE ─── */
+.navbar { position: sticky; top: 0; z-index: 100; }
+
+/* ─── RESPONSIVE TAB-CONTENT ─── */
+.tab-content { width: 100%; overflow-x: hidden; }
+
+/* ─── SMALL GLOBAL FIXES ─── */
+@media (max-width: 767px) {
+  * { -webkit-tap-highlight-color: transparent; }
+  select:focus, input:focus, button:focus { outline: none; }
+}

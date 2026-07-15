@@ -10,6 +10,7 @@
 // ====================== DATABASE CREDENTIALS ======================
 // Update these values according to your environment (XAMPP, live server, etc.)
 define('DB_HOST', 'localhost');
+define('DB_PORT', 3306);
 define('DB_NAME', 'hams2_db');
 define('DB_USER', 'root');
 define('DB_PASS', '');
@@ -20,6 +21,13 @@ define('APP_URL',  'http://localhost/hams2');
 
 // Set timezone to Tanzania (East Africa Time - EAT)
 date_default_timezone_set('Africa/Dar_es_Salaam');
+
+// Enable error logging to file
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/php_errors.log');
+if (!file_exists(__DIR__ . '/../logs')) {
+    mkdir(__DIR__ . '/../logs', 0777, true);
+}
 
 // ====================== SESSION CONFIGURATION ======================
 // Security and session lifetime settings
@@ -35,7 +43,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ====================== DATABASE CONNECTION ======================
-$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+$dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Throw exceptions on errors
@@ -46,10 +54,24 @@ $options = [
 try {
     $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
 } catch (PDOException $e) {
-    error_log('[HAMS] Database connection failed: ' . $e->getMessage());
-    http_response_code(500);
-    echo json_encode(['error' => 'Database connection failed. Please contact administrator.']);
-    exit();
+    // Some Windows MySQL setups behave differently when using localhost.
+    // Fall back to 127.0.0.1 for a standard TCP connection if possible.
+    if (DB_HOST === 'localhost') {
+        $fallbackDsn = str_replace('host=localhost', 'host=127.0.0.1', $dsn);
+        try {
+            $pdo = new PDO($fallbackDsn, DB_USER, DB_PASS, $options);
+        } catch (PDOException $e2) {
+            error_log('[HAMS] Database connection failed: ' . $e2->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Database connection failed. Please contact administrator.']);
+            exit();
+        }
+    } else {
+        error_log('[HAMS] Database connection failed: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['error' => 'Database connection failed. Please contact administrator.']);
+        exit();
+    }
 }
 
 // ===========================================================

@@ -5,22 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
   <nav class="navbar">
-    <a href="dashboard.html" class="navbar-brand">
-      <i class="fa-solid fa-hospital"></i> HAMS
-    </a>
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <a href="dashboard.html" class="navbar-brand"><i class="fa-solid fa-hospital"></i> HAMS</a>
     <div class="navbar-links">
-      <a href="dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
-      </a>
+      <a href="dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="book.html"><i class="fa-solid fa-calendar-plus"></i> Book</a>
+      <a href="appointments.html"><i class="fa-solid fa-calendar-check"></i> My Appointments</a>
+      <a href="family.html"><i class="fa-solid fa-people-group"></i> Family</a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </a>
+      <a href="profile.html" id="nav-username" class="active navbar-user-link">Account</a>
+      <a href="../php/logout.php" class="navbar-user-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+    <div id="mobile-nav-dropdown" class="mobile-nav-dropdown">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="book.html">Book Appointment</a>
+      <a href="appointments.html">My Appointments</a>
+      <a href="family.html">Family</a>
+      <div class="mobile-nav-divider"></div>
+      <a href="profile.html" id="mobile-nav-username" class="active">Account</a>
+      <a href="../php/logout.php">Logout</a>
     </div>
   </nav>
 
@@ -166,6 +177,7 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
     // ==========================================================
     // PROFILE PAGE JAVASCRIPT

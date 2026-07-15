@@ -5,177 +5,330 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Schedule Templates — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    .template-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
-    }
-    .template-card {
+    /* ─── base / layout ─── */
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 20px; margin-top: 16px; }
+    .template-card { background: var(--white); border: 1px solid var(--grey-200); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s; }
+    .template-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .template-card .card-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--grey-100); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .template-card .card-header .title-section h3 { margin: 0 0 4px; font-size: 1.05rem; }
+    .template-card .card-header .title-section .meta-info { font-size: 0.85rem; color: var(--grey-600); }
+    .template-card .card-header .title-section .meta-info i { width: 16px; margin-right: 4px; color: var(--grey-400); }
+    .template-card .card-body { padding: 16px 20px; flex: 1; }
+    .template-card .card-footer { padding: 14px 20px; border-top: 1px solid var(--grey-100); background: var(--grey-50); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .template-card .stat-badges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+    .template-card .stat-badge { background: var(--grey-50); border: 1px solid var(--grey-200); border-radius: 8px; padding: 12px; text-align: center; font-size: 0.85rem; }
+    .template-card .stat-badge .stat-number { font-size: 1.2rem; font-weight: 700; display: block; margin-bottom: 2px; }
+    .template-card .stat-badge .stat-label { color: var(--grey-600); font-size: 0.78rem; }
+    .stat-badge.good { border-left: 3px solid #0b7285; }
+    .stat-badge.warning { border-left: 3px solid #f59e0b; }
+    .stat-badge.info { border-left: 3px solid #3b82f6; }
+    .template-card .effective-range { font-size: 0.82rem; color: var(--grey-600); margin-bottom: 14px; padding: 8px 12px; background: var(--grey-50); border-radius: 6px; display: flex; align-items: center; gap: 8px; }
+    .template-card .working-days { display: grid; gap: 8px; margin-bottom: 14px; }
+    .template-card .working-day { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--grey-100); font-size: 0.85rem; }
+    .template-card .working-day:last-child { border-bottom: none; }
+    .template-card .working-day .day-label { font-weight: 600; min-width: 70px; }
+    .template-card .working-day .day-sessions { flex: 1; }
+    .template-card .working-day .day-sessions .session { display: inline-block; background: #e8f4f8; color: #0b7285; padding: 2px 10px; border-radius: 4px; font-size: 0.8rem; margin: 1px 3px; white-space: nowrap; }
+    .template-card .working-day .day-off { color: var(--grey-500); font-style: italic; }
+    .template-card .holiday-preview { font-size: 0.82rem; margin-top: 4px; }
+    .template-card .holiday-preview .holiday-chip { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; margin: 1px 2px; font-size: 0.78rem; }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 0.82rem; border: 1px solid var(--grey-200); background: var(--white); color: var(--grey-700); white-space: nowrap; }
+    .status-pill.active { color: #0b7285; border-color: #cfe2ff; background: #e8f4f8; }
+    .status-pill.inactive { color: #6c757d; border-color: #dee2e6; background: #f8f9fa; }
+    .status-pill.future { color: #856404; border-color: #ffeeba; background: #fff3cd; }
+    .status-pill.expired { color: #842029; border-color: #f8d7da; background: #fff5f5; }
+    .btn-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--grey-200); border-radius: 6px; background: var(--white); cursor: pointer; color: var(--grey-600); transition: all 0.15s; }
+    .btn-icon:hover { background: var(--grey-100); color: var(--primary); }
+    .cal-mini { margin-bottom: 16px; background: var(--white); border: 1px solid var(--grey-200); border-radius: 8px; padding: 12px; }
+    .cal-mini .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; }
+    .cal-mini .cal-header .cal-nav-btn { background: none; border: 1px solid var(--grey-200); border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 0.78rem; }
+    .cal-mini .cal-header .cal-nav-btn:hover { background: var(--grey-100); }
+    .cal-mini .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 0.75rem; }
+    .cal-mini .cal-grid .cal-day-label { color: var(--grey-500); padding: 4px 0; font-weight: 600; font-size: 0.7rem; }
+    .cal-mini .cal-grid .cal-day { padding: 4px 0; border-radius: 4px; cursor: default; }
+    .cal-mini .cal-grid .cal-day.working { background: #d4edda; color: #155724; }
+    .cal-mini .cal-grid .cal-day.holiday { background: #f8d7da; color: #721c24; }
+    .cal-mini .cal-grid .cal-day.leave { background: #ffeeba; color: #856404; }
+    .cal-mini .cal-grid .cal-day.weekend { background: var(--grey-50); color: var(--grey-500); }
+    .cal-mini .cal-grid .cal-day.today { font-weight: 700; border: 2px solid var(--primary); }
+    .cal-mini .cal-legend { display: flex; gap: 12px; margin-top: 8px; font-size: 0.72rem; flex-wrap: wrap; }
+    .cal-mini .cal-legend .legend-item { display: flex; align-items: center; gap: 4px; }
+    .cal-mini .cal-legend .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .session-group { background: var(--grey-50); border: 1px solid var(--grey-200); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+    .session-group h5 { margin: 0 0 8px; font-size: 0.88rem; }
+    .session-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+    .session-row input[type="time"] { padding: 6px 10px; border: 1.5px solid var(--grey-200); border-radius: 6px; font-size: 0.85rem; width: 110px; }
+    .session-row .session-label { font-size: 0.78rem; color: var(--grey-600); min-width: 40px; }
+    .session-row .btn-icon-sm { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--grey-200); border-radius: 4px; background: var(--white); cursor: pointer; color: var(--grey-500); font-size: 0.82rem; }
+    .session-row .btn-icon-sm:hover { background: var(--grey-100); }
+    .session-row .btn-icon-sm.danger:hover { color: #dc3545; border-color: #dc3545; }
+    .session-row .session-name-input { padding: 6px 8px; border: 1.5px solid var(--grey-200); border-radius: 6px; font-size: 0.82rem; width: 140px; background: var(--white); }
+    .session-row .session-name-input:focus { border-color: var(--primary); outline: none; }
+    .gen-summary { background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; margin: 12px 0; }
+    .gen-summary h4 { margin: 0 0 8px; color: #166534; }
+    .gen-summary .gen-stat { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.88rem; }
+    .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .form-row-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .form-row-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .day-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--grey-200); font-size: 0.88rem; }
+    .day-row:last-child { border-bottom: none; }
+    .day-row.is-off { opacity: 0.5; }
+    .day-row.is-off .session-group { display: none; }
+    .holiday-table { margin-bottom: 18px; }
+    .holiday-table .holiday-row { display: grid; grid-template-columns: 120px 1fr 78px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--grey-200); }
+    .holiday-table .holiday-row:last-child { border-bottom: none; }
+    .holiday-row button { width: 100%; }
+    .effective-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .generate-range-select { display: flex; gap: 8px; align-items: center; }
+    .generate-range-select select { padding: 6px 10px; border: 1.5px solid var(--grey-200); border-radius: var(--radius); font-size: 0.85rem; }
+    .conflict-review { background: #fff3cd; border: 1px solid #ffc107; border-radius: var(--radius); padding: 16px; margin: 12px 0; }
+    .conflict-review h4 { margin: 0 0 8px; color: #856404; }
+    .conflict-review .conflict-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .global-holiday-toolbar { display: grid; grid-template-columns: minmax(160px, 180px) minmax(220px, 1fr) auto; gap: 12px; align-items: end; }
+    .global-holiday-item { display: grid; grid-template-columns: minmax(140px, 160px) 1fr auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--grey-200); border-radius: var(--radius); background: var(--white); }
+    .tab-bar { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--grey-200); }
+    .tab-bar .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 0.9rem; color: var(--grey-600); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .tab-bar .tab:hover { color: var(--primary); }
+    .tab-bar .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .inline-editor { display: none; }
+    .inline-editor.open { display: block; }
+
+    /* ─── override / exception cards ─── */
+    .exception-card {
       background: var(--white);
       border: 1px solid var(--grey-200);
-      border-radius: var(--radius);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
     }
-    .template-card .card-header,
-    .template-card .card-footer {
-      padding: 16px;
-      border-bottom: 1px solid var(--grey-200);
-      background: var(--grey-100);
+    .exception-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
-    .template-card .card-footer {
-      border-top: 1px solid var(--grey-200);
-      border-bottom: none;
+    .exception-header {
       display: flex;
       justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
+      align-items: flex-start;
+      margin-bottom: 8px;
     }
-    .template-card .card-body {
-      padding: 16px;
-      flex: 1;
-    }
-    .template-card .template-meta {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    .template-card .template-meta .meta-block {
-      background: var(--grey-50);
-      border: 1px solid var(--grey-200);
-      border-radius: var(--radius);
-      padding: 10px;
-      font-size: 0.86rem;
-    }
-    .template-card .template-days {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .template-card .template-days .day-pill {
-      padding: 8px 10px;
-      border-radius: var(--radius);
-      background: var(--grey-50);
-      border: 1px solid var(--grey-200);
-      font-size: 0.82rem;
-    }
-    .template-card .holiday-list {
-      display: grid;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    .template-card .holiday-item {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px;
-      border: 1px solid var(--grey-200);
-      border-radius: var(--radius);
-      background: var(--white);
-      font-size: 0.85rem;
-    }
-    .template-card .holiday-item .holiday-note {
-      color: var(--grey-600);
-    }
-    .template-card .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .template-card .stats-row .stat {
-      border: 1px solid var(--grey-200);
-      border-radius: var(--radius);
-      padding: 12px;
-      background: var(--grey-50);
-      text-align: center;
-      font-size: 0.86rem;
-    }
-    .template-card .stat strong {
-      display: block;
-      font-size: 1.05rem;
-      margin-bottom: 4px;
-    }
-    .modal .form-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .modal .day-row {
-      display: grid;
-      grid-template-columns: 180px repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--grey-200);
-      font-size: 0.88rem;
-    }
-    .modal .day-row:last-child { border-bottom: none; }
-    .modal .day-row.is-off {
-      opacity: 0.5;
-    }
-    .modal .day-row input[type="time"],
-    .modal .day-row input[type="number"] {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1.5px solid var(--grey-200);
-      border-radius: var(--radius);
-      font-size: 0.85rem;
-    }
-    .modal .holiday-table {
-      margin-bottom: 18px;
-    }
-    .modal .holiday-table .holiday-row {
-      display: grid;
-      grid-template-columns: 120px 1fr 78px;
-      gap: 10px;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--grey-200);
-    }
-    .modal .holiday-table .holiday-row:last-child { border-bottom: none; }
-    .modal .holiday-row button {
-      width: 100%;
-    }
-    .template-card .status-pill {
+    .exception-type {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 10px;
+      padding: 4px 12px;
       border-radius: 999px;
       font-size: 0.82rem;
-      border: 1px solid var(--grey-200);
-      background: var(--white);
-      color: var(--grey-700);
+      font-weight: 600;
     }
-    .status-pill.active { color: #0b7285; border-color: #cfe2ff; }
-    .status-pill.off { color: #6c757d; border-color: #dee2e6; }
-    .status-pill.full { color: #842029; border-color: #f8d7da; }
+    .exception-type.off { background: #fee2e2; color: #b91c1c; }
+    .exception-type.custom { background: #dbeafe; color: #1e40af; }
+    .override-sessions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0;
+    }
+    .session-pill {
+      background: #e8f4f8;
+      color: #0b7285;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+    .override-form {
+      background: var(--grey-50);
+      border: 1px solid var(--grey-200);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .override-type-select {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .type-option {
+      padding: 16px 12px;
+      border: 2px solid var(--grey-200);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .type-option.active {
+      border-color: var(--primary);
+      background: #f0f9ff;
+    }
+    .override-sessions-editor {
+      background: var(--white);
+      border: 1px solid var(--grey-200);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .override-session-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .override-session-row input { flex: 1; }
+    .text-muted { color: var(--grey-600); }
+    .text-sm { font-size: 0.85rem; }
+    .text-danger { color: #b91c1c; }
+
+    /* audit */
+    .audit-log-panel { margin-top: 24px; }
+    .audit-log-panel .audit-entry { display: grid; grid-template-columns: 160px 120px 1fr 100px; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--grey-200); font-size: 0.85rem; align-items: start; }
+    .audit-log-panel .audit-entry:last-child { border-bottom: none; }
+    .audit-entry .action-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; }
+    .action-badge.created { background: #d1e7dd; color: #0f5132; }
+    .action-badge.updated { background: #cfe2ff; color: #084298; }
+    .action-badge.generated { background: #e2d9f3; color: #5a3e8a; }
+    .action-badge.deleted { background: #f8d7da; color: #842029; }
+    .action-badge.default { background: #e9ecef; color: #495057; }
+    .audit-log-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    .audit-log-toolbar select, .audit-log-toolbar input { padding: 6px 10px; border: 1.5px solid var(--grey-200); border-radius: var(--radius); font-size: 0.85rem; }
+    .json-diff { font-size: 0.78rem; max-height: 120px; overflow-y: auto; background: var(--grey-50); padding: 6px 8px; border-radius: 4px; margin-top: 4px; }
+    .json-diff .diff-old { color: #842029; }
+    .json-diff .diff-new { color: #0f5132; }
+
+    /* ─── CUSTOM CONFIRMATION MODAL ─── */
+    .confirm-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.45); z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .confirm-box {
+      background: var(--white); border-radius: 14px;
+      padding: 28px 32px 24px; max-width: 480px; width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: slideUp 0.2s ease-out;
+    }
+    .confirm-box .confirm-icon {
+      font-size: 2.4rem; color: #dc3545; text-align: center; margin-bottom: 12px;
+    }
+    .confirm-box h3 { margin: 0 0 6px; font-size: 1.2rem; text-align: center; }
+    .confirm-box .confirm-desc { font-size: 0.9rem; color: var(--grey-600); text-align: center; margin-bottom: 16px; line-height: 1.5; }
+    .confirm-box .confirm-detail {
+      background: var(--grey-50); border: 1px solid var(--grey-200); border-radius: 10px;
+      padding: 14px 16px; margin-bottom: 20px;
+    }
+    .confirm-box .confirm-detail .detail-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+    .confirm-box .confirm-detail .detail-note { font-size: 0.82rem; color: var(--grey-600); line-height: 1.4; }
+    .confirm-box .confirm-detail .detail-note i { color: var(--grey-400); margin-right: 4px; }
+    .confirm-box .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .confirm-box .confirm-actions .btn { min-width: 100px; justify-content: center; }
+    .confirm-box .confirm-actions .btn-danger {
+      background: #dc3545; color: white; border: none;
+    }
+    .confirm-box .confirm-actions .btn-danger:hover { background: #b91c1c; }
+    .confirm-box .confirm-actions .btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ─── VALIDATION ERRORS ─── */
+    .validation-errors { margin: 8px 0 12px; }
+    .validation-error {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; margin-bottom: 4px;
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;
+      color: #b91c1c; font-size: 0.82rem;
+    }
+    .validation-error i { font-size: 0.85rem; }
+    .validation-warning {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; margin-bottom: 4px;
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;
+      color: #92400e; font-size: 0.82rem;
+    }
+    .validation-warning i { font-size: 0.85rem; }
+
+    /* ─── SESSION STATS ─── */
+    .session-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;
+      margin: 8px 0 14px;
+    }
+    .session-stat {
+      background: var(--white); border: 1px solid var(--grey-200); border-radius: 8px;
+      padding: 10px 12px; text-align: center;
+    }
+    .session-stat .stat-value { font-size: 1.1rem; font-weight: 700; display: block; }
+    .session-stat .stat-label { font-size: 0.75rem; color: var(--grey-600); }
+    .session-stat.good .stat-value { color: #0b7285; }
+    .session-stat.warning .stat-value { color: #92400e; }
+    .session-stat.info .stat-value { color: #3b82f6; }
+
+    /* ─── SESSION NAME SUGGESTION ─── */
+    .session-name-suggest {
+      font-size: 0.72rem; color: var(--grey-500); margin-left: 4px; cursor: pointer;
+    }
+    .session-name-suggest:hover { color: var(--primary); text-decoration: underline; }
+
+    /* ─── MIN GAP CONFIG ─── */
+    .min-gap-config { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--grey-600); margin-bottom: 8px; }
+    .min-gap-config select { padding: 4px 8px; border: 1.5px solid var(--grey-200); border-radius: 4px; font-size: 0.82rem; }
+
+    @media (max-width: 768px) {
+      .template-grid { grid-template-columns: 1fr; }
+      .template-card .stat-badges { grid-template-columns: repeat(2, 1fr); }
+      .global-holiday-toolbar, .global-holiday-item { grid-template-columns: 1fr; }
+      .effective-date-row, .form-row-3, .form-row-4 { grid-template-columns: 1fr; }
+      .audit-log-panel .audit-entry { grid-template-columns: 1fr; gap: 4px; }
+      .override-type-select { grid-template-columns: 1fr; }
+      .confirm-box { padding: 20px 18px; }
+      .session-row input[type="time"] { width: 90px; }
+      .session-row .session-name-input { width: 110px; }
+      .session-stats { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
+  <!-- NAVBAR -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="admin-dashboard.html" class="navbar-brand">
       <i class="fa-solid fa-hospital"></i> HAMS Admin
     </a>
     <div class="navbar-links">
-      <a href="admin-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-      <a href="admin-users.html"><i class="fa-solid fa-users"></i> Users</a>
-      <a href="admin-doctors.html"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
-      <a href="admin-departments.html"><i class="fa-solid fa-building-columns"></i> Departments</a>
-      <a href="admin-schedules.html" class="active"><i class="fa-solid fa-calendar-week"></i> Schedules</a>
-      <a href="admin-slots.html"><i class="fa-solid fa-clock"></i> Slots</a>
+      <a href="admin-dashboard.html" >
+         Dashboard
+      </a>
+      <a href="admin-users.html">
+        Users
+      </a>
+      <a href="admin-doctors.html">
+         Doctors
+      </a>
+      <a href="admin-departments.html">
+        Departments
+      </a>
+      <a href="admin-schedules.html" class="active" >
+        Schedule Templates
+      </a>
+      <a href="admin-slots.html">
+        Time Slots
+      </a>
+      <a href="admin-appointments.html">
+        Appointments
+      </a>
       <div class="divider"></div>
-      <a href="../php/logout.php"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      <a href="../php/logout.php" class="navbar-user-link">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
     </div>
   </nav>
+
 
   <div class="page-wrapper">
     <aside class="sidebar">
@@ -189,7 +342,7 @@
         <a href="admin-users.html"><i class="fa-solid fa-users icon"></i> Users</a>
         <a href="admin-doctors.html"><i class="fa-solid fa-user-doctor icon"></i> Doctors</a>
         <a href="admin-departments.html"><i class="fa-solid fa-building-columns icon"></i> Departments</a>
-        <a href="admin-schedules.html" class="active"><i class="fa-solid fa-calendar-week icon"></i> Schedule Templates</a>
+        <a href="admin-schedules.html" class="active"><i class="fa-solid fa-calendar-alt icon"></i> Schedule Templates</a>
         <a href="admin-slots.html"><i class="fa-solid fa-clock icon"></i> Time Slots</a>
       </div>
       <div class="sidebar-section">
@@ -202,197 +355,346 @@
       <div class="page-header">
         <div>
           <h2>Schedule Templates</h2>
-          <p class="text-muted text-sm">Create reusable monthly appointment templates and generate your clinic schedule without rebuilding slots by hand.</p>
+          <p class="text-muted text-sm">Create reusable doctor schedules with working sessions, generate slots, and track all changes.</p>
         </div>
         <button class="btn btn-primary" onclick="openTemplateEditor()"><i class="fa-solid fa-plus"></i> New Template</button>
       </div>
 
       <div id="alert-box" class="alert" style="display:none;"></div>
 
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-body" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
-          <div class="form-group" style="min-width:180px;">
-            <label for="filter-month">Target month</label>
-            <input id="filter-month" type="month" class="form-control">
+      <div class="tab-bar">
+        <button class="tab active" data-tab="templates" onclick="switchTab('templates')"><i class="fa-solid fa-calendar-alt"></i> Templates</button>
+        <button class="tab" data-tab="holidays" onclick="switchTab('holidays')"><i class="fa-solid fa-calendar-xmark"></i> Hospital Holidays</button>
+        <button class="tab" data-tab="audit" onclick="switchTab('audit'); loadAuditLog();"><i class="fa-solid fa-history"></i> Audit Log</button>
+      </div>
+
+      <div id="tab-templates" class="tab-content active">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-body" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+            <div class="form-group" style="min-width:180px;">
+              <label for="filter-month">Target month</label>
+              <input id="filter-month" type="month" class="form-control">
+            </div>
+            <div class="form-group" style="min-width:220px;">
+              <label for="filter-doctor">Doctor</label>
+              <select id="filter-doctor" class="form-control" onchange="loadTemplates()"><option value="">All Doctors</option></select>
+            </div>
+            <div class="form-group" style="min-width:220px;">
+              <label for="filter-dept">Department</label>
+              <select id="filter-dept" class="form-control" onchange="loadTemplates()"><option value="">All Departments</option></select>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i class="fa-solid fa-filter-circle-xmark"></i> Clear filters</button>
           </div>
-          <div class="form-group" style="min-width:220px;">
-            <label for="filter-doctor">Doctor</label>
-            <select id="filter-doctor" class="form-control" onchange="loadTemplates()">
-              <option value="">All Doctors</option>
-            </select>
-          </div>
-          <div class="form-group" style="min-width:220px;">
-            <label for="filter-dept">Department</label>
-            <select id="filter-dept" class="form-control" onchange="loadTemplates()">
-              <option value="">All Departments</option>
-            </select>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i class="fa-solid fa-filter-circle-xmark"></i> Clear filters</button>
+        </div>
+
+        <div id="sched-loading" style="text-align:center; padding:40px; color:var(--grey-400);"><span class="spinner"></span><p style="margin-top:8px;">Loading schedule templates...</p></div>
+        <div id="templates-grid" class="template-grid" style="display:none;"></div>
+        <div id="templates-empty" class="empty-state" style="display:none;">
+          <i class="fa-solid fa-calendar-plus" style="font-size:2.5rem; color:var(--grey-400); display:block; margin-bottom:12px;"></i>
+          <p>No schedule templates found yet.</p>
+          <button class="btn btn-primary" onclick="openTemplateEditor()">Create the first template</button>
         </div>
       </div>
 
-      <div id="sched-loading" style="text-align:center; padding:40px; color:var(--grey-400);">
-        <span class="spinner"></span>
-        <p style="margin-top:8px;">Loading schedule templates...</p>
+      <div id="tab-holidays" class="tab-content">
+        <div class="card global-holiday-card"><div class="card-body">
+          <div><h3 style="margin:0 0 4px;">Hospital-wide holidays</h3><p class="text-muted text-sm" style="margin:0;">These dates stop slot generation for every doctor, regardless of template.</p></div>
+          <div class="global-holiday-toolbar">
+            <div class="form-group" style="margin:0;"><label for="global-holiday-date">Holiday date</label><input id="global-holiday-date" type="date" class="form-control"></div>
+            <div class="form-group" style="margin:0;"><label for="global-holiday-name">Holiday name</label><input id="global-holiday-name" type="text" class="form-control" placeholder="E.g. Independence Day"></div>
+            <div class="form-group" style="margin:0;"><button type="button" class="btn btn-primary" id="global-holiday-save-btn" onclick="saveGlobalHoliday()"><i class="fa-solid fa-plus"></i> Save Holiday</button></div>
+          </div>
+          <div id="global-holiday-list" class="global-holiday-list"></div>
+        </div></div>
       </div>
 
-      <div id="templates-grid" class="template-grid" style="display:none;"></div>
+      <div id="tab-audit" class="tab-content">
+        <div class="card"><div class="card-body">
+          <h3 style="margin:0 0 12px;">Scheduling Audit Log</h3>
+          <p class="text-muted text-sm" style="margin:0 0 16px;">Every scheduling action is recorded for accountability and troubleshooting.</p>
+          <div class="audit-log-toolbar">
+            <div class="form-group" style="margin:0; min-width:160px;"><label for="audit-filter-action" class="text-sm">Action</label>
+              <select id="audit-filter-action" class="form-control" onchange="loadAuditLog()">
+                <option value="">All actions</option>
+                <option value="template_created">Template Created</option>
+                <option value="template_updated">Template Updated</option>
+                <option value="slots_generated">Slots Generated</option>
+                <option value="holiday_added">Holiday Added</option>
+                <option value="holiday_removed">Holiday Removed</option>
+                <option value="exception_created">Exception Created</option>
+                <option value="template_deleted">Template Deleted</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0; min-width:160px;"><label for="audit-filter-entity" class="text-sm">Entity</label>
+              <select id="audit-filter-entity" class="form-control" onchange="loadAuditLog()">
+                <option value="">All entities</option>
+                <option value="schedule_template">Schedule Template</option>
+                <option value="time_slots">Time Slots</option>
+                <option value="holiday">Holiday</option>
+                <option value="exception">Exception</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0; align-self:flex-end;"><button class="btn btn-ghost btn-sm" onclick="loadAuditLog()"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+          </div>
+          <div id="audit-log-container"><p class="text-muted text-sm">Loading audit log...</p></div>
+          <div id="audit-log-empty" style="display:none;"><p class="text-muted">No audit entries found.</p></div>
+          <div id="audit-log-pagination" style="margin-top:12px; display:flex; gap:8px; align-items:center;"></div>
+        </div></div>
+      </div>
 
-      <div id="templates-empty" class="empty-state" style="display:none;">
-        <i class="fa-solid fa-calendar-plus" style="font-size:2.5rem; color:var(--grey-400); display:block; margin-bottom:12px;"></i>
-        <p>No schedule templates found yet.</p>
-        <button class="btn btn-primary" onclick="openTemplateEditor()">Create the first template</button>
+      <!-- ==================== INLINE EDITOR (SMART SCHEDULING) ==================== -->
+      <div class="inline-editor" id="inline-editor">
+        <div class="card" style="margin-top:16px;">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="modal-title" style="margin:0;">New Schedule Template</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="card-body">
+            <div id="modal-alert" class="alert alert-error" style="display:none;"></div>
+            <div id="conflict-review" class="conflict-review" style="display:none;">
+              <h4><i class="fa-solid fa-triangle-exclamation"></i> Template Update Conflict</h4>
+              <div id="conflict-details"></div>
+              <div class="conflict-actions" style="margin-top:12px;">
+                <button class="btn btn-warning" onclick="forceSaveTemplate()"><i class="fa-solid fa-check"></i> Save & Regenerate</button>
+                <button class="btn btn-ghost" onclick="closeModal()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+              </div>
+              <p class="text-muted text-sm" style="margin-top:8px;">Booked appointments remain unchanged. Unbooked future slots will be regenerated.</p>
+            </div>
+            <input type="hidden" id="edit-template-id" value="">
+
+            <!-- Basic Info -->
+            <div class="form-group">
+              <label for="tmpl-name"><i class="fa-solid fa-tag"></i> Template name</label>
+              <input id="tmpl-name" class="form-control" placeholder="E.g. General Medicine Weekdays">
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="tmpl-doctor"><i class="fa-solid fa-user-doctor"></i> Doctor</label>
+                <select id="tmpl-doctor" class="form-control"></select>
+              </div>
+              <div class="form-group">
+                <label for="tmpl-dept"><i class="fa-solid fa-building-columns"></i> Department</label>
+                <select id="tmpl-dept" class="form-control"></select>
+              </div>
+              <div class="form-group">
+                <label for="tmpl-duration"><i class="fa-solid fa-clock"></i> Slot duration (min)</label>
+                <input id="tmpl-duration" type="number" class="form-control" min="5" max="180" value="10">
+              </div>
+            </div>
+            <div class="effective-date-row">
+              <div class="form-group">
+                <label for="tmpl-effective-from"><i class="fa-solid fa-calendar"></i> Effective from</label>
+                <input id="tmpl-effective-from" type="date" class="form-control">
+                <span class="text-muted text-sm">When this template becomes active</span>
+              </div>
+              <div class="form-group">
+                <label for="tmpl-effective-to"><i class="fa-solid fa-calendar"></i> Effective to <span class="text-muted">(optional)</span></label>
+                <input id="tmpl-effective-to" type="date" class="form-control">
+                <span class="text-muted text-sm">Leave empty for ongoing</span>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input id="tmpl-active" type="checkbox" checked>
+                <label for="tmpl-active" style="margin:0;">Active</label>
+              </div>
+            </div>
+
+            <!-- Working Days -->
+            <div class="section-header" style="margin-bottom:10px;">
+              <h4 style="margin:0;"><i class="fa-solid fa-calendar-week"></i> Working Days & Sessions</h4>
+              <p class="text-muted text-sm">Enable working days and add named working sessions. Sessions are automatically validated and adjusted.</p>
+            </div>
+
+            <!-- Min gap config -->
+            <div class="min-gap-config">
+              <i class="fa-solid fa-arrows-left-right" style="color:var(--grey-500);"></i>
+              <span>Minimum gap between sessions:</span>
+              <select id="min-gap-select" onchange="onMinGapChange()">
+                <option value="5">5 min</option>
+                <option value="10">10 min</option>
+                <option value="15" selected>15 min</option>
+                <option value="20">20 min</option>
+                <option value="30">30 min</option>
+              </select>
+            </div>
+
+            <!-- Validation errors container -->
+            <div id="validation-errors" class="validation-errors"></div>
+
+            <div id="day-rows"></div>
+
+            <!-- Holidays -->
+            <div class="section-header" style="margin-top:20px;margin-bottom:10px;">
+              <h4 style="margin:0;"><i class="fa-solid fa-calendar-xmark"></i> Holidays & Unavailable Dates</h4>
+              <p class="text-muted text-sm">Dates when the doctor is not available (e.g. public holidays, personal days).</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
+              <div class="form-group" style="margin:0;min-width:160px;">
+                <label for="holiday-date">Date</label>
+                <input id="holiday-date" type="date" class="form-control">
+              </div>
+              <div class="form-group" style="margin:0;min-width:200px;">
+                <label for="holiday-note">Note <span class="text-muted">(optional)</span></label>
+                <input id="holiday-note" type="text" class="form-control" placeholder="E.g. Public Holiday">
+              </div>
+              <button class="btn btn-primary" onclick="addHoliday()"><i class="fa-solid fa-plus"></i> Add</button>
+            </div>
+            <div id="holiday-list" class="holiday-list"><p class="text-muted text-sm">No holidays or unavailable dates defined.</p></div>
+
+            <!-- Overrides / Exceptions -->
+            <div class="section-header" style="margin-top:20px;margin-bottom:10px;">
+              <h4 style="margin:0;"><i class="fa-solid fa-clock"></i> Date Overrides</h4>
+              <p class="text-muted text-sm">Override the default schedule for specific dates (e.g. half-day, custom hours, full day off).</p>
+            </div>
+            <div id="exception-list"><p class="text-muted text-sm">No overrides added yet.</p></div>
+
+            <div class="override-form" id="override-form">
+              <div class="form-group" style="margin:0;min-width:160px;">
+                <label for="override-date">Date</label>
+                <input id="override-date" type="date" class="form-control">
+              </div>
+              <div class="form-group" style="margin:0;min-width:200px;">
+                <label for="override-reason">Reason</label>
+                <input id="override-reason" type="text" class="form-control" placeholder="E.g. Half-day training">
+              </div>
+              <div class="override-type-select">
+                <div class="type-option active" id="type-full-off" onclick="selectOverrideType('full_off')">
+                  <i class="fa-solid fa-calendar-xmark" style="font-size:1.2rem;display:block;margin-bottom:6px;"></i>
+                  <strong>Full Day Off</strong>
+                  <div class="text-muted text-sm">Doctor not available</div>
+                </div>
+                <div class="type-option" id="type-custom" onclick="selectOverrideType('custom_schedule')">
+                  <i class="fa-solid fa-clock" style="font-size:1.2rem;display:block;margin-bottom:6px;"></i>
+                  <strong>Custom Schedule</strong>
+                  <div class="text-muted text-sm">Different hours for this date</div>
+                </div>
+              </div>
+              <div id="custom-sessions-section" style="display:none;">
+                <label class="text-sm" style="display:block;margin-bottom:4px;">Custom sessions</label>
+                <div id="override-sessions-container">
+                  <div class="override-session-row">
+                    <input type="time" class="form-control" style="flex:1;">
+                    <span class="text-muted">—</span>
+                    <input type="time" class="form-control" style="flex:1;">
+                  </div>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="addOverrideSession()" style="margin-top:4px;"><i class="fa-solid fa-plus"></i> Add session</button>
+              </div>
+              <button class="btn btn-primary" onclick="addOverride()" style="margin-top:12px;"><i class="fa-solid fa-floppy-disk"></i> Save Override</button>
+            </div>
+          </div>
+
+          <div class="card-footer" style="display:flex; justify-content:flex-end; gap:8px; padding:14px 20px; border-top:1px solid var(--grey-100); background:var(--grey-50);">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="modal-save-btn" onclick="saveTemplate()"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="modal-title">New Schedule Template</h3>
-        <button class="btn-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <div id="modal-alert" class="alert alert-error" style="display:none;"></div>
-
-        <input type="hidden" id="edit-template-id" value="">
-
-        <div class="form-group">
-          <label for="tmpl-name">Template name</label>
-          <input id="tmpl-name" class="form-control" placeholder="E.g. General Medicine Weekdays">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="tmpl-doctor">Doctor</label>
-            <select id="tmpl-doctor" class="form-control"></select>
-          </div>
-          <div class="form-group">
-            <label for="tmpl-dept">Department</label>
-            <select id="tmpl-dept" class="form-control" disabled></select>
-          </div>
-          <div class="form-group">
-            <label for="tmpl-duration">Slot duration</label>
-            <input id="tmpl-duration" type="number" class="form-control" min="5" max="180" value="10">
-          </div>
-          <div class="form-group" style="align-self:flex-end;">
-            <label>&nbsp;</label>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <input id="tmpl-active" type="checkbox" checked>
-              <label for="tmpl-active" style="margin:0;">Active</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-header" style="margin-bottom:10px;">
-          <h4 style="margin:0;">Working days</h4>
-          <p class="text-muted text-sm">Enable working days and define start/end hours plus optional break windows.</p>
-        </div>
-        <div id="day-rows"></div>
-
-        <div class="section-header" style="margin-top:18px; margin-bottom:10px;">
-          <h4 style="margin:0;">Holidays and unavailable dates</h4>
-        </div>
-        <div id="holiday-list"></div>
-
-        <div class="form-row" style="align-items:flex-end;">
-          <div class="form-group">
-            <label for="holiday-date">Holiday date</label>
-            <input id="holiday-date" type="date" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="holiday-note">Note</label>
-            <input id="holiday-note" type="text" class="form-control" placeholder="Optional description">
-          </div>
-          <div class="form-group" style="align-self:flex-end;">
-            <button type="button" class="btn btn-primary btn-sm" onclick="addHoliday()"><i class="fa-solid fa-plus"></i> Add holiday</button>
-          </div>
-        </div>
-
-        <div class="section-header" style="margin-top:18px; margin-bottom:10px;">
-          <h4 style="margin:0;">Doctor leave & one-off overrides</h4>
-          <p class="text-muted text-sm">Add a single-date override for a specific doctor without changing the recurring template.</p>
-        </div>
-        <div id="exception-list"></div>
-
-        <div class="form-row" style="align-items:flex-end; gap:14px;">
-          <div class="form-group" style="flex:1 1 180px;">
-            <label for="exception-date">Date</label>
-            <input id="exception-date" type="date" class="form-control">
-          </div>
-          <div class="form-group" style="flex:0 0 120px; display:flex; align-items:flex-end; gap:10px;">
-            <input id="exception-working" type="checkbox" checked>
-            <label for="exception-working" style="margin:0;">Working day</label>
-          </div>
-          <div class="form-group" style="flex:1 1 120px;">
-            <label for="exception-start">Start</label>
-            <input id="exception-start" type="time" class="form-control" value="08:00">
-          </div>
-          <div class="form-group" style="flex:1 1 120px;">
-            <label for="exception-end">End</label>
-            <input id="exception-end" type="time" class="form-control" value="12:00">
-          </div>
-        </div>
-        <div class="form-row" style="align-items:flex-end; gap:14px; margin-top:10px;">
-          <div class="form-group" style="flex:1 1 120px;">
-            <label for="exception-break-start">Break start</label>
-            <input id="exception-break-start" type="time" class="form-control">
-          </div>
-          <div class="form-group" style="flex:1 1 120px;">
-            <label for="exception-break-end">Break end</label>
-            <input id="exception-break-end" type="time" class="form-control">
-          </div>
-          <div class="form-group" style="flex:2 1 240px;">
-            <label for="exception-note">Note</label>
-            <input id="exception-note" type="text" class="form-control" placeholder="E.g. Doctor on leave">
-          </div>
-          <div class="form-group" style="flex:0 0 160px; align-self:flex-end;">
-            <button type="button" class="btn btn-primary btn-sm" onclick="addException()"><i class="fa-solid fa-plus"></i> Add override</button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="modal-save-btn" onclick="saveTemplate()"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
-      </div>
-    </div>
-  </div>
-
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
     const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const DEFAULT_SESSION_NAMES = ['Morning Session', 'Afternoon Session', 'Evening Session'];
     let templates = [];
     let departments = [];
     let doctors = [];
+    let globalHolidays = [];
     let holidays = [];
     let exceptions = [];
+    let auditLogOffset = 0;
+    const AUDIT_LOG_LIMIT = 30;
+    let sessionsByDay = {};
+    let currentOverrideType = 'full_off';
+    let overrideSessions = [];
 
     function formatMonth(month) {
       if (!month) return '';
       const [year, mon] = month.split('-');
-      const date = new Date(`${year}-${mon}-01`);
+      const date = new Date(year + '-' + mon + '-01');
       return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
     }
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    function showToast(msg, type, duration) {
+      const el = document.getElementById('alert-box');
+      el.textContent = msg;
+      el.className = 'alert alert-' + (type || 'info');
+      el.style.display = 'block';
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.style.display = 'none', duration || 4000);
+    }
+    function setLoading(id, state) {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      if (state) { btn._orig = btn.innerHTML; btn.innerHTML = '<span class="spinner"></span>'; btn.disabled = true; }
+      else { btn.innerHTML = btn._orig || 'Save'; btn.disabled = false; }
+    }
+    function parseJsonResponse(res) { return res.json().catch(() => ({ error: 'Invalid response' })); }
+    function getMinGap() { return parseInt(document.getElementById('min-gap-select').value, 10) || 15; }
 
-    fetch('../php/session_check.php')
-      .then(r => r.json())
-      .then(d => {
-        if (!d.logged_in || d.role !== 'admin') {
-          window.location.href = '../index.html?msg=access_denied';
-        }
-      });
+    // ─── TIME HELPERS ───
+    function parseTime(t) {
+      if (!t) return 0;
+      const parts = t.split(':');
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    }
+    function formatMinutes(mins) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    }
+    function timeTo12h(t) {
+      if (!t) return '';
+      const [h, m] = t.split(':').map(Number);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+    }
+    function minutesToHours(minutes) {
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      if (h === 0) return m + ' min';
+      if (m === 0) return h + 'h';
+      return h + 'h ' + m + 'min';
+    }
+
+    fetch('../php/session_check.php').then(r => r.json()).then(d => {
+      if (!d.logged_in || d.role !== 'admin') window.location.href = '../index.html?msg=access_denied';
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       const now = new Date();
       const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
       document.getElementById('filter-month').value = nextMonth.toISOString().slice(0,7);
-      const tmplDoctorSelect = document.getElementById('tmpl-doctor');
-      tmplDoctorSelect.addEventListener('change', async () => {
+      document.getElementById('tmpl-doctor').addEventListener('change', async function() {
         syncDoctorDepartment();
-        await loadDoctorExceptions(tmplDoctorSelect.value);
+        await loadDoctorExceptions(this.value);
       });
-      loadDepartments().then(loadTemplates);
+      loadDepartments().then(async () => {
+        await loadGlobalHolidays();
+        await loadTemplates();
+      });
     });
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelector('.tab[data-tab="' + tabName + '"]').classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
 
     async function loadDepartments() {
       try {
@@ -400,56 +702,88 @@
           fetch('../php/admin_get_departments.php'),
           fetch('../php/admin_get_doctors.php')
         ]);
-
         departments = await deptRes.json();
         doctors = await doctorRes.json();
 
-        const filterDept = document.getElementById('filter-dept');
-        const filterDoc = document.getElementById('filter-doctor');
-        const templateDoc = document.getElementById('tmpl-doctor');
-        const templateDept = document.getElementById('tmpl-dept');
-
-        filterDept.innerHTML = '<option value="">All Departments</option>';
-        filterDoc.innerHTML = '<option value="">All Doctors</option>';
-        templateDept.innerHTML = '<option value="">— Choose department —</option>';
-        templateDoc.innerHTML = '<option value="">— Choose doctor —</option>';
-
-        departments.forEach(dept => {
-          const opt1 = document.createElement('option');
-          opt1.value = dept.dept_id;
-          opt1.textContent = dept.dept_name;
-          filterDept.appendChild(opt1);
-
-          const opt2 = document.createElement('option');
-          opt2.value = dept.dept_id;
-          opt2.textContent = dept.dept_name;
-          templateDept.appendChild(opt2);
+        ['filter-dept', 'tmpl-dept'].forEach(id => {
+          const sel = document.getElementById(id);
+          sel.innerHTML = '<option value="">' + (id === 'tmpl-dept' ? '— Choose department —' : 'All Departments') + '</option>';
+          departments.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.dept_id; opt.textContent = d.dept_name;
+            sel.appendChild(opt);
+          });
         });
-
-        doctors.forEach(doc => {
-          const opt = document.createElement('option');
-          opt.value = doc.doctor_id;
-          opt.textContent = doc.full_name + (doc.dept_name ? ` — ${doc.dept_name}` : '');
-          filterDoc.appendChild(opt);
-
-          const opt2 = document.createElement('option');
-          opt2.value = doc.doctor_id;
-          opt2.textContent = doc.full_name + (doc.dept_name ? ` — ${doc.dept_name}` : '');
-          templateDoc.appendChild(opt2);
+        ['filter-doctor', 'tmpl-doctor'].forEach(id => {
+          const sel = document.getElementById(id);
+          sel.innerHTML = '<option value="">' + (id === 'tmpl-doctor' ? '— Choose doctor —' : 'All Doctors') + '</option>';
+          doctors.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.doctor_id;
+            opt.textContent = d.full_name + (d.dept_name ? ' — ' + d.dept_name : '');
+            sel.appendChild(opt);
+          });
         });
-      } catch (err) {
-        console.error('Could not load departments or doctors:', err);
-      }
+      } catch (err) { console.error('Could not load:', err); }
     }
 
     function syncDoctorDepartment() {
-      const doctorSelect = document.getElementById('tmpl-doctor');
-      const deptSelect = document.getElementById('tmpl-dept');
-      const doctorId = parseInt(doctorSelect.value, 10);
-      const doctor = doctors.find(d => d.doctor_id === doctorId);
-      if (doctor) {
-        deptSelect.value = doctor.dept_id || '';
-      }
+      const docId = parseInt(document.getElementById('tmpl-doctor').value, 10);
+      const doc = doctors.find(d => d.doctor_id === docId);
+      if (doc && doc.dept_id) document.getElementById('tmpl-dept').value = doc.dept_id;
+    }
+
+    async function loadGlobalHolidays() {
+      try {
+        const res = await fetch('../php/admin_get_holidays.php');
+        const data = await parseJsonResponse(res);
+        globalHolidays = Array.isArray(data) ? data.slice().sort((a, b) => a.holiday_date.localeCompare(b.holiday_date)) : [];
+      } catch (err) { globalHolidays = []; }
+      const container = document.getElementById('global-holiday-list');
+      if (!globalHolidays.length) { container.innerHTML = '<div class="global-holiday-empty">No hospital-wide holidays saved yet.</div>'; return; }
+      container.innerHTML = '';
+      globalHolidays.forEach(h => {
+        container.innerHTML += '<div class="global-holiday-item"><div><strong>' + formatDate(h.holiday_date) + '</strong></div><div>' + escapeHtml(h.name) + '<div class="text-muted text-sm">Applies to all schedules</div></div><div><button class="btn btn-ghost btn-sm" onclick="deleteGlobalHoliday(' + h.holiday_id + ')"><i class="fa-solid fa-trash"></i></button></div>';
+      });
+    }
+
+    async function saveGlobalHoliday() {
+      const dateEl = document.getElementById('global-holiday-date');
+      const nameEl = document.getElementById('global-holiday-name');
+      const holiday_date = dateEl.value;
+      const name = nameEl.value.trim();
+      if (!holiday_date) { showToast('Select a holiday date first.', 'error'); return; }
+      if (!name) { showToast('Enter a holiday name.', 'error'); return; }
+      setLoading('global-holiday-save-btn', true);
+      try {
+        const res = await fetch('../php/admin_save_holiday.php', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ holiday_date, name }),
+        });
+        const data = await parseJsonResponse(res);
+        if (data.success) { dateEl.value = ''; nameEl.value = ''; showToast('Holiday saved.', 'success'); await loadGlobalHolidays(); }
+        else showToast(data.error || 'Could not save.', 'error');
+      } catch (err) { showToast('Network error.', 'error'); }
+      setLoading('global-holiday-save-btn', false);
+    }
+
+    async function deleteGlobalHoliday(holidayId) {
+      if (!await showConfirmModal({
+        title: 'Delete Hospital Holiday?',
+        message: 'This will remove this holiday for all doctors.',
+        confirmText: 'Delete',
+        confirmClass: 'btn-danger',
+        icon: 'fa-triangle-exclamation'
+      })) return;
+      try {
+        const res = await fetch('../php/admin_save_holiday.php', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', holiday_id: holidayId }),
+        });
+        const data = await parseJsonResponse(res);
+        if (data.success) { showToast('Holiday removed.', 'success'); await loadGlobalHolidays(); }
+        else showToast(data.error || 'Could not remove.', 'error');
+      } catch (err) { showToast('Network error.', 'error'); }
     }
 
     async function loadTemplates() {
@@ -459,15 +793,15 @@
       document.getElementById('sched-loading').style.display = 'block';
       document.getElementById('templates-grid').style.display = 'none';
       document.getElementById('templates-empty').style.display = 'none';
-      document.getElementById('alert-box').style.display = 'none';
 
       try {
         const query = new URLSearchParams();
         if (month) query.append('month', month);
         if (deptId) query.append('dept_id', deptId);
         if (doctorId) query.append('doctor_id', doctorId);
+        query.append('include_inactive', '1');
 
-        const res = await fetch(`../php/admin_get_schedule_templates.php?${query.toString()}`);
+        const res = await fetch('../php/admin_get_schedule_templates.php?' + query.toString());
         const result = await res.json();
         templates = Array.isArray(result) ? result : [];
         const filtered = templates.filter(t => (!deptId || t.dept_id == deptId) && (!doctorId || t.doctor_id == doctorId));
@@ -483,58 +817,82 @@
         grid.innerHTML = '';
 
         filtered.forEach(template => {
-          const card = document.createElement('div');
-          card.className = 'template-card';
+          const now = new Date();
+          const todayStr = now.toISOString().slice(0,10);
+          const isExpired = template.effective_to && template.effective_to < todayStr;
+          const isFuture = template.effective_from && template.effective_from > todayStr;
+          const isActive = template.is_active == 1 && !isExpired;
 
-          const activeLabel = template.is_active == 1 ? '<span class="status-pill active"><i class="fa-solid fa-circle"></i> Active</span>' : '<span class="status-pill off"><i class="fa-solid fa-circle"></i> Inactive</span>';
+          let statusBadge = '<span class="status-pill active"><i class="fa-solid fa-circle"></i> Active</span>';
+          if (template.is_active == 0) statusBadge = '<span class="status-pill inactive"><i class="fa-solid fa-circle"></i> Inactive</span>';
+          else if (isExpired) statusBadge = '<span class="status-pill expired"><i class="fa-solid fa-clock"></i> Expired</span>';
+          else if (isFuture) statusBadge = '<span class="status-pill future"><i class="fa-solid fa-clock"></i> Future</span>';
 
           const stats = month ? (template.month_stats || template.stats) : template.stats;
           const statsLabel = month ? 'This month' : 'Total';
-          const daySummary = template.days.length
-            ? template.days.map(day => {
-                if (day.is_working == 0) {
-                  return `${DAY_NAMES[day.day_of_week].slice(0,3)} off`;
-                }
-                const start = day.start_time ? day.start_time.slice(0,5) : '—';
-                const end = day.end_time ? day.end_time.slice(0,5) : '—';
-                const breakInfo = day.break_start && day.break_end ? `, break ${day.break_start.slice(0,5)}–${day.break_end.slice(0,5)}` : '';
-                return `${DAY_NAMES[day.day_of_week].slice(0,3)} ${start}–${end}${breakInfo}`;
-              }).join(' · ')
-            : 'No schedule days defined.';
+          const effectiveRange = template.effective_from
+            ? formatDate(template.effective_from) + ' – ' + (template.effective_to ? formatDate(template.effective_to) : 'Present')
+            : '<span class="text-muted">No effective dates set</span>';
 
-          const holidayText = template.holidays.length
-            ? template.holidays.map(h => `${formatDate(h.holiday_date)}${h.note ? ` (${escapeHtml(h.note)})` : ''}`).join('<br>')
-            : '<span style="color:var(--grey-500);">None set</span>';
+          const dayDisplays = [];
+          template.days.forEach(day => {
+            const d = day.day_of_week;
+            const isWorking = day.is_working == 1;
+            if (!isWorking) {
+              dayDisplays.push('<div class="working-day"><div class="day-label">' + DAY_NAMES[d].slice(0,3) + '</div><div class="day-off"><i class="fa-solid fa-ban"></i> Off</div></div>');
+              return;
+            }
+            let sessions = [];
+            if (day.break_start && day.break_end && day.break_start < day.break_end) {
+              if (day.break_start > day.start_time) sessions.push(day.start_time.slice(0,5) + '–' + day.break_start.slice(0,5));
+              if (day.break_end < day.end_time) sessions.push(day.break_end.slice(0,5) + '–' + day.end_time.slice(0,5));
+            } else {
+              sessions.push(day.start_time.slice(0,5) + '–' + day.end_time.slice(0,5));
+            }
+            const sessionHtml = sessions.map(s => '<span class="session">' + s + '</span>').join('');
+            dayDisplays.push('<div class="working-day"><div class="day-label">' + DAY_NAMES[d].slice(0,3) + '</div><div class="day-sessions">' + sessionHtml + '</div></div>');
+          });
 
+          const holidayHtml = template.holidays.length
+            ? template.holidays.map(h => '<span class="holiday-chip"><i class="fa-solid fa-calendar-xmark"></i> ' + formatDate(h.holiday_date) + (h.note ? ': ' + escapeHtml(h.note) : '') + '</span>').join('')
+            : '<span class="text-muted" style="font-size:0.82rem;">None set</span>';
+
+          const card = document.createElement('div');
+          card.className = 'template-card';
           card.innerHTML = `
             <div class="card-header">
-              <div>
-                <strong>${escapeHtml(template.template_name)}</strong>
-                <div class="text-muted text-sm">${escapeHtml(template.doctor_name || 'No doctor')} • ${escapeHtml(template.dept_name)}</div>
+              <div class="title-section">
+                <h3><i class="fa-solid fa-calendar-alt" style="color:var(--primary);margin-right:6px;"></i> ${escapeHtml(template.template_name)}</h3>
+                <div class="meta-info"><i class="fa-solid fa-user-doctor"></i> ${escapeHtml(template.doctor_name || 'No doctor')} &middot; <i class="fa-solid fa-building-columns"></i> ${escapeHtml(template.dept_name)}</div>
+                <div class="meta-info" style="font-size:0.78rem;"><i class="fa-solid fa-hourglass-half"></i> ${template.slot_duration} min slots</div>
               </div>
-              <div>${activeLabel}</div>
+              ${statusBadge}
             </div>
             <div class="card-body">
-              <div class="template-meta">
-                <div class="meta-block"><strong>${template.slot_duration} min</strong>Slot duration</div>
-                <div class="meta-block"><strong>1</strong>Patient per slot</div>
-                <div class="meta-block"><strong>${stats.available_slots}</strong>${statsLabel} available</div>
-                <div class="meta-block"><strong>${stats.total_booked}</strong>${statsLabel} booked</div>
+              <div class="effective-range"><i class="fa-solid fa-calendar"></i> ${effectiveRange}</div>
+              <div class="stat-badges">
+                <div class="stat-badge info"><span class="stat-number">${stats.available_slots}</span><span class="stat-label">${statsLabel} available</span></div>
+                <div class="stat-badge warning"><span class="stat-number">${stats.total_booked}</span><span class="stat-label">${statsLabel} booked</span></div>
               </div>
-              <div class="template-days">
-                ${daySummary.split(' · ').map(item => `<span class="day-pill">${escapeHtml(item)}</span>`).join('')}
-              </div>
-              <div class="holiday-list">
-                <div class="text-muted text-sm" style="margin-bottom:8px;"><strong>Holidays</strong></div>
-                <div>${holidayText}</div>
-              </div>
+              <div class="working-days">${dayDisplays.join('')}</div>
+              <div class="holiday-preview"><i class="fa-solid fa-calendar-xmark" style="color:var(--grey-400);margin-right:4px;"></i> ${holidayHtml}</div>
             </div>
             <div class="card-footer">
-              <button class="btn btn-ghost btn-sm" onclick="openTemplateEditor(${template.template_id})"><i class="fa-solid fa-pen"></i> Edit</button>
-              <button class="btn btn-primary btn-sm" onclick="generateMonth(${template.template_id})"><i class="fa-solid fa-calendar-plus"></i> Generate ${escapeHtml(monthLabel)}</button>
-            </div>
-          `;
-
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm" onclick="openTemplateEditor(${template.template_id})"><i class="fa-solid fa-pen"></i> Edit</button>
+                <button class="btn btn-ghost btn-sm" onclick="showCalendarPreview(${template.template_id})"><i class="fa-solid fa-calendar-alt"></i> Calendar</button>
+                <button class="btn btn-ghost btn-sm" style="color:#b91c1c;" onclick="deleteTemplate(${template.template_id})"><i class="fa-solid fa-trash"></i> Delete</button>
+              </div>
+              <div class="generate-range-select">
+                <select id="gen-range-${template.template_id}" class="form-control" style="width:auto;">
+                  <option value="1">1 month</option>
+                  <option value="3">3 months</option>
+                  <option value="6">6 months</option>
+                  <option value="12">12 months</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="generateMonth(${template.template_id})"><i class="fa-solid fa-calendar-plus"></i> Generate ${escapeHtml(monthLabel)}</button>
+              </div>
+            </div>`;
           grid.appendChild(card);
         });
 
@@ -542,311 +900,770 @@
         document.getElementById('templates-grid').style.display = 'grid';
       } catch (err) {
         document.getElementById('sched-loading').style.display = 'none';
-        document.getElementById('alert-box').textContent = 'Failed to load schedule templates. Please try again.';
-        document.getElementById('alert-box').className = 'alert alert-error';
-        document.getElementById('alert-box').style.display = 'block';
+        showToast('Failed to load templates.', 'error');
       }
     }
 
     function clearFilters() {
-      document.getElementById('filter-month').value = '';
-      document.getElementById('filter-dept').value = '';
-      document.getElementById('filter-doctor').value = '';
+      ['filter-month', 'filter-dept', 'filter-doctor'].forEach(id => document.getElementById(id).value = '');
       loadTemplates();
     }
 
-    async function openTemplateEditor(templateId = null) {
-      const modalTitle = document.getElementById('modal-title');
-      const templateIdInput = document.getElementById('edit-template-id');
-      const nameInput = document.getElementById('tmpl-name');
-      const doctorSelect = document.getElementById('tmpl-doctor');
-      const deptSelect = document.getElementById('tmpl-dept');
-      const durationInput = document.getElementById('tmpl-duration');
-      const activeCheckbox = document.getElementById('tmpl-active');
-      const holidayDate = document.getElementById('holiday-date');
-      const holidayNote = document.getElementById('holiday-note');
-
-      holidays = [];
-      exceptions = [];
-      holidayDate.value = '';
-      holidayNote.value = '';
-      document.getElementById('exception-date').value = '';
-      document.getElementById('exception-note').value = '';
-      document.getElementById('exception-start').value = '08:00';
-      document.getElementById('exception-end').value = '12:00';
-      document.getElementById('exception-break-start').value = '';
-      document.getElementById('exception-break-end').value = '';
-      document.getElementById('exception-working').checked = true;
-      toggleExceptionFields();
-
-      if (templateId) {
-        const template = templates.find(t => t.template_id == templateId);
-        if (!template) return;
-        modalTitle.textContent = `Edit Template — ${template.template_name}`;
-        templateIdInput.value = template.template_id;
-        nameInput.value = template.template_name;
-        doctorSelect.value = template.doctor_id;
-        deptSelect.value = template.dept_id;
-        durationInput.value = template.slot_duration;
-        activeCheckbox.checked = template.is_active == 1;
-        holidays = template.holidays.map(h => ({ holiday_date: h.holiday_date, note: h.note }));
-        buildDayRows(template.days);
-        await loadDoctorExceptions(template.doctor_id);
-        refreshExceptionList();
-      } else {
-        modalTitle.textContent = 'New Schedule Template';
-        templateIdInput.value = '';
-        nameInput.value = '';
-        doctorSelect.value = '';
-        deptSelect.value = '';
-        durationInput.value = 10;
-        activeCheckbox.checked = true;
-        const defaultDays = Array.from({ length: 7 }, (_, index) => ({
-          day_of_week: index,
-          is_working: index >= 1 && index <= 5 ? 1 : 0,
-          start_time: index >= 1 && index <= 5 ? '08:00' : '09:00',
-          end_time: index >= 1 && index <= 5 ? '16:00' : '13:00',
-          break_start: index >= 1 && index <= 5 ? '12:00' : '',
-          break_end: index >= 1 && index <= 5 ? '13:00' : '',
-        }));
-        buildDayRows(defaultDays);
-        refreshExceptionList();
-      }
-
-      refreshHolidayList();
-      document.getElementById('modal-alert').style.display = 'none';
-      document.getElementById('modal-overlay').classList.add('open');
+    // ─── CUSTOM CONFIRMATION MODAL ───
+    function showConfirmModal({ title, message, detailHtml, confirmText, cancelText, confirmClass, icon, loading }) {
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        overlay.innerHTML = `
+          <div class="confirm-box">
+            ${icon ? '<div class="confirm-icon"><i class="fa-solid ' + icon + '"></i></div>' : ''}
+            <h3>${escapeHtml(title || 'Confirm')}</h3>
+            <div class="confirm-desc">${message || ''}</div>
+            ${detailHtml || ''}
+            <div class="confirm-actions">
+              <button class="btn btn-ghost" id="confirm-cancel-btn">${escapeHtml(cancelText || 'Cancel')}</button>
+              <button class="btn ${confirmClass || 'btn-primary'}" id="confirm-ok-btn">${loading ? '<span class="spinner"></span>' : escapeHtml(confirmText || 'Confirm')}</button>
+            </div>
+          </div>`;
+        document.body.appendChild(overlay);
+        const box = overlay.querySelector('.confirm-box');
+        const okBtn = overlay.querySelector('#confirm-ok-btn');
+        const cancelBtn = overlay.querySelector('#confirm-cancel-btn');
+        function close(result) {
+          overlay.remove();
+          resolve(result);
+        }
+        okBtn.addEventListener('click', () => close(true));
+        cancelBtn.addEventListener('click', () => close(false));
+        overlay.addEventListener('click', e => { if (e.target === overlay) close(false); });
+        box.addEventListener('click', e => e.stopPropagation());
+      });
     }
 
-    function syncDoctorDepartment() {
-      const doctorSelect = document.getElementById('tmpl-doctor');
-      const deptSelect = document.getElementById('tmpl-dept');
-      const doctorId = parseInt(doctorSelect.value, 10);
-      const doctor = doctors.find(d => d.doctor_id === doctorId);
-      if (doctor && doctor.dept_id) {
-        deptSelect.value = doctor.dept_id;
+    // ─── SMART SESSION ENGINE ───
+    // Generate default session names based on count
+    function getDefaultSessionNames(count) {
+      if (count <= 3) return DEFAULT_SESSION_NAMES.slice(0, count);
+      const names = [];
+      for (let i = 0; i < count; i++) {
+        names.push('Session ' + (i + 1));
       }
+      return names;
     }
 
+    // Validate sessions for a given day
+    function validateDaySessions(sessions, minGap) {
+      const errors = [];
+      if (!sessions || sessions.length === 0) return errors;
+
+      // Check for duplicate names
+      const names = sessions.map(s => s.name || '');
+      const nameCounts = {};
+      names.forEach(n => { nameCounts[n] = (nameCounts[n] || 0) + 1; });
+      Object.entries(nameCounts).forEach(([name, count]) => {
+        if (count > 1 && name) errors.push({ type: 'error', msg: 'Duplicate session name: "' + name + '".' });
+      });
+
+      // Check each session
+      sessions.forEach((s, i) => {
+        if (!s.start_time || !s.end_time) return;
+        const start = parseTime(s.start_time);
+        const end = parseTime(s.end_time);
+
+        if (end <= start) {
+          errors.push({ type: 'error', msg: (s.name || 'Session ' + (i+1)) + ' must end after it starts.' });
+        }
+        if (end === start) {
+          errors.push({ type: 'error', msg: (s.name || 'Session ' + (i+1)) + ' has zero duration.' });
+        }
+        if (end - start < 0) {
+          errors.push({ type: 'error', msg: (s.name || 'Session ' + (i+1)) + ' has negative duration.' });
+        }
+        const duration = end - start;
+        if (duration > 0 && duration < 30) {
+          errors.push({ type: 'warning', msg: (s.name || 'Session ' + (i+1)) + ' duration is only ' + duration + ' min (minimum 30 min recommended).' });
+        }
+      });
+
+      // Check chronological order and gaps
+      const sorted = sessions
+        .map((s, i) => ({ ...s, index: i }))
+        .filter(s => s.start_time && s.end_time)
+        .sort((a, b) => parseTime(a.start_time) - parseTime(b.start_time));
+
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const current = sorted[i];
+        const next = sorted[i + 1];
+        const currentEnd = parseTime(current.end_time);
+        const nextStart = parseTime(next.start_time);
+
+        if (nextStart < currentEnd) {
+          errors.push({ type: 'error', msg: (next.name || 'Session ' + (next.index+1)) + ' overlaps ' + (current.name || 'Session ' + (current.index+1)) + '.' });
+        }
+        if (nextStart === currentEnd) {
+          errors.push({ type: 'warning', msg: (current.name || 'Session ' + (current.index+1)) + ' ends exactly when ' + (next.name || 'Session ' + (next.index+1)) + ' starts. No gap.' });
+        }
+        if (nextStart > currentEnd && nextStart - currentEnd < minGap) {
+          errors.push({ type: 'warning', msg: (current.name || 'Session ' + (current.index+1)) + ' ends at ' + timeTo12h(current.end_time) + ' but ' + (next.name || 'Session ' + (next.index+1)) + ' starts at ' + timeTo12h(next.start_time) + '. Gap is only ' + (nextStart - currentEnd) + ' min (minimum ' + minGap + ' min).' });
+        }
+      }
+
+      return errors;
+    }
+
+    // Auto-adjust sessions after a change
+    function autoAdjustSessions(sessions, changedIndex, minGap) {
+      if (!sessions || sessions.length < 2) return { sessions, warnings: [] };
+      const warnings = [];
+
+      // Sort by start_time
+      const sorted = sessions
+        .map((s, i) => ({ ...s, originalIndex: i }))
+        .filter(s => s.start_time && s.end_time)
+        .sort((a, b) => parseTime(a.start_time) - parseTime(b.start_time));
+
+      // Rebuild with gaps
+      const adjusted = [];
+      for (let i = 0; i < sorted.length; i++) {
+        const current = { ...sorted[i] };
+        if (i > 0) {
+          const prev = adjusted[i - 1];
+          const prevEnd = parseTime(prev.end_time);
+          const currentStart = parseTime(current.start_time);
+          if (currentStart < prevEnd) {
+            // Overlap — push this session forward
+            const newStart = prevEnd + minGap;
+            const duration = parseTime(current.end_time) - currentStart;
+            if (duration <= 0) {
+              warnings.push(current.name + ': There is no remaining time available for this session.');
+              continue;
+            }
+            current.start_time = formatMinutes(newStart);
+            current.end_time = formatMinutes(newStart + duration);
+            warnings.push(current.name + ' was automatically moved to ' + timeTo12h(current.start_time) + ' to avoid overlap.');
+          } else if (currentStart - prevEnd < minGap) {
+            // Gap too small — push forward to meet min gap
+            const newStart = prevEnd + minGap;
+            const duration = parseTime(current.end_time) - currentStart;
+            current.start_time = formatMinutes(newStart);
+            current.end_time = formatMinutes(newStart + duration);
+            warnings.push(current.name + ' was adjusted to start at ' + timeTo12h(current.start_time) + ' to maintain minimum gap.');
+          }
+        }
+        adjusted.push(current);
+      }
+
+      // Map back to original indices if possible
+      const result = sessions.map((s, i) => {
+        const adj = adjusted.find(a => a.originalIndex === i);
+        return adj || s;
+      });
+
+      return { sessions: result, warnings };
+    }
+
+    // Calculate session stats
+    function calculateDayStats(sessions) {
+      if (!sessions || sessions.length === 0) return { totalMinutes: 0, breakMinutes: 0, sessionCount: 0, slotsCount: 0 };
+      const sorted = sessions
+        .filter(s => s.start_time && s.end_time)
+        .map(s => ({ ...s, start: parseTime(s.start_time), end: parseTime(s.end_time) }))
+        .filter(s => s.end > s.start)
+        .sort((a, b) => a.start - b.start);
+
+      let totalMinutes = 0;
+      let breakMinutes = 0;
+      sorted.forEach((s, i) => {
+        totalMinutes += s.end - s.start;
+        if (i > 0) {
+          const gap = s.start - sorted[i - 1].end;
+          if (gap > 0) breakMinutes += gap;
+        }
+      });
+
+      return {
+        totalMinutes,
+        breakMinutes,
+        sessionCount: sorted.length,
+        slotsCount: 0 // computed per day based on slot duration
+      };
+    }
+
+    // ─── SESSION EDITOR (SMART) ───
     function buildDayRows(days) {
       const container = document.getElementById('day-rows');
       container.innerHTML = '';
+      sessionsByDay = {};
 
       days.forEach(day => {
+        const dayOfWeek = day.day_of_week;
+        const isWorking = day.is_working == 1;
         const row = document.createElement('div');
-        row.className = `day-row ${day.is_working == 1 ? '' : 'is-off'}`;
-        row.id = `day-${day.day_of_week}`;
+        row.className = 'day-row' + (isWorking ? '' : ' is-off');
+        row.id = 'day-wrapper-' + dayOfWeek;
+
+        let sessions = [];
+        if (day.break_start && day.break_end && day.break_start < day.break_end) {
+          if (day.break_start > day.start_time) sessions.push({ start_time: day.start_time, end_time: day.break_start, name: day.session_1_name || DEFAULT_SESSION_NAMES[0] || 'Morning Session' });
+          if (day.break_end < day.end_time) sessions.push({ start_time: day.break_end, end_time: day.end_time, name: day.session_2_name || DEFAULT_SESSION_NAMES[1] || 'Afternoon Session' });
+        } else if (isWorking) {
+          sessions.push({ start_time: day.start_time || '08:00', end_time: day.end_time || '16:00', name: day.session_1_name || DEFAULT_SESSION_NAMES[0] || 'Morning Session' });
+        }
+        if (sessions.length === 0 && isWorking) {
+          sessions.push({ start_time: '08:00', end_time: '16:00', name: DEFAULT_SESSION_NAMES[0] });
+        }
+
+        // If we have explicit sessions data from template, use those with names
+        if (day.sessions && day.sessions.length > 0) {
+          sessions = day.sessions.map((s, i) => ({
+            start_time: stripSec(s.start_time),
+            end_time: stripSec(s.end_time),
+            name: s.session_name || getDefaultSessionNames(day.sessions.length)[i] || 'Session ' + (i+1)
+          }));
+        }
+
+        sessionsByDay[dayOfWeek] = sessions.map((s, i) => ({
+          start_time: s.start_time,
+          end_time: s.end_time,
+          name: s.name || getDefaultSessionNames(sessions.length)[i] || 'Session ' + (i+1),
+          sort_order: i
+        }));
+
+        const sessionsHtml = buildSessionsHtml(dayOfWeek);
 
         row.innerHTML = `
-          <label style="font-weight:600; display:flex; align-items:center; gap:8px;">
-            <input type="checkbox" id="chk-${day.day_of_week}" ${day.is_working == 1 ? 'checked' : ''} onchange="toggleDay(${day.day_of_week})">
-            ${DAY_NAMES[day.day_of_week]}
-          </label>
-          <input type="time" id="start-${day.day_of_week}" value="${(day.start_time || '08:00').slice(0,5)}" placeholder="Start">
-          <input type="time" id="end-${day.day_of_week}" value="${(day.end_time || '16:00').slice(0,5)}" placeholder="End">
-          <input type="time" id="break-start-${day.day_of_week}" value="${(day.break_start || '').slice(0,5)}" placeholder="Break start">
-          <input type="time" id="break-end-${day.day_of_week}" value="${(day.break_end || '').slice(0,5)}" placeholder="Break end">
-        `;
-
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="chk-${dayOfWeek}" ${isWorking ? 'checked' : ''} onchange="toggleDay(${dayOfWeek})" style="margin:0;">
+            <label for="chk-${dayOfWeek}" style="font-weight:600;margin:0;min-width:90px;">${DAY_NAMES[dayOfWeek]}</label>
+          </div>
+          <div>
+            <div class="session-group" id="sessions-${dayOfWeek}">
+              ${sessionsHtml}
+              <div style="display:flex; gap:8px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="addSession(${dayOfWeek})"><i class="fa-solid fa-plus"></i> Add session</button>
+                <div class="session-stats" id="stats-${dayOfWeek}" style="display:none; margin:0;"></div>
+              </div>
+            </div>
+          </div>`;
         container.appendChild(row);
       });
     }
 
-    function toggleDay(dayNum) {
-      const row = document.getElementById(`day-${dayNum}`);
-      const checked = document.getElementById(`chk-${dayNum}`).checked;
-      row.classList.toggle('is-off', !checked);
+    function buildSessionsHtml(dayNum, sessions) {
+      const list = sessions || sessionsByDay[dayNum] || [];
+      return list.map((s, i) => `
+        <div class="session-row" id="session-row-${dayNum}-${i}">
+          <input type="text" class="session-name-input" value="${escapeHtml(s.name || '')}" 
+            placeholder="Session name" 
+            onchange="updateSessionName(${dayNum}, ${i}, this.value)" 
+            onfocus="this.select()"
+            title="Click to rename this session">
+          <input type="time" class="session-start" value="${(s.start_time || '08:00').slice(0,5)}" 
+            onchange="onSessionChange(${dayNum}, ${i})">
+          <span class="text-muted">—</span>
+          <input type="time" class="session-end" value="${(s.end_time || '16:00').slice(0,5)}" 
+            onchange="onSessionChange(${dayNum}, ${i})">
+          <button type="button" class="btn-icon-sm danger" onclick="removeSession(${dayNum}, ${i})" title="Remove session"><i class="fa-solid fa-trash"></i></button>
+        </div>`).join('');
     }
 
+    function getDaySessionsFromDOM(dayNum) {
+      const container = document.getElementById('sessions-' + dayNum);
+      if (!container) return [];
+      const rows = container.querySelectorAll('.session-row');
+      const sessions = [];
+      rows.forEach((row, i) => {
+        const nameInput = row.querySelector('.session-name-input');
+        const start = row.querySelector('.session-start').value;
+        const end = row.querySelector('.session-end').value;
+        const name = nameInput ? nameInput.value.trim() : (getDefaultSessionNames(rows.length)[i] || 'Session ' + (i+1));
+        if (start && end) sessions.push({ start_time: start, end_time: end, name: name || 'Session ' + (i+1), sort_order: i });
+      });
+      return sessions;
+    }
+
+    function updateSessionName(dayNum, index, name) {
+      const sessions = getDaySessionsFromDOM(dayNum);
+      if (sessions[index]) sessions[index].name = name;
+      sessionsByDay[dayNum] = sessions;
+      onSessionChange(dayNum, index);
+    }
+
+    function onSessionChange(dayNum, changedIndex) {
+      const sessions = getDaySessionsFromDOM(dayNum);
+      const minGap = getMinGap();
+
+      // Apply auto-adjustment
+      const adjusted = autoAdjustSessions(sessions, changedIndex, minGap);
+      sessionsByDay[dayNum] = adjusted.sessions;
+
+      // Re-render with adjusted values
+      renderSessions(dayNum);
+
+      // Show warnings if any
+      const warnings = adjusted.warnings;
+      renderValidation(dayNum);
+
+      // Show warnings as toasts if auto-adjustment happened
+      warnings.forEach(w => showToast('⚠️ ' + w, 'warning', 5000));
+    }
+
+    function onMinGapChange() {
+      // Re-validate all days
+      for (let d = 0; d <= 6; d++) {
+        if (sessionsByDay[d]) {
+          renderValidation(d);
+        }
+      }
+    }
+
+    function renderValidation(dayNum) {
+      const sessions = getDaySessionsFromDOM(dayNum);
+      const minGap = getMinGap();
+      const errors = validateDaySessions(sessions, minGap);
+      const stats = calculateDayStats(sessions);
+
+      // Update stats display
+      const statsEl = document.getElementById('stats-' + dayNum);
+      if (statsEl) {
+        if (stats.sessionCount > 0) {
+          const slotDur = parseInt(document.getElementById('tmpl-duration').value, 10) || 10;
+          const totalSlots = Math.floor(stats.totalMinutes / slotDur);
+          statsEl.style.display = 'flex';
+          statsEl.innerHTML = `
+            <div class="session-stat good"><span class="stat-value">${minutesToHours(stats.totalMinutes)}</span><span class="stat-label">Working</span></div>
+            <div class="session-stat warning"><span class="stat-value">${minutesToHours(stats.breakMinutes)}</span><span class="stat-label">Breaks</span></div>
+            <div class="session-stat info"><span class="stat-value">${totalSlots}</span><span class="stat-label">Slots (${slotDur}min)</span></div>
+          `;
+        } else {
+          statsEl.style.display = 'none';
+        }
+      }
+
+      // Update validation errors for this day
+      const dayRow = document.getElementById('day-wrapper-' + dayNum);
+      if (!dayRow) return;
+      let existingErr = dayRow.querySelector('.day-validation');
+      if (errors.length === 0) {
+        if (existingErr) existingErr.remove();
+        return;
+      }
+      if (!existingErr) {
+        existingErr = document.createElement('div');
+        existingErr.className = 'day-validation';
+        existingErr.style.cssText = 'margin-top:8px;';
+        const sessionGroup = dayRow.querySelector('.session-group');
+        if (sessionGroup) sessionGroup.after(existingErr);
+      }
+      existingErr.innerHTML = errors.map(e =>
+        '<div class="' + (e.type === 'error' ? 'validation-error' : 'validation-warning') + '">' +
+        '<i class="fa-solid ' + (e.type === 'error' ? 'fa-circle-xmark' : 'fa-triangle-exclamation') + '"></i> ' +
+        escapeHtml(e.msg) + '</div>'
+      ).join('');
+    }
+
+    function addSession(dayNum) {
+      if (!sessionsByDay[dayNum]) sessionsByDay[dayNum] = [];
+      const existing = getDaySessionsFromDOM(dayNum) || sessionsByDay[dayNum];
+      const count = existing.length;
+      const lastSession = existing[count - 1];
+      let startTime = '08:00';
+      let endTime = '16:00';
+      if (lastSession) {
+        const lastEnd = parseTime(lastSession.end_time);
+        startTime = formatMinutes(lastEnd + getMinGap());
+        endTime = formatMinutes(lastEnd + getMinGap() + 120); // default 2h
+      }
+      const defaultName = getDefaultSessionNames(count + 1)[count] || 'Session ' + (count + 1);
+      sessionsByDay[dayNum].push({ start_time: startTime, end_time: endTime, name: defaultName, sort_order: count });
+      renderSessions(dayNum);
+    }
+
+    function removeSession(dayNum, index) {
+      if (!sessionsByDay[dayNum]) return;
+      sessionsByDay[dayNum].splice(index, 1);
+      if (sessionsByDay[dayNum].length === 0) {
+        sessionsByDay[dayNum].push({ start_time: '08:00', end_time: '16:00', name: DEFAULT_SESSION_NAMES[0], sort_order: 0 });
+      }
+      renderSessions(dayNum);
+    }
+
+    function renderSessions(dayNum) {
+      const container = document.getElementById('sessions-' + dayNum);
+      if (!container) return;
+      const sessions = sessionsByDay[dayNum] || getDaySessionsFromDOM(dayNum) || [];
+      const html = buildSessionsHtml(dayNum, sessions);
+      // Rebuild entire container: session rows + footer
+      container.innerHTML = html + `
+        <div style="display:flex; gap:8px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="addSession(${dayNum})"><i class="fa-solid fa-plus"></i> Add session</button>
+          <div class="session-stats" id="stats-${dayNum}" style="display:none; margin:0;"></div>
+        </div>`;
+      // Re-run validation
+      renderValidation(dayNum);
+    }
+
+    function toggleDay(dayNum) {
+      const row = document.getElementById('day-wrapper-' + dayNum);
+      const checked = document.getElementById('chk-' + dayNum).checked;
+      row.classList.toggle('is-off', !checked);
+      if (checked && (!sessionsByDay[dayNum] || sessionsByDay[dayNum].length === 0)) {
+        sessionsByDay[dayNum] = [{ start_time: '08:00', end_time: '16:00', name: DEFAULT_SESSION_NAMES[0], sort_order: 0 }];
+        renderSessions(dayNum);
+      }
+      // Remove validation when off
+      if (!checked) {
+        const existingErr = row.querySelector('.day-validation');
+        if (existingErr) existingErr.remove();
+        const statsEl = document.getElementById('stats-' + dayNum);
+        if (statsEl) statsEl.style.display = 'none';
+      }
+    }
+
+    // ─── CALENDAR PREVIEW ───
+    let calPreviewTemplateId = null;
+    let calPreviewMonth = null;
+    function showCalendarPreview(templateId) {
+      const template = templates.find(t => t.template_id == templateId);
+      if (!template) return;
+      calPreviewTemplateId = templateId;
+      calPreviewMonth = new Date().toISOString().slice(0,7);
+      renderCalendarModal(template);
+    }
+    function renderCalendarModal(template) {
+      const overlay = document.createElement('div');
+      overlay.className = 'confirm-overlay';
+      const box = document.createElement('div');
+      box.className = 'confirm-box';
+      box.style.width = '480px';
+      box.style.maxWidth = '95vw';
+
+      const [year, mon] = calPreviewMonth.split('-');
+      const monthDate = new Date(parseInt(year), parseInt(mon) - 1, 1);
+      const monthName = monthDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      const daysInMonth = new Date(parseInt(year), parseInt(mon), 0).getDate();
+      const firstDay = monthDate.getDay();
+
+      const workingMap = {};
+      const holidayMap = {};
+      template.days.forEach(d => { workingMap[d.day_of_week] = d.is_working == 1; });
+      template.holidays.forEach(h => { holidayMap[h.holiday_date] = h.note || 'Holiday'; });
+      globalHolidays.forEach(h => {
+        if (h.holiday_date.startsWith(calPreviewMonth)) holidayMap[h.holiday_date] = h.name || 'Hospital Holiday';
+      });
+
+      let calHtml = '<div class="cal-mini" style="border:none;padding:0;">';
+      calHtml += '<div class="cal-header"><button class="cal-nav-btn" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button><span>' + monthName + '</span><button class="cal-nav-btn" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button></div>';
+      calHtml += '<div class="cal-grid">';
+      ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(l => { calHtml += '<div class="cal-day-label">' + l + '</div>'; });
+      for (let i = 0; i < firstDay; i++) { calHtml += '<div></div>'; }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = calPreviewMonth + '-' + String(d).padStart(2, '0');
+        const dayOfWeek = new Date(parseInt(year), parseInt(mon) - 1, d).getDay();
+        const today = new Date().toISOString().slice(0,10);
+        let cls = 'cal-day';
+        if (dateStr === today) cls += ' today';
+        if (holidayMap[dateStr]) cls += ' holiday';
+        else if (dayOfWeek === 0 || dayOfWeek === 6) cls += ' weekend';
+        else if (workingMap[dayOfWeek]) cls += ' working';
+        else cls += ' weekend';
+        calHtml += '<div class="' + cls + '" title="' + (holidayMap[dateStr] || '') + '">' + d + '</div>';
+      }
+      calHtml += '</div>';
+      calHtml += '<div class="cal-legend">';
+      calHtml += '<span class="legend-item"><span class="legend-dot" style="background:#d4edda;"></span> Working</span>';
+      calHtml += '<span class="legend-item"><span class="legend-dot" style="background:#f8d7da;"></span> Holiday</span>';
+      calHtml += '<span class="legend-item"><span class="legend-dot" style="background:#ffeeba;"></span> Leave</span>';
+      calHtml += '<span class="legend-item"><span class="legend-dot" style="background:var(--grey-50);"></span> Off</span>';
+      calHtml += '</div></div>';
+
+      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><h4 style="margin:0;"><i class="fa-solid fa-calendar-alt"></i> ' + escapeHtml(template.template_name) + '</h4><button class="btn btn-ghost btn-sm" onclick="this.closest(\'.confirm-overlay\').remove()"><i class="fa-solid fa-xmark"></i></button></div>' + calHtml + '<div style="text-align:center;margin-top:12px;"><button class="btn btn-ghost btn-sm" onclick="this.closest(\'.confirm-overlay\').remove()">Close</button></div>';
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
+    }
+    function calNav(dir) {
+      if (!calPreviewMonth) return;
+      const [y, m] = calPreviewMonth.split('-').map(Number);
+      const d = new Date(y, m - 1 + dir, 1);
+      calPreviewMonth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      const template = templates.find(t => t.template_id == calPreviewTemplateId);
+      if (template) {
+        const overlays = document.querySelectorAll('.confirm-overlay');
+        if (overlays.length) overlays[overlays.length - 1].remove();
+        renderCalendarModal(template);
+      }
+    }
+
+    // ─── HOLIDAYS ───
     function addHoliday() {
       const dateEl = document.getElementById('holiday-date');
       const noteEl = document.getElementById('holiday-note');
       const date = dateEl.value;
       const note = noteEl.value.trim();
-
-      if (!date) {
-        showToast('Select a holiday date before adding.', 'error');
-        return;
-      }
-
-      if (holidays.some(h => h.holiday_date === date)) {
-        showToast('This date is already added as a holiday.', 'warning');
-        return;
-      }
-
+      if (!date) { showToast('Select a holiday date before adding.', 'error'); return; }
+      if (holidays.some(h => h.holiday_date === date)) { showToast('Date already added.', 'warning'); return; }
       holidays.push({ holiday_date: date, note });
       refreshHolidayList();
-      dateEl.value = '';
-      noteEl.value = '';
+      dateEl.value = ''; noteEl.value = '';
     }
-
     function refreshHolidayList() {
       const container = document.getElementById('holiday-list');
-      if (!holidays.length) {
-        container.innerHTML = '<p class="text-muted text-sm">No holidays or unavailable dates defined.</p>';
-        return;
-      }
-      container.innerHTML = '';
+      if (!holidays.length) { container.innerHTML = '<p class="text-muted text-sm">No holidays or unavailable dates defined.</p>'; return; }
+      container.innerHTML = '<div class="holiday-table">';
       holidays.forEach((holiday, index) => {
-        const row = document.createElement('div');
-        row.className = 'holiday-row';
-        row.innerHTML = `
-          <div>${formatDate(holiday.holiday_date)}</div>
-          <div>${escapeHtml(holiday.note || 'No note')}</div>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="removeHoliday(${index})"><i class="fa-solid fa-trash"></i></button>
-        `;
-        container.appendChild(row);
+        container.innerHTML += '<div class="holiday-row"><div>' + formatDate(holiday.holiday_date) + '</div><div>' + escapeHtml(holiday.note || 'No note') + '</div><button class="btn btn-ghost btn-sm" onclick="removeHoliday(' + index + ')"><i class="fa-solid fa-trash"></i></button></div>';
       });
+      container.innerHTML += '</div>';
+    }
+    function removeHoliday(index) { holidays.splice(index, 1); refreshHolidayList(); }
+
+    // ─── OVERRIDES ───
+    function selectOverrideType(type) {
+      currentOverrideType = type;
+      document.getElementById('type-full-off').classList.toggle('active', type === 'full_off');
+      document.getElementById('type-custom').classList.toggle('active', type === 'custom_schedule');
+      document.getElementById('custom-sessions-section').style.display = type === 'custom_schedule' ? 'block' : 'none';
+      if (type === 'custom_schedule' && overrideSessions.length === 0) {
+        overrideSessions = [{ start_time: '09:00', end_time: '13:00' }];
+        renderOverrideSessions();
+      }
     }
 
-    function removeHoliday(index) {
-      holidays.splice(index, 1);
-      refreshHolidayList();
+    function renderOverrideSessions() {
+      const container = document.getElementById('override-sessions-container');
+      if (!container) return;
+      container.innerHTML = overrideSessions.map((s, i) => `
+        <div class="override-session-row">
+          <input type="time" value="${s.start_time}" onchange="updateOverrideSession(${i}, 'start')" class="form-control">
+          <span class="text-muted">—</span>
+          <input type="time" value="${s.end_time}" onchange="updateOverrideSession(${i}, 'end')" class="form-control">
+          <button class="btn btn-ghost btn-sm" onclick="removeOverrideSession(${i})"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `).join('');
+    }
+
+    function addOverrideSession() {
+      overrideSessions.push({ start_time: '14:00', end_time: '17:00' });
+      renderOverrideSessions();
+    }
+    function removeOverrideSession(i) {
+      overrideSessions.splice(i, 1);
+      if (overrideSessions.length === 0) overrideSessions = [{ start_time: '09:00', end_time: '13:00' }];
+      renderOverrideSessions();
+    }
+    function updateOverrideSession(i, field) {
+      const rows = document.querySelectorAll('#override-sessions-container .override-session-row');
+      overrideSessions = Array.from(rows).map((row, idx) => ({
+        start_time: row.querySelectorAll('input')[0].value,
+        end_time: row.querySelectorAll('input')[1].value
+      }));
+    }
+
+    function addOverride() {
+      const date = document.getElementById('override-date').value;
+      const reason = document.getElementById('override-reason').value.trim();
+      if (!date) { showToast('Date is required', 'error'); return; }
+      if (exceptions.some(e => e.exception_date === date)) { showToast('Override already exists for this date', 'warning'); return; }
+      if (currentOverrideType === 'custom_schedule' && overrideSessions.length === 0) { showToast('Add at least one session', 'error'); return; }
+
+      exceptions.push({
+        exception_date: date,
+        override_type: currentOverrideType,
+        reason: reason || (currentOverrideType === 'full_off' ? 'Full Day Off' : 'Custom Schedule'),
+        sessions: currentOverrideType === 'custom_schedule' ? JSON.parse(JSON.stringify(overrideSessions)) : [],
+        is_working: currentOverrideType === 'custom_schedule' ? 1 : 0
+      });
+
+      refreshExceptionList();
+      resetOverrideForm();
+      showToast('Override added successfully', 'success');
+    }
+
+    function resetOverrideForm() {
+      document.getElementById('override-date').value = '';
+      document.getElementById('override-reason').value = '';
+      overrideSessions = [];
+      currentOverrideType = 'full_off';
+      selectOverrideType('full_off');
     }
 
     function refreshExceptionList() {
       const container = document.getElementById('exception-list');
       if (!exceptions.length) {
-        container.innerHTML = '<p class="text-muted text-sm">No doctor leave or overrides defined.</p>';
+        container.innerHTML = `<p class="text-muted text-sm">No overrides added yet.</p>`;
         return;
       }
-      container.innerHTML = '';
-      exceptions.forEach((exception, index) => {
-        const row = document.createElement('div');
-        row.className = 'holiday-row';
-        const status = exception.is_working == 1 ? 'Working' : 'Unavailable';
-        const range = exception.is_working == 1
-          ? `${exception.start_time ? exception.start_time.slice(0,5) : '—'}–${exception.end_time ? exception.end_time.slice(0,5) : '—'}`
-          : 'Off';
-        row.innerHTML = `
-          <div>
-            <strong>${formatDate(exception.exception_date)}</strong><br>
-            <span class="text-muted text-sm">${status} · ${range}</span>
+      container.innerHTML = exceptions.map((exc, i) => {
+        const isOff = exc.override_type === 'full_off';
+        return `
+          <div class="exception-card">
+            <div class="exception-header">
+              <div>
+                <strong>${formatDate(exc.exception_date)}</strong>
+                <span class="exception-type ${isOff ? 'off' : 'custom'}">
+                  <i class="fa-solid ${isOff ? 'fa-calendar-xmark' : 'fa-clock'}"></i>
+                  ${isOff ? 'Full Day Off' : 'Custom Schedule'}
+                </span>
+              </div>
+              <button onclick="removeException(${i})" class="btn btn-ghost btn-sm"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            ${exc.sessions && exc.sessions.length ? `
+              <div class="override-sessions">
+                ${exc.sessions.map(s => `<span class="session-pill">${s.start_time}–${s.end_time}</span>`).join('')}
+              </div>` : ''}
+            ${exc.reason ? `<div class="text-sm text-muted"><i class="fa-solid fa-comment-dots"></i> ${escapeHtml(exc.reason)}</div>` : ''}
           </div>
-          <div>${escapeHtml(exception.note || 'No note')}</div>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="removeException(${index})"><i class="fa-solid fa-trash"></i></button>
         `;
-        container.appendChild(row);
-      });
+      }).join('');
     }
 
     function removeException(index) {
-      exceptions.splice(index, 1);
-      refreshExceptionList();
-    }
-
-    function toggleExceptionFields() {
-      const isWorking = document.getElementById('exception-working').checked;
-      ['exception-start', 'exception-end', 'exception-break-start', 'exception-break-end'].forEach(id => {
-        const field = document.getElementById(id);
-        if (field) field.disabled = !isWorking;
+      const exc = exceptions[index];
+      if (!exc) return;
+      showConfirmModal({
+        title: 'Remove Override?',
+        message: 'Delete the override for ' + formatDate(exc.exception_date) + '?',
+        confirmText: 'Remove',
+        confirmClass: 'btn-danger',
+        icon: 'fa-triangle-exclamation'
+      }).then(result => {
+        if (result) {
+          exceptions.splice(index, 1);
+          refreshExceptionList();
+          showToast('Override removed.', 'success');
+        }
       });
     }
 
-    document.getElementById('exception-working').addEventListener('change', toggleExceptionFields);
-
     async function loadDoctorExceptions(doctorId) {
       exceptions = [];
-      if (!doctorId) {
-        refreshExceptionList();
-        return;
-      }
-
+      if (!doctorId) { refreshExceptionList(); return; }
       try {
         const res = await fetch(`../php/admin_get_doctor_exceptions.php?doctor_id=${doctorId}`);
         const data = await res.json();
         if (Array.isArray(data)) {
           exceptions = data.map(exc => ({
             exception_date: exc.exception_date,
-            is_working: exc.is_working,
-            start_time: exc.start_time || '',
-            end_time: exc.end_time || '',
-            break_start: exc.break_start || '',
-            break_end: exc.break_end || '',
-            note: exc.note || '',
+            override_type: exc.is_working == 1 ? 'custom_schedule' : 'full_off',
+            reason: exc.note || (exc.is_working == 1 ? 'Custom Schedule' : 'Full Day Off'),
+            sessions: exc.is_working == 1 ? [{ start_time: exc.start_time || '09:00', end_time: exc.end_time || '13:00' }] : [],
+            is_working: exc.is_working
           }));
         }
-      } catch (err) {
-        console.error('Could not load doctor exceptions:', err);
-      }
+      } catch (e) { console.error(e); }
       refreshExceptionList();
     }
 
-    function addException() {
-      const dateEl = document.getElementById('exception-date');
-      const noteEl = document.getElementById('exception-note');
-      const isWorkingEl = document.getElementById('exception-working');
-      const startEl = document.getElementById('exception-start');
-      const endEl = document.getElementById('exception-end');
-      const breakStartEl = document.getElementById('exception-break-start');
-      const breakEndEl = document.getElementById('exception-break-end');
-
-      const date = dateEl.value;
-      const isWorking = isWorkingEl.checked ? 1 : 0;
-      const start_time = startEl.value;
-      const end_time = endEl.value;
-      const break_start = breakStartEl.value;
-      const break_end = breakEndEl.value;
-      const note = noteEl.value.trim();
-
-      if (!date) {
-        showToast('Select a date for the override.', 'error');
-        return;
-      }
-      if (exceptions.some(exc => exc.exception_date === date)) {
-        showToast('An override already exists for this date.', 'warning');
-        return;
-      }
-      if (isWorking) {
-        if (!start_time || !end_time) {
-          showToast('Working overrides require a start and end time.', 'error');
-          return;
-        }
-        if (end_time <= start_time) {
-          showToast('Override end time must be after start time.', 'error');
-          return;
-        }
-        if ((break_start && !break_end) || (!break_start && break_end)) {
-          showToast('Override break must include both start and end times.', 'error');
-          return;
-        }
-        if (break_start && break_end) {
-          if (break_end <= break_start) {
-            showToast('Override break end must be after break start.', 'error');
-            return;
-          }
-          if (break_start <= start_time || break_end >= end_time) {
-            showToast('Override break must fit within the working window.', 'error');
-            return;
-          }
-        }
-      }
-
-      exceptions.push({
-        exception_date: date,
-        is_working,
-        start_time,
-        end_time,
-        break_start,
-        break_end,
-        note,
-      });
-
-      refreshExceptionList();
-      dateEl.value = '';
-      noteEl.value = '';
-      startEl.value = '08:00';
-      endEl.value = '12:00';
-      breakStartEl.value = '';
-      breakEndEl.value = '';
-      isWorkingEl.checked = true;
-      toggleExceptionFields();
-    }
-
+    // ─── OPEN / CLOSE EDITOR ───
     function closeModal() {
-      document.getElementById('modal-overlay').classList.remove('open');
+      document.getElementById('inline-editor').classList.remove('open');
     }
 
+    async function openTemplateEditor(templateId) {
+      const editor = document.getElementById('inline-editor');
+      if (editor.classList.contains('open')) { editor.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+
+      document.getElementById('modal-alert').style.display = 'none';
+      document.getElementById('conflict-review').style.display = 'none';
+      holidays = [];
+      exceptions = [];
+      sessionsByDay = {};
+      overrideSessions = [];
+      document.getElementById('holiday-date').value = '';
+      document.getElementById('holiday-note').value = '';
+      resetOverrideForm();
+      // Reset min gap to default
+      document.getElementById('min-gap-select').value = '15';
+
+      if (templateId) {
+        const template = templates.find(t => t.template_id == templateId);
+        if (!template) return;
+        document.getElementById('modal-title').textContent = 'Edit Template — ' + template.template_name;
+        document.getElementById('edit-template-id').value = template.template_id;
+        document.getElementById('tmpl-name').value = template.template_name;
+        document.getElementById('tmpl-doctor').value = template.doctor_id;
+        document.getElementById('tmpl-dept').value = template.dept_id;
+        document.getElementById('tmpl-duration').value = template.slot_duration;
+        document.getElementById('tmpl-active').checked = template.is_active == 1;
+        document.getElementById('tmpl-effective-from').value = template.effective_from || '';
+        document.getElementById('tmpl-effective-to').value = template.effective_to || '';
+        holidays = template.holidays.map(h => ({ holiday_date: h.holiday_date, note: h.note }));
+
+        // Build days with session names if available
+        const daysWithSessions = template.days.map(day => {
+          const daySessions = template.sessions
+            ? template.sessions.filter(s => s.day_of_week === day.day_of_week).sort((a, b) => a.sort_order - b.sort_order)
+            : [];
+          return { ...day, sessions: daySessions };
+        });
+        buildDayRows(daysWithSessions);
+        await loadDoctorExceptions(template.doctor_id);
+        refreshExceptionList();
+      } else {
+        document.getElementById('modal-title').textContent = 'New Schedule Template';
+        document.getElementById('edit-template-id').value = '';
+        document.getElementById('tmpl-name').value = '';
+        document.getElementById('tmpl-doctor').value = '';
+        document.getElementById('tmpl-dept').value = '';
+        document.getElementById('tmpl-duration').value = 10;
+        document.getElementById('tmpl-active').checked = true;
+        document.getElementById('tmpl-effective-from').value = '';
+        document.getElementById('tmpl-effective-to').value = '';
+        buildDayRows([
+          { day_of_week: 0, is_working: 0, start_time: '09:00', end_time: '13:00', break_start: '', break_end: '', sessions: [] },
+          { day_of_week: 1, is_working: 1, start_time: '08:00', end_time: '16:00', break_start: '12:00', break_end: '13:00', sessions: [
+            { start_time: '08:00', end_time: '10:00', session_name: 'Morning Session', sort_order: 0 },
+            { start_time: '10:15', end_time: '12:00', session_name: 'Afternoon Session', sort_order: 1 },
+            { start_time: '12:30', end_time: '16:00', session_name: 'Evening Session', sort_order: 2 }
+          ] },
+          { day_of_week: 2, is_working: 1, start_time: '08:00', end_time: '16:00', break_start: '12:00', break_end: '13:00', sessions: [
+            { start_time: '08:00', end_time: '10:00', session_name: 'Morning Session', sort_order: 0 },
+            { start_time: '10:15', end_time: '12:00', session_name: 'Afternoon Session', sort_order: 1 },
+            { start_time: '12:30', end_time: '16:00', session_name: 'Evening Session', sort_order: 2 }
+          ] },
+          { day_of_week: 3, is_working: 1, start_time: '08:00', end_time: '16:00', break_start: '12:00', break_end: '13:00', sessions: [
+            { start_time: '08:00', end_time: '10:00', session_name: 'Morning Session', sort_order: 0 },
+            { start_time: '10:15', end_time: '12:00', session_name: 'Afternoon Session', sort_order: 1 },
+            { start_time: '12:30', end_time: '16:00', session_name: 'Evening Session', sort_order: 2 }
+          ] },
+          { day_of_week: 4, is_working: 1, start_time: '08:00', end_time: '16:00', break_start: '12:00', break_end: '13:00', sessions: [
+            { start_time: '08:00', end_time: '10:00', session_name: 'Morning Session', sort_order: 0 },
+            { start_time: '10:15', end_time: '12:00', session_name: 'Afternoon Session', sort_order: 1 },
+            { start_time: '12:30', end_time: '16:00', session_name: 'Evening Session', sort_order: 2 }
+          ] },
+          { day_of_week: 5, is_working: 1, start_time: '08:00', end_time: '14:00', break_start: '12:00', break_end: '13:00', sessions: [
+            { start_time: '08:00', end_time: '10:00', session_name: 'Morning Session', sort_order: 0 },
+            { start_time: '10:15', end_time: '12:00', session_name: 'Afternoon Session', sort_order: 1 },
+            { start_time: '12:30', end_time: '14:00', session_name: 'Evening Session', sort_order: 2 }
+          ] },
+          { day_of_week: 6, is_working: 0, start_time: '09:00', end_time: '13:00', break_start: '', break_end: '', sessions: [] },
+        ]);
+        refreshExceptionList();
+        resetOverrideForm();
+      }
+
+      refreshHolidayList();
+      editor.classList.add('open');
+      setTimeout(() => editor.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      // Run initial validation on all days
+      setTimeout(() => {
+        for (let d = 0; d <= 6; d++) {
+          if (document.getElementById('chk-' + d) && document.getElementById('chk-' + d).checked) {
+            renderValidation(d);
+          }
+        }
+      }, 100);
+    }
+
+    // ─── Helper: strip ":00" seconds suffix from HH:MM:SS to HH:MM ───
+    function stripSec(t) {
+      if (!t) return t;
+      const parts = t.split(':');
+      return parts.length >= 2 ? parts[0] + ':' + parts[1] : t;
+    }
+
+    // ─── SAVE TEMPLATE ───
     async function saveTemplate() {
       const templateId = document.getElementById('edit-template-id').value;
       const name = document.getElementById('tmpl-name').value.trim();
@@ -854,144 +1671,298 @@
       const deptId = document.getElementById('tmpl-dept').value;
       const duration = parseInt(document.getElementById('tmpl-duration').value, 10);
       const isActive = document.getElementById('tmpl-active').checked ? 1 : 0;
+      const effectiveFrom = document.getElementById('tmpl-effective-from').value;
+      const effectiveTo = document.getElementById('tmpl-effective-to').value;
       const alertBox = document.getElementById('modal-alert');
+      alertBox.style.display = 'none';
+
+      if (!name || !doctorId || isNaN(duration) || duration < 5) {
+        alertBox.textContent = 'Template name, doctor and duration are required.'; alertBox.style.display = 'block'; return;
+      }
+
+      // Check for validation errors before saving
+      let hasErrors = false;
+      for (let d = 0; d <= 6; d++) {
+        if (!document.getElementById('chk-' + d).checked) continue;
+        const sessions = getDaySessionsFromDOM(d);
+        const errors = validateDaySessions(sessions, getMinGap());
+        if (errors.some(e => e.type === 'error')) {
+          hasErrors = true;
+        }
+      }
+      if (hasErrors) {
+        alertBox.textContent = 'Please fix validation errors before saving. Red error indicators must be resolved.'; alertBox.style.display = 'block';
+        return;
+      }
 
       const days = [];
       for (let d = 0; d <= 6; d++) {
-        const isWorking = document.getElementById(`chk-${d}`).checked ? 1 : 0;
-        const start = document.getElementById(`start-${d}`).value;
-        const end = document.getElementById(`end-${d}`).value;
-        const breakStart = document.getElementById(`break-start-${d}`).value;
-        const breakEnd = document.getElementById(`break-end-${d}`).value;
-
-        if (isWorking) {
-          if (!start || !end) {
-            alertBox.textContent = `${DAY_NAMES[d]} requires start and end times.`;
-            alertBox.style.display = 'block';
-            return;
+        const isWorking = document.getElementById('chk-' + d).checked ? 1 : 0;
+        let start = '', end = '', breakStart = '', breakEnd = '';
+        if (sessionsByDay[d] && sessionsByDay[d].length > 0) {
+          start = sessionsByDay[d][0].start_time || '08:00';
+          end = sessionsByDay[d][sessionsByDay[d].length - 1].end_time || '16:00';
+          if (sessionsByDay[d].length > 1) {
+            breakStart = sessionsByDay[d][0].end_time;
+            breakEnd = sessionsByDay[d][1].start_time;
           }
-          if (end <= start) {
-            alertBox.textContent = `${DAY_NAMES[d]} end time must be after start time.`;
-            alertBox.style.display = 'block';
-            return;
-          }
-          if ((breakStart && !breakEnd) || (!breakStart && breakEnd)) {
-            alertBox.textContent = `${DAY_NAMES[d]} must have both break start and end or neither.`;
-            alertBox.style.display = 'block';
-            return;
-          }
-          if (breakStart && breakEnd) {
-            if (breakEnd <= breakStart) {
-              alertBox.textContent = `${DAY_NAMES[d]} break end must be after break start.`;
-              alertBox.style.display = 'block';
-              return;
-            }
-            if (breakStart <= start || breakEnd >= end) {
-              alertBox.textContent = `${DAY_NAMES[d]} break must fit inside working hours.`;
-              alertBox.style.display = 'block';
-              return;
-            }
-          }
+        } else if (isWorking) {
+          start = '08:00'; end = '16:00';
         }
-
-        days.push({
-          day_of_week: d,
-          is_working: isWorking,
-          start_time: start,
-          end_time: end,
-          break_start: breakStart,
-          break_end: breakEnd,
-        });
-      }
-
-      if (!name || !doctorId || isNaN(duration) || duration < 5) {
-        alertBox.textContent = 'Template name, doctor and duration are required and must be valid.';
-        alertBox.style.display = 'block';
-        return;
+        days.push({ day_of_week: d, is_working: isWorking, start_time: start, end_time: end, break_start: breakStart, break_end: breakEnd });
       }
 
       if (!days.some(day => day.is_working === 1)) {
-        alertBox.textContent = 'At least one working day must be enabled.';
-        alertBox.style.display = 'block';
-        return;
+        alertBox.textContent = 'At least one working day must be enabled.'; alertBox.style.display = 'block'; return;
+      }
+      if (effectiveFrom && effectiveTo && effectiveTo <= effectiveFrom) {
+        alertBox.textContent = 'Effective to date must be after effective from date.'; alertBox.style.display = 'block'; return;
       }
 
-      alertBox.style.display = 'none';
-      setLoading('modal-save-btn', true);
+      const sessions = [];
+      for (let d = 0; d <= 6; d++) {
+        if (sessionsByDay[d]) {
+          sessionsByDay[d].forEach((s, i) => {
+            if (s.start_time && s.end_time) {
+              sessions.push({ day_of_week: d, start_time: s.start_time, end_time: s.end_time, session_name: s.name || '', sort_order: i });
+            }
+          });
+        }
+      }
 
+      setLoading('modal-save-btn', true);
       try {
         const res = await fetch('../php/admin_save_schedule_template.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            template_id: templateId || null,
-            template_name: name,
-            doctor_id: doctorId,
-            slot_duration: duration,
-            is_active: isActive,
-            days,
-            holidays,
-            exceptions,
+            template_id: templateId || null, template_name: name, doctor_id: doctorId,
+            dept_id: deptId || null, slot_duration: duration, is_active: isActive,
+            effective_from: effectiveFrom || null, effective_to: effectiveTo || null,
+            days, sessions, holidays, exceptions,
           }),
         });
-
         const data = await res.json();
         if (data.success) {
           closeModal();
-          showToast('Schedule template saved successfully.', 'success');
+          showToast('Template saved successfully.', 'success', 5000);
           loadTemplates();
+        } else if (data.need_confirmation) {
+          document.getElementById('conflict-details').innerHTML = '<p>This template has <strong>' + data.future_slots + '</strong> future slot(s) with <strong>' + data.booked_slots + '</strong> booking(s).</p>';
+          document.getElementById('conflict-review').style.display = 'block';
+          document.getElementById('conflict-review').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          window._pendingSaveForce = true;
         } else {
-          alertBox.textContent = data.error || 'Failed to save template.';
-          alertBox.style.display = 'block';
+          alertBox.textContent = data.error || 'Failed to save.'; alertBox.style.display = 'block';
         }
-      } catch (err) {
-        alertBox.textContent = 'Network error. Please try again.';
-        alertBox.style.display = 'block';
-      }
-
+      } catch (err) { alertBox.textContent = 'Network error.'; alertBox.style.display = 'block'; }
       setLoading('modal-save-btn', false);
     }
 
-    async function generateMonth(templateId) {
-      const month = document.getElementById('filter-month').value;
-      if (!month) {
-        showToast('Select a target month before generating.', 'error');
-        return;
+    async function forceSaveTemplate() {
+      const templateId = document.getElementById('edit-template-id').value;
+      const name = document.getElementById('tmpl-name').value.trim();
+      const doctorId = document.getElementById('tmpl-doctor').value;
+      const deptId = document.getElementById('tmpl-dept').value;
+      const duration = parseInt(document.getElementById('tmpl-duration').value, 10);
+      const isActive = document.getElementById('tmpl-active').checked ? 1 : 0;
+      const effectiveFrom = document.getElementById('tmpl-effective-from').value;
+      const effectiveTo = document.getElementById('tmpl-effective-to').value;
+
+      const days = [];
+      for (let d = 0; d <= 6; d++) {
+        const isWorking = document.getElementById('chk-' + d).checked ? 1 : 0;
+        let start = '08:00', end = '16:00', breakStart = '', breakEnd = '';
+        if (sessionsByDay[d] && sessionsByDay[d].length > 0) {
+          start = sessionsByDay[d][0].start_time || '08:00';
+          end = sessionsByDay[d][sessionsByDay[d].length - 1].end_time || '16:00';
+          if (sessionsByDay[d].length > 1) {
+            breakStart = sessionsByDay[d][0].end_time;
+            breakEnd = sessionsByDay[d][1].start_time;
+          }
+        }
+        days.push({ day_of_week: d, is_working: isWorking, start_time: start, end_time: end, break_start: breakStart, break_end: breakEnd });
       }
 
-      const payload = { template_id: templateId, month };
-      let shouldConfirm = false;
+      const sessions = [];
+      for (let d = 0; d <= 6; d++) {
+        if (sessionsByDay[d]) {
+          sessionsByDay[d].forEach((s, i) => {
+            if (s.start_time && s.end_time) sessions.push({ day_of_week: d, start_time: s.start_time, end_time: s.end_time, session_name: s.name || '', sort_order: i });
+          });
+        }
+      }
+
+      setLoading('modal-save-btn', true);
+      try {
+        const res = await fetch('../php/admin_save_schedule_template.php', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            template_id: templateId || null, template_name: name, doctor_id: doctorId,
+            dept_id: deptId || null, slot_duration: duration, is_active: isActive,
+            effective_from: effectiveFrom || null, effective_to: effectiveTo || null,
+            days, sessions, holidays, exceptions, force: true,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) { closeModal(); showToast('Template saved. Future unbooked slots regenerated.', 'success', 5000); loadTemplates(); }
+        else showToast(data.error || 'Failed to save.', 'error');
+      } catch (err) { showToast('Network error.', 'error'); }
+      setLoading('modal-save-btn', false);
+    }
+
+    // ─── DELETE TEMPLATE (CUSTOM MODAL) ───
+    async function deleteTemplate(templateId) {
+      const template = templates.find(t => t.template_id == templateId);
+      if (!template) return;
+      const name = template.template_name;
+      const doctorName = template.doctor_name || 'Doctor';
+
+      const confirmed = await showConfirmModal({
+        title: 'Delete Schedule Template?',
+        message: '',
+        icon: 'fa-trash-can',
+        confirmText: 'Delete Template',
+        confirmClass: 'btn-danger',
+        cancelText: 'Cancel',
+        detailHtml: `<div class="confirm-detail">
+          <div class="detail-name"><i class="fa-solid fa-user-doctor" style="color:var(--primary);margin-right:6px;"></i> ${escapeHtml(doctorName)} — ${escapeHtml(name)}</div>
+          <div class="detail-note"><i class="fa-solid fa-circle-info"></i> This will permanently remove the template, its working days, holidays, and all future unbooked slots. Historical booked slots will be preserved.</div>
+        </div>`
+      });
+      if (!confirmed) return;
+
+      setLoading('modal-save-btn', true);
+      try {
+        const res = await fetch('../php/admin_delete_schedule_template.php', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ template_id: templateId }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Template deleted successfully.', 'success', 5000);
+          loadTemplates();
+        } else if (data.has_bookings) {
+          const forceConfirmed = await showConfirmModal({
+            title: 'Template Has Booked Appointments',
+            message: 'This template has <strong>' + data.booked_count + '</strong> future booked appointment(s). Delete anyway?<br><br>Future unbooked slots will also be removed, but booked slots will be kept.',
+            icon: 'fa-triangle-exclamation',
+            confirmText: 'Delete Anyway',
+            confirmClass: 'btn-danger',
+            cancelText: 'Cancel'
+          });
+          if (forceConfirmed) {
+            const res2 = await fetch('../php/admin_delete_schedule_template.php', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ template_id: templateId, force: true }),
+            });
+            const data2 = await res2.json();
+            if (data2.success) { showToast('Template deleted.', 'success', 5000); loadTemplates(); }
+            else showToast(data2.error || 'Could not delete.', 'error');
+          }
+        } else {
+          showToast(data.error || 'Could not delete template.', 'error');
+        }
+      } catch (err) { showToast('Network error.', 'error'); }
+      setLoading('modal-save-btn', false);
+    }
+
+    // ─── GENERATE SLOTS ───
+    async function generateMonth(templateId) {
+      const month = document.getElementById('filter-month').value;
+      if (!month) { showToast('Select a target month first.', 'error'); return; }
+
+      const rangeSelect = document.getElementById('gen-range-' + templateId);
+      const range = rangeSelect ? rangeSelect.value : '1';
+
+      const payload = { template_id: templateId, month, range };
       let confirmed = false;
 
-      do {
+      for (;;) {
         const res = await fetch('../php/admin_generate_schedule_slots.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
         const data = await res.json();
 
         if (data.need_confirmation && !confirmed) {
-          const message = `Existing slots exist for ${data.duplicate_count} day(s) in ${month}. Continue and keep the existing bookings?`;
-          shouldConfirm = await confirmDialog(message, { confirmText: 'Continue', cancelText: 'Cancel' });
-          if (!shouldConfirm) {
-            return;
-          }
+          const ok = await showConfirmModal({
+            title: 'Existing Slots Found',
+            message: data.message || 'Existing slots found for this period. Continue?',
+            confirmText: 'Continue',
+            cancelText: 'Cancel',
+            icon: 'fa-triangle-exclamation',
+            confirmClass: 'btn-warning'
+          });
+          if (!ok) return;
           payload.confirm = true;
           confirmed = true;
           continue;
         }
 
         if (data.success) {
-          const message = data.message || `Generated ${data.created} slots for ${month}.`;
-          showToast(message, 'success', 7000);
+          let msg = '<div class="gen-summary"><h4><i class="fa-solid fa-check-circle" style="color:#166534;"></i> Generation Complete</h4>';
+          if (data.created > 0) msg += '<div class="gen-stat"><i class="fa-solid fa-check-circle" style="color:#166534;"></i> ' + data.created + ' slots created</div>';
+          if (data.skipped > 0) msg += '<div class="gen-stat"><i class="fa-solid fa-rotate-left" style="color:#92400e;"></i> ' + data.skipped + ' duplicates skipped</div>';
+          if (data.holidays_skipped > 0) msg += '<div class="gen-stat"><i class="fa-solid fa-calendar-xmark" style="color:#92400e;"></i> ' + data.holidays_skipped + ' holidays skipped</div>';
+          if (data.leave_skipped > 0) msg += '<div class="gen-stat"><i class="fa-solid fa-user-clock" style="color:#92400e;"></i> ' + data.leave_skipped + ' leave days skipped</div>';
+          msg += '</div>';
+          showToast(data.message || 'Generation complete!', 'success', 8000);
           loadTemplates();
           return;
         }
-
-        showToast(data.error || 'Schedule generation failed.', 'error', 6000);
+        showToast(data.error || 'Generation failed.', 'error', 6000);
         return;
-      } while (shouldConfirm);
+      }
+    }
+
+    // ─── AUDIT LOG ───
+    async function loadAuditLog() {
+      const container = document.getElementById('audit-log-container');
+      const emptyEl = document.getElementById('audit-log-empty');
+      const pagination = document.getElementById('audit-log-pagination');
+      const actionFilter = document.getElementById('audit-filter-action').value;
+      const entityFilter = document.getElementById('audit-filter-entity').value;
+      container.innerHTML = '<p class="text-muted text-sm">Loading...</p>';
+      emptyEl.style.display = 'none';
+      pagination.innerHTML = '';
+      try {
+        const query = new URLSearchParams();
+        query.append('limit', AUDIT_LOG_LIMIT); query.append('offset', auditLogOffset);
+        if (actionFilter) query.append('action', actionFilter);
+        if (entityFilter) query.append('entity_type', entityFilter);
+        const res = await fetch('../php/admin_get_audit_log.php?' + query.toString());
+        const data = await res.json();
+        if (!data.entries || !data.entries.length) { container.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+        container.innerHTML = '';
+        data.entries.forEach(entry => {
+          const actionClass = entry.action.includes('created') ? 'created' : entry.action.includes('updated') ? 'updated' : entry.action.includes('generated') ? 'generated' : entry.action.includes('deleted') || entry.action.includes('removed') ? 'deleted' : 'default';
+          const entityLabel = entry.entity_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          let detailsHtml = '';
+          if (entry.new_values) {
+            const vals = typeof entry.new_values === 'string' ? JSON.parse(entry.new_values) : entry.new_values;
+            const lines = [];
+            if (vals.created !== undefined) lines.push('Created: ' + vals.created);
+            if (vals.skipped !== undefined) lines.push('Skipped: ' + vals.skipped);
+            if (vals.generated_days !== undefined) lines.push('Days: ' + vals.generated_days);
+            if (vals.template_name) lines.push('Name: ' + vals.template_name);
+            if (lines.length) detailsHtml = '<div class="json-diff">' + lines.join('<br>') + '</div>';
+          }
+          container.innerHTML += '<div class="audit-entry"><div class="text-muted text-sm">' + new Date(entry.created_at).toLocaleString() + '</div><div><span class="action-badge ' + actionClass + '">' + entry.action.replace(/_/g, ' ') + '</span></div><div><strong>' + escapeHtml(entry.admin_name) + '</strong><div class="text-muted text-sm">' + entityLabel + (entry.entity_id ? ' #' + entry.entity_id : '') + '</div><div class="text-sm">' + escapeHtml(entry.description || '') + '</div>' + detailsHtml + '</div><div class="text-muted text-sm">' + entityLabel + '</div></div>';
+        });
+        const totalPages = Math.ceil(data.total / AUDIT_LOG_LIMIT);
+        const currentPage = Math.floor(auditLogOffset / AUDIT_LOG_LIMIT) + 1;
+        if (totalPages > 1) {
+          if (auditLogOffset > 0) {
+            pagination.innerHTML += '<button class="btn btn-ghost btn-sm" onclick="auditLogOffset=Math.max(0,auditLogOffset-' + AUDIT_LOG_LIMIT + ');loadAuditLog();"><i class="fa-solid fa-chevron-left"></i> Previous</button>';
+          }
+          pagination.innerHTML += '<span class="text-sm text-muted">Page ' + currentPage + ' of ' + totalPages + ' (' + data.total + ' entries)</span>';
+          if (auditLogOffset + AUDIT_LOG_LIMIT < data.total) {
+            pagination.innerHTML += '<button class="btn btn-ghost btn-sm" onclick="auditLogOffset+=' + AUDIT_LOG_LIMIT + ';loadAuditLog();">Next <i class="fa-solid fa-chevron-right"></i></button>';
+          }
+        } else {
+          pagination.innerHTML = '<span class="text-sm text-muted">' + data.total + ' entries</span>';
+        }
+      } catch (err) { container.innerHTML = '<p class="text-sm" style="color:var(--error);">Failed to load: ' + err.message + '</p>'; }
     }
   </script>
 </body>

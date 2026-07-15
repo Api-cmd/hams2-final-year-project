@@ -44,7 +44,7 @@
   --status-no-show:   #6b7280;   /* grey   */
 
   /* --- Typography --- */
-  --font: 'Inter ', sans-serif;  /* system font, no download needed */
+  --font: 'gilroy', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;  
   --font-size:   15px;
   --line-height: 1.6;
 
@@ -1246,49 +1246,109 @@ table tbody tr:hover {
   color: var(--white);
 }
 
-/* Step indicator (booking form steps) */
+/* ============================================================
+   MODERN STEP INDICATOR (Booking stepper)
+   A clean horizontal stepper similar to Stripe/Airbnb.
+   ============================================================ */
 .step-indicator {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+  padding: 8px 0;
 }
 
 .step {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  font-size: 0.82rem;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
   color: var(--grey-400);
+  position: relative;
+  text-align: center;
+  min-width: 64px;
 }
 
 .step .num {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--grey-200);
   color: var(--grey-400);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 700;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
+/* Current step — primary border */
 .step.active .num {
+  background: var(--blue);
+  color: var(--white);
+  box-shadow: 0 0 0 4px rgba(26, 111, 196, 0.2);
+}
+
+.step.active {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+/* Completed step — blue fill */
+.step.done .num {
   background: var(--blue);
   color: var(--white);
 }
 
-.step.active { color: var(--blue); font-weight: 600; }
-.step.done .num { background: #10b981; color: var(--white); }
+.step.done {
+  color: var(--blue);
+  font-weight: 600;
+}
 
+/* Upcoming/inactive step stays grey */
+.step .step-label {
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+
+/* Line connecting steps */
 .step-line {
   flex: 1;
-  height: 1px;
+  height: 2px;
   background: var(--grey-200);
-  min-width: 24px;
-  max-width: 48px;
+  min-width: 32px;
+  max-width: 80px;
+  margin: 0 4px;
+  transition: background 0.3s ease;
+}
+
+/* When the step before the line is done, colour the line blue */
+.step.done + .step-line {
+  background: var(--blue);
+}
+
+@media (max-width: 480px) {
+  .step {
+    min-width: 48px;
+    font-size: 0.7rem;
+  }
+  .step .num {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+  .step-line {
+    min-width: 16px;
+    max-width: 40px;
+  }
+  .step .step-label {
+    font-size: 0.65rem;
+  }
 }
 
 /* Loading spinner */
@@ -1306,13 +1366,423 @@ table tbody tr:hover {
   to { transform: rotate(360deg); }
 }
 
-/* Footer */
-footer {
-  background: var(--white);
-  border-top: 1px solid var(--grey-200);
+
+/* ============================================================
+   12. NEW DASHBOARD STYLES (Redesigned Patient Dashboard)
+   ============================================================ */
+
+/* Dashboard Container */
+.dashboard-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 32px;
+  min-height: calc(100vh - 60px - 140px);
+}
+
+/* Welcome Hero Card */
+.welcome-hero {
+  background: linear-gradient(135deg, var(--blue) 0%, #145aa3 100%);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 8px 32px rgba(26,111,196,0.2);
+}
+
+.welcome-hero-content h2 {
+  color: var(--white);
+  font-size: 1.6rem;
+  margin: 0 0 4px 0;
+}
+
+.welcome-hero-content .text-muted {
+  color: rgba(255,255,255,0.75) !important;
+}
+
+.welcome-hero-appt {
+  flex-shrink: 0;
+  min-width: 280px;
+}
+
+.welcome-loading {
   text-align: center;
   padding: 16px;
+}
+
+.welcome-loading .spinner {
+  border-color: rgba(255,255,255,0.3);
+  border-top-color: var(--white);
+}
+
+/* Has appointment */
+.welcome-has-appt {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.appt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f1fb;
+  color: var(--blue);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.appt-label {
   font-size: 0.82rem;
   color: var(--grey-400);
-  margin-top: auto;
+  margin-bottom: 4px;
+}
+
+.appt-doctor {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--grey-900);
+  margin-bottom: 2px;
+}
+
+.appt-dept {
+  font-size: 0.85rem;
+  color: var(--grey-700);
+  margin-bottom: 8px;
+}
+
+.appt-datetime {
+  font-size: 0.85rem;
+  color: var(--grey-700);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.appt-datetime i {
+  color: var(--blue);
+}
+
+/* No appointment */
+.welcome-no-appt {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.15);
+  border: 1px dashed rgba(255,255,255,0.4);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.no-appt-icon {
+  font-size: 2rem;
+  color: rgba(255,255,255,0.6);
+}
+
+.no-appt-text p {
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.no-appt-text .btn {
+  background: var(--white);
+  color: var(--blue);
+}
+
+.no-appt-text .btn:hover {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+}
+
+/* Quick Actions Grid */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap);
+  margin-bottom: 28px;
+}
+
+.action-card {
+  background: var(--white);
+  border: 1px solid var(--grey-200);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.action-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+  transform: translateY(-4px);
+  border-color: var(--blue);
+  text-decoration: none;
+}
+
+.action-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--blue-light);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: var(--blue);
+  transition: all 0.25s;
+}
+
+.action-card:hover .action-icon {
+  background: var(--blue);
+  color: var(--white);
+}
+
+.action-text h3 {
+  font-size: 1rem;
+  margin: 0 0 4px 0;
+  color: var(--grey-900);
+}
+
+.action-text p {
+  font-size: 0.82rem;
+  color: var(--grey-400);
+  margin: 0;
+}
+
+/* Dashboard Bottom Grid (Health Tips + Announcements) */
+.dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+
+/* Health Tips Carousel */
+.health-tips-carousel {
+  position: relative;
+  min-height: 80px;
+}
+
+.health-tip-text {
+  font-size: 1rem;
+  color: var(--grey-700);
+  line-height: 1.6;
+  transition: opacity 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.health-tip-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.tip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--grey-200);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tip-dot.active {
+  background: var(--blue);
+  width: 24px;
+  border-radius: 5px;
+}
+
+/* Announcements */
+#announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.announcement-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.announcement-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.announcement-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--grey-900);
+  margin-bottom: 2px;
+}
+
+.announcement-date {
+  font-size: 0.75rem;
+  color: var(--grey-400);
+  margin-bottom: 6px;
+}
+
+.announcement-content {
+  font-size: 0.88rem;
+  color: var(--grey-700);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   13. APPOINTMENTS PAGE IMPROVEMENTS
+   ============================================================ */
+
+/* Toolbar: search + filter side by side */
+.appt-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.appt-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.appt-search-wrap i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--grey-400);
+  font-size: 0.9rem;
+}
+
+.appt-search-wrap input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  border: 1.5px solid var(--grey-200);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.appt-search-wrap input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(26,111,196,0.12);
+}
+
+.appt-filter-select {
+  padding: 9px 36px 9px 14px;
+  border: 1.5px solid var(--grey-200);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  font-family: var(--font);
+  color: var(--grey-700);
+  background: var(--white);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9da8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  min-width: 140px;
+}
+
+.appt-filter-select:focus {
+  border-color: var(--blue);
+}
+
+/* Combined Date-Time cell */
+.datetime-cell {
+  line-height: 1.5;
+}
+
+.datetime-cell .date-part {
+  display: block;
+  color: var(--grey-900);
+  font-weight: 500;
+}
+
+.datetime-cell .time-part {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--grey-400);
+}
+
+/* Responsive adjustments for new dashboard */
+@media (max-width: 768px) {
+  .welcome-hero {
+    flex-direction: column;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .welcome-hero-appt {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-container {
+    padding: 20px 16px;
+  }
+
+  .appt-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .appt-search-wrap {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-hero {
+    padding: 20px 16px;
+  }
+
+  .welcome-hero-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .action-card {
+    padding: 16px;
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .action-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .welcome-no-appt {
+    flex-direction: column;
+    text-align: center;
+  }
 }

@@ -1,0 +1,504 @@
+[14-Jul-2026 15:50:53 Africa/Dar_es_Salaam] PHP Warning:  mkdir(): File exists in C:\xampp\htdocs\hams2\php\config.php on line 29
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] PHP Warning:  ini_set(): Session ini settings cannot be changed when a session is active in C:\xampp\htdocs\hams2\php\config.php on line 34
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] PHP Warning:  ini_set(): Session ini settings cannot be changed when a session is active in C:\xampp\htdocs\hams2\php\config.php on line 35
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] PHP Warning:  ini_set(): Session ini settings cannot be changed when a session is active in C:\xampp\htdocs\hams2\php\config.php on line 36
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] PHP Warning:  ini_set(): Session ini settings cannot be changed when a session is active in C:\xampp\htdocs\hams2\php\config.php on line 37
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] PHP Warning:  ini_set(): Session ini settings cannot be changed when a session is active in C:\xampp\htdocs\hams2\php\config.php on line 38
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] [HAMS] get_departments.php called
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[14-Jul-2026 20:33:06 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[14-Jul-2026 20:47:44 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[14-Jul-2026 20:47:44 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[14-Jul-2026 20:47:52 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[14-Jul-2026 20:47:58 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[14-Jul-2026 20:47:58 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[14-Jul-2026 20:47:58 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[14-Jul-2026 20:47:58 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[14-Jul-2026 20:48:42 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[14-Jul-2026 20:48:42 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"2215","dept_id":"1","doctor_id":2,"notes":"","family_profile_id":"0"}
+[14-Jul-2026 20:48:42 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.appointment_id' in 'field list' in C:\xampp\htdocs\hams2\php\book_appointment.php:100
+Stack trace:
+#0 C:\xampp\htdocs\hams2\php\book_appointment.php(100): PDO->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2\php\book_appointment.php on line 100
+[14-Jul-2026 20:48:49 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[14-Jul-2026 20:48:49 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"2215","dept_id":"1","doctor_id":2,"notes":"","family_profile_id":"0"}
+[14-Jul-2026 20:48:49 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.appointment_id' in 'field list' in C:\xampp\htdocs\hams2\php\book_appointment.php:100
+Stack trace:
+#0 C:\xampp\htdocs\hams2\php\book_appointment.php(100): PDO->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2\php\book_appointment.php on line 100
+[14-Jul-2026 20:48:49 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[14-Jul-2026 20:48:49 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"2215","dept_id":"1","doctor_id":2,"notes":"","family_profile_id":"0"}
+[14-Jul-2026 20:48:49 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.appointment_id' in 'field list' in C:\xampp\htdocs\hams2\php\book_appointment.php:100
+Stack trace:
+#0 C:\xampp\htdocs\hams2\php\book_appointment.php(100): PDO->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2\php\book_appointment.php on line 100
+[14-Jul-2026 20:50:40 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[14-Jul-2026 20:50:40 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"2215","dept_id":"1","doctor_id":2,"notes":"","family_profile_id":"0"}
+[14-Jul-2026 20:50:45 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[14-Jul-2026 20:50:45 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[14-Jul-2026 20:50:45 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 8 appointments
+[14-Jul-2026 20:50:49 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[14-Jul-2026 20:50:49 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[14-Jul-2026 20:50:49 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[14-Jul-2026 20:50:49 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[14-Jul-2026 20:51:10 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[14-Jul-2026 20:51:10 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[14-Jul-2026 20:51:10 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 8 appointments
+[14-Jul-2026 20:51:16 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[14-Jul-2026 20:51:16 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[14-Jul-2026 20:51:16 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 8 appointments
+[14-Jul-2026 22:55:34 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[14-Jul-2026 22:55:40 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[14-Jul-2026 22:55:40 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[14-Jul-2026 22:55:40 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[14-Jul-2026 22:55:40 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[14-Jul-2026 22:56:24 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[14-Jul-2026 22:56:24 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"2217","dept_id":"1","doctor_id":2,"notes":"non","family_profile_id":"1"}
+[14-Jul-2026 22:56:27 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[14-Jul-2026 22:56:27 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[14-Jul-2026 22:56:27 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 9 appointments
+[14-Jul-2026 22:56:30 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[14-Jul-2026 22:56:30 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[14-Jul-2026 22:56:30 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 9 appointments
+[14-Jul-2026 23:10:35 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 00:41:36 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 00:41:38 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 00:42:01 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 00:45:56 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 00:46:24 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 02:31:18 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 02:31:32 Africa/Dar_es_Salaam] [HAMS] get_announcements.php error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'hams2_db.announcements' doesn't exist
+[15-Jul-2026 04:26:11 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[15-Jul-2026 04:26:11 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 04:26:11 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 10 appointments
+[15-Jul-2026 04:26:21 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 04:26:21 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[15-Jul-2026 04:26:21 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 04:26:21 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 04:26:50 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[15-Jul-2026 04:26:50 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"2220","dept_id":"1","doctor_id":2,"notes":"hapo","family_profile_id":"1"}
+[15-Jul-2026 04:26:52 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[15-Jul-2026 04:26:52 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 04:26:52 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 11 appointments
+[15-Jul-2026 04:27:10 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[15-Jul-2026 04:27:10 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid AND a.status IN ('pending','confirmed') AND s.slot_date >= CURDATE()
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 04:27:10 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 4 appointments
+[15-Jul-2026 04:27:15 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[15-Jul-2026 04:27:15 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 04:27:15 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 11 appointments
+[15-Jul-2026 06:45:11 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 06:45:11 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 06:45:12 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 06:45:12 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 06:45:15 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 06:45:15 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 06:45:16 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 06:45:16 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 07:54:09 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 07:54:09 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 07:54:11 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 07:54:11 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 07:54:13 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 07:54:13 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 07:54:22 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 07:54:22 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 07:57:01 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 07:57:01 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 07:58:04 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 07:58:04 Africa/Dar_es_Salaam] [HAMS] Session data: []
+[15-Jul-2026 08:23:48 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 08:23:48 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":6,"user_name":"anather","user_role":"patient","user_email":"anather@gmail.com","login_ip":"::1"}
+[15-Jul-2026 08:23:48 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 08:23:48 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 08:25:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:25:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:25:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 08:27:24 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 08:27:24 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":6,"user_name":"anather","user_role":"patient","user_email":"anather@gmail.com","login_ip":"::1"}
+[15-Jul-2026 08:27:24 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 08:27:24 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 08:27:27 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 08:27:27 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":6,"user_name":"anather","user_role":"patient","user_email":"anather@gmail.com","login_ip":"::1"}
+[15-Jul-2026 08:27:27 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 08:27:27 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 08:27:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:27:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:27:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 08:28:01 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:28:01 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:28:01 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 08:28:03 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:28:03 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:28:03 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 08:28:26 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:28:26 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:28:26 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 08:29:26 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:29:26 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:29:26 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 08:29:27 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:29:27 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid AND a.status = 'cancelled'
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:29:27 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 08:29:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 6
+[15-Jul-2026 08:29:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 08:29:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments

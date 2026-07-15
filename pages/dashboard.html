@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Dashboard — HAMS</title>
-  <!-- Font Awesome  -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
 
@@ -18,176 +19,126 @@
 
   <!-- ============================================================
        NAVBAR
-       The navbar is the same on every patient page.
-       To change the brand name or links, edit this section.
        ============================================================ -->
   <nav class="navbar">
-
-    <!-- Brand -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="dashboard.html" class="navbar-brand">
-      <span>🏥</span> HAMS
+      <i class="fa-solid fa-hospital"></i> HAMS
     </a>
-
-    <!-- Navigation links (right side) -->
     <div class="navbar-links">
       <a href="dashboard.html" class="active">Dashboard</a>
       <a href="book.html">Book Appointment</a>
       <a href="appointments.html">My Appointments</a>
       <a href="family.html">Family</a>
       <div class="divider"></div>
-      <!--
-        The user's name is inserted here by JavaScript
-        after fetching it from the PHP session.
-      -->
-      <a href="profile.html" id="nav-username">Account</a>
+      <a href="profile.html" id="nav-username" class="navbar-user-link">Account</a>
+      <a href="../php/logout.php" class="navbar-user-link">Logout</a>
+    </div>
+    <!-- Mobile nav dropdown (shown when hamburger is clicked on small screens) -->
+    <div id="mobile-nav-dropdown" class="mobile-nav-dropdown">
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="book.html">Book Appointment</a>
+      <a href="appointments.html">My Appointments</a>
+      <a href="family.html">Family</a>
+      <div class="mobile-nav-divider"></div>
+      <a href="profile.html" id="mobile-nav-username">Account</a>
       <a href="../php/logout.php">Logout</a>
     </div>
-
   </nav>
 
   <!-- ============================================================
        MAIN CONTENT
-       No sidebar on patient pages — full width layout.
        ============================================================ -->
-  <div style="padding: 28px 32px; max-width: 1100px; margin: 0 auto;">
+  <div class="dashboard-container">
 
-    <!-- Page header: greeting + quick action button -->
-    <div class="page-header">
-      <div>
-        <!--
-          id="greeting": JavaScript will replace "Patient" with the
-          actual logged-in user's name fetched from PHP.
-        -->
+    <!-- A. WELCOME SECTION (Hero Card) -->
+    <div class="welcome-hero" id="welcome-hero">
+      <div class="welcome-hero-content">
         <h2>Welcome back, <span id="greeting">Patient</span> </h2>
         <p class="text-muted text-sm" id="today-date"></p>
       </div>
-      <a href="book.html" class="btn btn-primary">+ Book Appointment</a>
+      <div class="welcome-hero-appt" id="welcome-appt-area">
+        <!-- Dynamically loaded by JS -->
+        <div id="welcome-loading" class="welcome-loading">
+          <span class="spinner"></span>
+        </div>
+      </div>
     </div>
 
-    <!-- ============================================================
-         STAT CARDS
-         Four summary numbers. The values are loaded by JavaScript
-         which fetches them from php/get_stats.php
-         ============================================================ -->
-    <div class="stats-grid">
-
-      <!-- Total booked -->
-      <div class="stat-card">
-        <div class="stat-label">Total Booked</div>
-        <div class="stat-value" id="stat-total">—</div>
-        <div class="stat-sub">all time</div>
-      </div>
-
-      <!-- Upcoming -->
-      <div class="stat-card" style="border-top-color:#3b82f6;">
-        <div class="stat-label">Upcoming</div>
-        <div class="stat-value" id="stat-upcoming">—</div>
-        <div class="stat-sub">pending or confirmed</div>
-      </div>
-
-      <!-- Completed -->
-      <div class="stat-card green">
-        <div class="stat-label">Completed</div>
-        <div class="stat-value" id="stat-completed">—</div>
-        <div class="stat-sub">seen by doctor</div>
-      </div>
-
-      <!-- Cancelled -->
-      <div class="stat-card red">
-        <div class="stat-label">Cancelled</div>
-        <div class="stat-value" id="stat-cancelled">—</div>
-        <div class="stat-sub">by you or staff</div>
-      </div>
-
-    </div><!-- end stats-grid -->
-
-    <!-- ============================================================
-         RECENT APPOINTMENTS TABLE
-         Loaded by JavaScript from php/get_appointments.php
-         ============================================================ -->
-    <div class="card">
-      <div class="card-header">
-        <h3>Recent Appointments</h3>
-        <a href="appointments.html" class="btn btn-ghost btn-sm">View All</a>
-      </div>
-
-      <div class="card-body" style="padding:0;">
-
-        <!-- Shown while the table data is loading -->
-        <div id="table-loading" style="padding:32px; text-align:center; color:var(--grey-400);">
-          <span class="spinner"></span>
-          <p style="margin-top:8px;">Loading appointments...</p>
+    <!-- B. QUICK ACTIONS -->
+    <div class="quick-actions-grid">
+      <a href="book.html" class="action-card">
+        <div class="action-icon">
+          <i class="fa-solid fa-calendar-plus"></i>
         </div>
+        <div class="action-text">
+          <h3>Book Appointment</h3>
+          <p>Choose a doctor and time slot</p>
+        </div>
+      </a>
+      <a href="appointments.html" class="action-card">
+        <div class="action-icon">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div class="action-text">
+          <h3>My Appointments</h3>
+          <p>View, cancel or reschedule appointments</p>
+        </div>
+      </a>
+      <a href="family.html" class="action-card">
+        <div class="action-icon">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="action-text">
+          <h3>Family Profiles</h3>
+          <p>Book appointments for a family member</p>
+        </div>
+      </a>
+    </div>
 
-        <!-- The actual table — hidden until data loads -->
-        <div id="table-wrap" style="display:none;">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Patient</th>
-                  <th>Doctor</th>
-                  <th>Department</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <!--
-                tbody is empty here.
-                JavaScript builds the rows and inserts them here
-                after fetching data from php/get_appointments.php
-              -->
-              <tbody id="appointments-tbody"></tbody>
-            </table>
+    <!-- C. HEALTH TIPS + D. ANNOUNCEMENTS (two-column layout) -->
+    <div class="dashboard-bottom-grid">
+
+      <!-- Health Tips -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-heart-pulse"></i> Health Tips</h3>
+        </div>
+        <div class="card-body">
+          <div class="health-tips-carousel" id="health-tips-carousel">
+            <p class="health-tip-text" id="health-tip-text">Stay hydrated.</p>
+            <div class="health-tip-dots" id="health-tip-dots"></div>
           </div>
         </div>
+      </div>
 
-        <!-- Shown when the patient has no appointments yet -->
-        <div id="table-empty" class="empty-state" style="display:none;">
-          <span class="icon"><i class="fa-solid fa-calendar-xmark"></i></span>
-          <p>No appointments yet.</p>
-          <a href="book.html" class="btn btn-primary">Book Your First Appointment</a>
+      <!-- Hospital Announcements -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-bullhorn"></i> Hospital Announcements</h3>
         </div>
+        <div class="card-body">
+          <div id="announcements-area">
+            <div id="announcements-loading" style="text-align:center; color:var(--grey-400);">
+              <span class="spinner"></span>
+            </div>
+            <div id="announcements-list"></div>
+            <div id="announcements-empty" class="empty-state" style="display:none; padding:20px;">
+              <i class="fa-solid fa-circle-info" style="font-size:2rem; color:var(--grey-400); display:block; margin-bottom:8px;"></i>
+              <p>No announcements available.</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      </div><!-- end card-body -->
-    </div><!-- end card -->
+    </div><!-- end dashboard-bottom-grid -->
 
-    <!-- ============================================================
-         QUICK LINKS
-         Three shortcut cards at the bottom of the dashboard.
-         ============================================================ -->
-    <div class="quick-links">
-
-      <a href="book.html" class="quick-link-card">
-        <span class="icon"><i class="fa-solid fa-calendar-plus"></i></span>
-        <div class="title">Book Appointment</div>
-        <div class="sub">Choose a doctor and time slot</div>
-      </a>
-
-      <a href="appointments.html" class="quick-link-card">
-        <span class="icon"><i class="fa-solid fa-calendar-check"></i></span>
-        <div class="title">My Appointments</div>
-        <div class="sub">View, cancel or reschedule</div>
-      </a>
-
-      <a href="family.html" class="quick-link-card">
-        <span class="icon"><i class="fa-solid fa-users"></i></span>
-        <div class="title">Family Profiles</div>
-        <div class="sub">Book for a family member</div>
-      </a>
-
-    </div>
-
-  </div><!-- end main content -->
-
-  <footer>
-    &copy; <span id="footer-year"></span> Health Appointment Management System | Developed by Group 09
-  </footer>
+  </div><!-- end dashboard-container -->
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
     // ===========================================================
     // DASHBOARD PAGE JAVASCRIPT
@@ -197,131 +148,201 @@
     document.getElementById('today-date').textContent =
       new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-    // Set footer year automatically
-    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // --- Health Tips Data ---
+    const healthTips = [
+      'Stay hydrated, drink at least 8 glasses of water a day.',
+      'Get enough sleep aim for 7–9 hours per night.',
+      'Wash your hands frequently to prevent infections.',
+      'Exercise regularly at least 30 minutes a day.',
+      'Eat a balanced diet rich in fruits and vegetables.'
+    ];
 
-    // --- Load session info (logged-in user's name and role) ---
-    // We call php/session_check.php which returns JSON like:
-    // { "logged_in": true, "name": "Amina Juma", "role": "patient" }
+    let currentTipIndex = 0;
+    let tipInterval;
+
+    function showTip(index) {
+      const textEl = document.getElementById('health-tip-text');
+      const dotsEl = document.getElementById('health-tip-dots');
+
+      textEl.style.opacity = '0';
+      setTimeout(() => {
+        textEl.textContent = healthTips[index];
+        textEl.style.opacity = '1';
+      }, 300);
+
+      dotsEl.querySelectorAll('.tip-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+    }
+
+    function initHealthTips() {
+      const dotsEl = document.getElementById('health-tip-dots');
+      dotsEl.innerHTML = '';
+      healthTips.forEach((_, i) => {
+        const dot = document.createElement('span');
+        dot.className = 'tip-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => {
+          currentTipIndex = i;
+          showTip(i);
+          resetTipInterval();
+        };
+        dotsEl.appendChild(dot);
+      });
+      showTip(0);
+      tipInterval = setInterval(() => {
+        currentTipIndex = (currentTipIndex + 1) % healthTips.length;
+        showTip(currentTipIndex);
+      }, 5000);
+    }
+
+    function resetTipInterval() {
+      clearInterval(tipInterval);
+      tipInterval = setInterval(() => {
+        currentTipIndex = (currentTipIndex + 1) % healthTips.length;
+        showTip(currentTipIndex);
+      }, 5000);
+    }
+
+    // --- Load session info ---
     async function loadSession() {
       try {
         const res  = await fetch('../php/session_check.php');
         const data = await res.json();
 
         if (!data.logged_in) {
-          // Not logged in — send back to login page
           window.location.href = '../index.html?msg=login_required';
           return;
         }
 
         if (data.role !== 'patient') {
-          // Wrong role — e.g. admin trying to access patient pages
           window.location.href = '../index.html?msg=access_denied';
           return;
         }
 
-        // Insert the user's first name into the greeting
         const firstName = data.name.split(' ')[0];
         document.getElementById('greeting').textContent = firstName;
         document.getElementById('nav-username').textContent = data.name;
+        document.getElementById('mobile-nav-username').textContent = data.name;
 
       } catch (err) {
         console.error('Session check failed:', err);
       }
     }
 
-    // --- Load stat card numbers ---
-    // Fetches from php/get_stats.php which returns:
-    // { "total": 5, "upcoming": 2, "completed": 2, "cancelled": 1 }
-    async function loadStats() {
+    // --- Load upcoming appointment (Hero Card) ---
+    async function loadUpcomingAppointment() {
       try {
-        const res  = await fetch('../php/get_stats.php');
+        const res  = await fetch('../php/get_upcoming_appointment.php');
         const data = await res.json();
 
-        document.getElementById('stat-total').textContent     = data.total     ?? 0;
-        document.getElementById('stat-upcoming').textContent  = data.upcoming  ?? 0;
-        document.getElementById('stat-completed').textContent = data.completed ?? 0;
-        document.getElementById('stat-cancelled').textContent = data.cancelled ?? 0;
+        const area = document.getElementById('welcome-appt-area');
 
-      } catch (err) {
-        console.error('Stats load failed:', err);
-      }
-    }
-
-    // --- Load recent appointments table ---
-    // Fetches from php/get_appointments.php?limit=5
-    // Returns an array of appointment objects.
-    async function loadAppointments() {
-      try {
-        const res  = await fetch('../php/get_appointments.php?limit=5');
-        const data = await res.json();
-
-        // Hide the loading spinner
-        document.getElementById('table-loading').style.display = 'none';
-
-        if (!data.length) {
-          // Show empty state message
-          document.getElementById('table-empty').style.display = 'block';
+        if (!data || data.error || !data.appt_id) {
+          area.innerHTML = `
+            <div class="welcome-no-appt">
+              <div class="no-appt-icon">
+                <i class="fa-solid fa-calendar-xmark"></i>
+              </div>
+              <div class="no-appt-text">
+                <p>You have no upcoming appointments.</p>
+                <a href="book.html" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-calendar-plus"></i> Book Appointment
+                </a>
+              </div>
+            </div>
+          `;
           return;
         }
 
-        // Build HTML rows from the data
-        const tbody = document.getElementById('appointments-tbody');
+        const today = new Date();
+        const todayStr = localToday();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-        data.forEach((appt, index) => {
-          // Determine who the appointment is for
-          const patientName = appt.family_name || 'Mysel';
+        let dateDisplay;
+        if (data.slot_date === tomorrowStr) {
+          dateDisplay = 'Tomorrow';
+        } else {
+          const d = new Date(data.slot_date + 'T00:00:00');
+          dateDisplay = d.toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+        }
 
-          // Format the date into DD/MM/YYYY
-          const date = new Date(appt.slot_date);
-          const formattedDate = date.toLocaleDateString('en-GB');
+        const timeFormatted = formatTime(data.start_time);
+        const doctorName = data.doctor_name ? `Dr. ${escapeHtml(data.doctor_name)}` : 'Auto-assigned';
 
-          // Format the time into 12-hour format e.g. "08:30 AM"
-          const timeParts = appt.start_time.split(':');
-          const timeObj   = new Date();
-          timeObj.setHours(timeParts[0], timeParts[1]);
-          const formattedTime = timeObj.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true });
-
-          // Build the status badge HTML
-          // The badge class matches what we defined in style.css e.g. badge-seen
-          const badgeHtml = `<span class="badge badge-${appt.status}">${appt.status}</span>`;
-
-          // Build the action button — only show cancel if status allows it
-          let actionHtml = '—';
-          if (['pending','confirmed'].includes(appt.status)) {
-            actionHtml = `<a href="appointments.html?id=${appt.appt_id}"
-                            class="btn btn-ghost btn-sm">View</a>`;
-          }
-
-          // Create the table row
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${escapeHtml(patientName)}</td>
-            <td>Dr. ${escapeHtml(appt.doctor_name)}</td>
-            <td>${escapeHtml(appt.dept_name)}</td>
-            <td>${formattedDate}</td>
-            <td>${formattedTime}</td>
-            <td>${badgeHtml}</td>
-            <td>${actionHtml}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        // Show the table now that rows are inserted
-        document.getElementById('table-wrap').style.display = 'block';
+        area.innerHTML = `
+          <div class="welcome-has-appt">
+            <div class="appt-badge">
+              <i class="fa-solid fa-clock"></i>
+              <span>Upcoming Appointment</span>
+            </div>
+            <p class="appt-label">Your next appointment</p>
+            <p class="appt-doctor">${doctorName}</p>
+            <p class="appt-dept">${escapeHtml(data.dept_name)}</p>
+            <p class="appt-datetime">
+              <i class="fa-regular fa-calendar"></i> ${dateDisplay}
+              <i class="fa-regular fa-clock" style="margin-left:12px;"></i> ${timeFormatted}
+            </p>
+            <a href="appointments.html" class="btn btn-secondary btn-sm">
+              <i class="fa-solid fa-eye"></i> View Appointment
+            </a>
+          </div>
+        `;
 
       } catch (err) {
-        console.error('Appointments load failed:', err);
-        document.getElementById('table-loading').style.display = 'none';
-        document.getElementById('table-empty').style.display   = 'block';
+        console.error('Upcoming appointment load failed:', err);
+        document.getElementById('welcome-appt-area').innerHTML = `
+          <div class="welcome-no-appt">
+            <p>Could not load appointment info.</p>
+            <a href="book.html" class="btn btn-primary btn-sm">Book Appointment</a>
+          </div>
+        `;
       }
     }
 
-    // Run all three loaders when the page opens
+    // --- Load announcements ---
+    async function loadAnnouncements() {
+      try {
+        const res  = await fetch('../php/get_announcements.php');
+        const data = await res.json();
+
+        document.getElementById('announcements-loading').style.display = 'none';
+
+        if (!Array.isArray(data) || data.length === 0) {
+          document.getElementById('announcements-empty').style.display = 'block';
+          return;
+        }
+
+        const list = document.getElementById('announcements-list');
+        list.innerHTML = data.map(a => {
+          const date = new Date(a.posted_date + 'T00:00:00');
+          const formattedDate = date.toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+          return `
+            <div class="announcement-item">
+              <div class="announcement-title">${escapeHtml(a.title)}</div>
+              <div class="announcement-date">${formattedDate}</div>
+              <div class="announcement-content">${escapeHtml(a.content)}</div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error('Announcements load failed:', err);
+        document.getElementById('announcements-loading').style.display = 'none';
+        document.getElementById('announcements-empty').style.display = 'block';
+      }
+    }
+
+    // Run all loaders
     loadSession();
-    loadStats();
-    loadAppointments();
+    loadUpcomingAppointment();
+    loadAnnouncements();
+    initHealthTips();
   </script>
 
 </body>

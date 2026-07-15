@@ -1,0 +1,42 @@
+HAMS2 SLOT BUG DEBUG STEPS
+===========================
+
+Here's what you need to do to find out exactly what the errors are!
+
+First, hard-refresh your browser (Ctrl + Shift + R or Cmd + Shift + R) to clear any cache.
+
+Then, open these test scripts in your browser to see the actual errors!
+
+
+1. Check your database schema:
+   Go to: http://localhost/hams2/php/test_schema.php
+   - This will show DESCRIBE for doctors, time_slots, and departments tables!
+   - Compare this with what the queries are expecting!
+
+
+2. Test the time slots retrieval query:
+   Go to: http://localhost/hams2/php/test_admin_get_slots_query.php
+   - This runs the admin_get_slots.php query directly, with all errors printed!
+   - Also try: http://localhost/hams2/php/debug_admin_get_slots.php (no auth)
+
+
+3. Test the slot creation logic:
+   First, log into your admin account!
+   Go to: http://localhost/hams2/php/test_save_slots.php
+   - This simulates a slot creation request with valid test data!
+   - Also try: http://localhost/hams2/php/debug_admin_save_slots.php (no auth)
+     To use debug_admin_save_slots.php, you can send it a test JSON payload!
+     (You can use Postman or cURL to send a POST request with JSON body, or use a browser extension like RESTer)
+
+
+4. Check the Network tab in your browser's dev tools:
+   When you open admin-slots.html and try to generate slots:
+   - Open F12 (or Ctrl + Shift + I / Cmd + Option + I)
+   - Go to "Network" tab
+   - Find the request to "admin_save_slots.php" or "admin_get_slots.php"
+   - Click on it
+   - Go to "Response" tab to see EXACTLY what error message the server returned!
+   - Copy and paste that error somewhere!
+
+
+Then, tell me what you see! That error message will tell us exactly what's wrong!

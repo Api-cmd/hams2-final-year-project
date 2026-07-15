@@ -10,7 +10,7 @@ require_role('admin');
 
 try {
     $dept_id = (int)($_GET['dept_id'] ?? 0);
-    $date    = clean($_GET['date'] ?? '');
+    $date    = isset($_GET['date']) ? clean((string)$_GET['date']) : '';
 
     $whereClauses = [];
     $params = [];
@@ -48,12 +48,15 @@ try {
             ts.is_booked,
             ts.is_active,
             ts.doctor_id,
+            ts.template_id,
             d.dept_name,
             doc.full_name AS doctor_name,
+            st.template_name,
             GREATEST(ts.capacity - ts.booked_count, 0) AS available_count
         FROM time_slots ts
-        JOIN departments d ON ts.dept_id = d.dept_id
+        LEFT JOIN departments d ON ts.dept_id = d.dept_id
         LEFT JOIN doctors doc ON ts.doctor_id = doc.doctor_id
+        LEFT JOIN schedule_templates st ON ts.template_id = st.template_id
         $whereSql
         ORDER BY ts.slot_date DESC, ts.start_time ASC
     ";
@@ -65,5 +68,8 @@ try {
 } catch (PDOException $e) {
     error_log('[HAMS] Error fetching slots: ' . $e->getMessage());
     send_json(['error' => 'Failed to fetch slots', 'detail' => $e->getMessage()], 500);
+} catch (TypeError $e) {
+    error_log('[HAMS] TypeError fetching slots: ' . $e->getMessage());
+    send_json(['error' => 'Type error fetching slots', 'detail' => $e->getMessage()], 500);
 }
 ?>

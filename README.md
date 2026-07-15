@@ -2,12 +2,7 @@
 
 A simplified online appointment booking system with only **Patient** and **Admin** roles. Unlike the original HAMS system, HAMS2 does not have doctor login - appointments are booked by department instead.
 
-## Key Differences from HAMS
 
-- **No Doctor Role**: Staff/doctor login removed - only Patient and Admin roles
-- **Department-Based Booking**: Patients book appointments by department, not by specific doctor(also he can book by a specif doctor)
-- **Simplified Workflow**: 3-step booking process (Department → Date/Time → Confirm) instead of 4-step
-- **Reduced Complexity**: No doctor management, schedules, or staff dashboards
 
 ## Features
 
@@ -51,7 +46,11 @@ The system uses MySQL/MariaDB with the following tables:
 1. **Copy the project**
    - Place the `hams2` folder in your web server's document root (e.g., `C:\xampp\htdocs\hams2`)
 
-2. **Create the database**
+2. **Start your database server**
+   - In XAMPP, open the control panel and start **MySQL**.
+   - If you installed MySQL/MariaDB separately, make sure the service is running on port `3306`.
+
+3. **Create the database**
    ```bash
    # Import the SQL schema
    mysql -u root -p < hams2_database_schema.sql

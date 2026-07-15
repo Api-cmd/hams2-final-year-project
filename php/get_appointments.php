@@ -72,17 +72,17 @@ $sql = "
 
 error_log('[HAMS] get_appointments.php - SQL: ' . $sql);
 
-// Note: LIMIT cannot use a named placeholder in PDO when emulate_prepares is false,
-// so we bind it separately using bindValue with an explicit integer type.
-$stmt = $pdo->prepare($sql);
-$stmt->bindValue(':uid',   $uid,   PDO::PARAM_INT);
-$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-$stmt->execute();
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':uid',   $uid,   PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
 
-$appointments = $stmt->fetchAll();
+    $appointments = $stmt->fetchAll();
+    error_log('[HAMS] get_appointments.php - Found ' . count($appointments) . ' appointments');
 
-error_log('[HAMS] get_appointments.php - Found ' . count($appointments) . ' appointments');
-
-// The data goes straight to JSON — the HTML page builds the table rows from it
-send_json($appointments);
-?>
+    send_json($appointments);
+} catch (PDOException $e) {
+    error_log('[HAMS] get_appointments.php error: ' . $e->getMessage());
+    send_json(['error' => 'Failed to load appointments. Please contact support.'], 500);
+}

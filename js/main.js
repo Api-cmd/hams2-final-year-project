@@ -68,6 +68,37 @@ function formatTime(timeStr) {
 
 
 // -----------------------------------------------------------
+// localToday()
+// Returns today's date in YYYY-MM-DD using local timezone
+// (avoids UTC drift from toISOString() near midnight).
+// -----------------------------------------------------------
+function localToday() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+
+// -----------------------------------------------------------
+// parseJsonResponse(response)
+// Safely parse a fetch Response as JSON.
+// Throws with a readable message if the body is not JSON.
+// -----------------------------------------------------------
+async function parseJsonResponse(response) {
+  const text = await response.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.error('Non-JSON response:', text.slice(0, 500));
+    throw new Error('Server returned an invalid response. Check PHP error logs.');
+  }
+}
+
+
+// -----------------------------------------------------------
 // statusBadge(status)
 // Returns an HTML string for a coloured status pill.
 // The class name must match what we defined in style.css.

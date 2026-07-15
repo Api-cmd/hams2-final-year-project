@@ -5,33 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .announcement-input-card { border-top: 3px solid var(--blue); }
+    .announcement-input-card textarea { resize: vertical; min-height: 80px; }
+    .announcement-list-card { border-top: 3px solid var(--status-confirmed); }
+    .announcement-admin-item { padding: 12px 16px; border-bottom: 1px solid var(--grey-200); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .announcement-admin-item:last-child { border-bottom: none; }
+    .announcement-admin-item .title { font-weight: 600; color: var(--grey-900); }
+    .announcement-admin-item .content { font-size: 0.85rem; color: var(--grey-700); margin-top: 4px; }
+    .announcement-admin-item .date { font-size: 0.75rem; color: var(--grey-400); margin-top: 2px; }
+    .announcement-admin-item .actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--white); border-radius: var(--radius); padding: 20px; border-top: 4px solid var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .stat-card.green { border-top-color: #10b981; }
+    .stat-card.amber { border-top-color: #f59e0b; }
+    .stat-card .stat-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--grey-400); margin-bottom: 4px; }
+    .stat-card .stat-value { font-size: 2rem; font-weight: 700; color: var(--grey-900); line-height: 1.2; }
+    .stat-card .stat-sub { font-size: 0.8rem; color: var(--grey-400); margin-top: 4px; }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .stat-card { padding: 14px; }
+      .stat-card .stat-value { font-size: 1.6rem; }
+      .page-header { flex-direction: column; gap: 8px; }
+      .page-header > div:last-child { text-align: left; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
   <!-- NAVBAR -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="admin-dashboard.html" class="navbar-brand">
       <i class="fa-solid fa-hospital"></i> HAMS Admin
     </a>
     <div class="navbar-links">
       <a href="admin-dashboard.html" class="active">
-        <i class="fa-solid fa-gauge"></i> Dashboard
+         Dashboard
       </a>
       <a href="admin-users.html">
-        <i class="fa-solid fa-users"></i> Users
+        Users
       </a>
       <a href="admin-doctors.html">
-        <i class="fa-solid fa-user-doctor"></i> Doctors
+         Doctors
+      </a>
+      <a href="admin-departments.html">
+        Departments
+      </a>
+      <a href="admin-schedules.html">
+        Schedule Templates
       </a>
       <a href="admin-slots.html">
-        <i class="fa-solid fa-clock"></i> Time Slots
+        Time Slots
       </a>
       <a href="admin-appointments.html">
-        <i class="fa-solid fa-calendar-check"></i> Appointments
+        Appointments
       </a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
+      <a href="../php/logout.php" class="navbar-user-link">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
       </a>
     </div>
@@ -63,6 +101,9 @@
         <a href="admin-departments.html">
           <i class="fa-solid fa-building-columns icon"></i> Departments
         </a>
+        <a href="admin-schedules.html">
+          <i class="fa-solid fa-calendar-alt icon"></i> Schedule Templates
+        </a>
         <a href="admin-slots.html">
           <i class="fa-solid fa-clock icon"></i> Time Slots
         </a>
@@ -80,35 +121,22 @@
     <!-- MAIN CONTENT -->
     <main class="main-content">
 
-      <!-- Page heading -->
       <div class="page-header">
         <div>
           <h2>Admin Dashboard</h2>
           <p class="text-muted text-sm" id="today-date"></p>
         </div>
+        <div style="text-align:right;">
+          <span class="text-muted text-sm" id="refresh-indicator"></span>
+          <br>
+          <span class="text-muted text-sm">
+            <i class="fa-solid fa-rotate" style="color:var(--blue);"></i>
+            Auto-refreshes every 30 seconds
+          </span>
+        </div>
       </div>
 
-
-      <div class="page-header">
-  <div>
-    <h2>Admin Dashboard</h2>
-    <p class="text-muted text-sm" id="today-date"></p>
-  </div>
-  <!-- Shows when data was last refreshed -->
-  <div style="text-align:right;">
-    <span class="text-muted text-sm" id="refresh-indicator"></span>
-    <br>
-    <span class="text-muted text-sm">
-      <i class="fa-solid fa-rotate" style="color:var(--blue);"></i>
-      Auto-refreshes every 30 seconds
-    </span>
-  </div>
-</div>
-
-      <!-- =====================================================
-           STAT CARDS
-           Loaded from php/admin_get_stats.php
-           ===================================================== -->
+      <!-- STAT CARDS -->
       <div class="stats-grid">
 
         <div class="stat-card">
@@ -124,92 +152,53 @@
         </div>
 
         <div class="stat-card green">
-          <div class="stat-label">Today's Appointments</div>
-          <div class="stat-value" id="stat-today">—</div>
-          <div class="stat-sub">scheduled for today</div>
+          <div class="stat-label">Total Appointments</div>
+          <div class="stat-value" id="stat-total-appts">—</div>
+          <div class="stat-sub">all time appointments</div>
         </div>
 
         <div class="stat-card amber">
-          <div class="stat-label">Pending Approval</div>
-          <div class="stat-value" id="stat-pending">—</div>
-          <div class="stat-sub">awaiting confirmation</div>
+          <div class="stat-label">Total Doctors</div>
+          <div class="stat-value" id="stat-doctors">—</div>
+          <div class="stat-sub">active doctors</div>
         </div>
 
       </div>
 
-      <!-- =====================================================
-           TODAY'S APPOINTMENTS TABLE
-           Shows all appointments for today across all doctors.
-           ===================================================== -->
-      <div class="card" style="margin-bottom:24px;">
+      <!-- ANNOUNCEMENT INPUT CARD -->
+      <div class="card announcement-input-card" style="margin-bottom:24px;">
         <div class="card-header">
-          <h3><i class="fa-solid fa-calendar-day"></i> Today's Appointments</h3>
-          <a href="admin-appointments.html" class="btn btn-ghost btn-sm">View All</a>
+          <h3><i class="fa-solid fa-bullhorn"></i> Post an Announcement</h3>
+        </div>
+        <div class="card-body">
+          <div id="announce-alert-box" class="alert" style="display:none;"></div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" id="announce-title" class="form-control" placeholder="Announcement title..." maxlength="200">
+            <textarea id="announce-content" class="form-control" placeholder="Write your announcement here..." maxlength="2000"></textarea>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="postAnnouncement()">
+                <i class="fa-solid fa-paper-plane"></i> Post Announcement
+              </button>
+              <span class="text-muted text-sm" id="char-count">0 / 2000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXISTING ANNOUNCEMENTS LIST -->
+      <div class="card announcement-list-card" style="margin-bottom:24px;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-list"></i> Posted Announcements</h3>
         </div>
         <div class="card-body" style="padding:0;">
-
-          <div id="today-loading" style="padding:32px; text-align:center; color:var(--grey-400);">
+          <div id="admin-announce-loading" style="padding:20px; text-align:center; color:var(--grey-400);">
             <span class="spinner"></span>
             <p style="margin-top:8px;">Loading...</p>
           </div>
-
-          <div id="today-wrap" style="display:none;">
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Patient</th>
-                    <th>Doctor</th>
-                    <th>Department</th>
-                    <th>Status</th>
-                   
-                  </tr>
-                </thead>
-                <tbody id="today-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div id="today-empty" class="empty-state" style="display:none;">
-            <i class="fa-solid fa-calendar-xmark icon" style="font-size:2.5rem; color:var(--grey-400);"></i>
-            <p>No appointments scheduled for today.</p>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- =====================================================
-           RECENT REGISTRATIONS
-           The 5 most recently registered patients.
-           ===================================================== -->
-      <div class="card">
-        <div class="card-header">
-          <h3><i class="fa-solid fa-user-plus"></i> Recent Registrations</h3>
-          <a href="admin-users.html" class="btn btn-ghost btn-sm">Manage Users</a>
-        </div>
-        <div class="card-body" style="padding:0;">
-          <div id="reg-loading" style="padding:24px; text-align:center; color:var(--grey-400);">
-            <span class="spinner"></span>
-          </div>
-          <div id="reg-wrap" style="display:none;">
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Registered</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="reg-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-          <div id="reg-empty" class="empty-state" style="display:none;">
-            <p>No users registered yet.</p>
+          <div id="admin-announce-list"></div>
+          <div id="admin-announce-empty" class="empty-state" style="display:none; padding:20px;">
+            <i class="fa-solid fa-circle-info" style="font-size:2rem; color:var(--grey-400); display:block; margin-bottom:8px;"></i>
+            <p>No announcements posted yet.</p>
           </div>
         </div>
       </div>
@@ -218,6 +207,7 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
     // ==========================================================
     // ADMIN DASHBOARD JAVASCRIPT
@@ -225,6 +215,11 @@
 
     document.getElementById('today-date').textContent =
       new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    // Char counter for announcement textarea
+    document.getElementById('announce-content').addEventListener('input', function() {
+      document.getElementById('char-count').textContent = this.value.length + ' / 2000';
+    });
 
     // --- Session check: admin only ---
     async function checkSession() {
@@ -242,171 +237,146 @@
         const data = await res.json();
         document.getElementById('stat-patients').textContent = data.patients ?? 0;
         document.getElementById('stat-departments').textContent = data.departments ?? 0;
-        document.getElementById('stat-today').textContent    = data.today    ?? 0;
-        document.getElementById('stat-pending').textContent  = data.pending  ?? 0;
+        document.getElementById('stat-total-appts').textContent = data.total_appts ?? data.today ?? 0;
+        document.getElementById('stat-doctors').textContent  = data.doctors  ?? 0;
       } catch (err) {
         console.error('Stats error:', err);
       }
     }
 
-    // --- Load today's appointments ---
-    async function loadToday() {
-  try {
-    const res  = await fetch('../php/admin_get_today.php');
-    const data = await res.json();
+    // --- Post a new announcement ---
+    async function postAnnouncement() {
+      const title = document.getElementById('announce-title').value.trim();
+      const content = document.getElementById('announce-content').value.trim();
 
-    document.getElementById('today-loading').style.display = 'none';
-
-    if (!data.length) {
-      document.getElementById('today-empty').style.display = 'block';
-      return;
-    }
-
-    const tbody = document.getElementById('today-tbody');
-    data.forEach(a => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${formatTime(a.start_time)}</td>
-        <td>${escapeHtml(a.patient_name)}</td>
-        <td>Dr. ${escapeHtml(a.doctor_name)}</td>
-        <td>${escapeHtml(a.dept_name)}</td>
-        <td>${statusBadge(a.status)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('today-wrap').style.display = 'block';
-
-  } catch (err) {
-    document.getElementById('today-loading').style.display = 'none';
-    document.getElementById('today-empty').style.display   = 'block';
-  }
-}
-
-    // --- Load recent registrations ---
-    async function loadRegistrations() {
-      try {
-        const res  = await fetch('../php/admin_get_users.php?limit=5');
-        const data = await res.json();
-
-        document.getElementById('reg-loading').style.display = 'none';
-
-        if (!data.length) {
-          document.getElementById('reg-empty').style.display = 'block';
-          return;
-        }
-
-        const tbody = document.getElementById('reg-tbody');
-        data.forEach(u => {
-          const date = new Date(u.created_at).toLocaleDateString('en-GB');
-          const tr   = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${escapeHtml(u.full_name)}</td>
-            <td>${escapeHtml(u.email)}</td>
-            <td>${escapeHtml(u.phone)}</td>
-            <td>${date}</td>
-            <td>
-              <span class="badge ${u.is_active == 1 ? 'badge-seen' : 'badge-cancelled'}">
-                ${u.is_active == 1 ? 'Active' : 'Disabled'}
-              </span>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        document.getElementById('reg-wrap').style.display = 'block';
-
-      } catch (err) {
-        document.getElementById('reg-loading').style.display = 'none';
-        document.getElementById('reg-empty').style.display   = 'block';
-      }
-    }
-
-    // --- Confirm an appointment directly from the dashboard ---
-    async function confirmAppt(apptId, btn) {
-      if (!confirmAction('Confirm this appointment?')) return;
-
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>';
+      if (!title) { showAlert('Please enter a title.', 'error', 'announce-alert-box'); return; }
+      if (!content) { showAlert('Please enter announcement content.', 'error', 'announce-alert-box'); return; }
 
       try {
-        const res  = await fetch('../php/admin_update_appointment.php', {
+        const res = await fetch('../php/admin_save_announcement.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ appt_id: apptId, status: 'confirmed' }),
+          body: JSON.stringify({ title, content, posted_date: localToday(), is_active: 1 }),
         });
         const data = await res.json();
 
         if (data.success) {
-          // Replace the button with a confirmed badge
-          btn.replaceWith(Object.assign(
-            document.createElement('span'),
-            { className: 'badge badge-confirmed', textContent: 'Confirmed' }
-          ));
+          showAlert('Announcement posted successfully!', 'success', 'announce-alert-box');
+          document.getElementById('announce-title').value = '';
+          document.getElementById('announce-content').value = '';
+          document.getElementById('char-count').textContent = '0 / 2000';
+          loadAdminAnnouncements();
         } else {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Confirm';
-          showAlert(data.error || 'Update failed.', 'error');
+          showAlert(data.error || 'Failed to post announcement.', 'error', 'announce-alert-box');
         }
       } catch (err) {
+        showAlert('Network error.', 'error', 'announce-alert-box');
+      }
+    }
+
+    // --- Load existing announcements (admin view) ---
+    async function loadAdminAnnouncements() {
+      try {
+        const res  = await fetch('../php/admin_get_announcements.php');
+        const data = await res.json();
+
+        document.getElementById('admin-announce-loading').style.display = 'none';
+
+        if (!Array.isArray(data) || data.length === 0) {
+          document.getElementById('admin-announce-empty').style.display = 'block';
+          return;
+        }
+
+        const list = document.getElementById('admin-announce-list');
+        list.innerHTML = data.map(a => {
+          const date = new Date(a.posted_date + 'T00:00:00');
+          const formattedDate = date.toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+          return `
+            <div class="announcement-admin-item">
+              <div style="flex:1; min-width:200px;">
+                <div class="title">${escapeHtml(a.title)}</div>
+                <div class="content">${escapeHtml(a.content)}</div>
+                <div class="date">${formattedDate}</div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-ghost btn-sm text-danger" onclick="deleteAnnouncement(${a.announcement_id}, this)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error('Admin announcements load failed:', err);
+        document.getElementById('admin-announce-loading').style.display = 'none';
+        document.getElementById('admin-announce-empty').style.display = 'block';
+      }
+    }
+
+    // --- Delete an announcement ---
+    async function deleteAnnouncement(id, btn) {
+      if (!await confirmAction('Delete this announcement?')) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch('../php/admin_delete_announcement.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ announcement_id: id }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showAlert('Announcement deleted.', 'success');
+          loadAdminAnnouncements();
+        } else {
+          showAlert(data.error || 'Delete failed.', 'error');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        showAlert('Network error.', 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Confirm';
       }
     }
 
     checkSession();
     loadStats();
-    loadToday();
-    loadRegistrations();
-
+    loadAdminAnnouncements();
 
     // ===========================================================
-// AUTO REFRESH
-// Reloads today's appointments and stats every 30 seconds.
-// This means if a patient books while the admin page is open
-// it appears automatically without manual refresh.
-// ===========================================================
+    // AUTO REFRESH
+    // ===========================================================
 
-const REFRESH_INTERVAL = 30000; // 30 seconds in milliseconds
+    const REFRESH_INTERVAL = 30000;
 
-// Store the interval so we can cancel it if needed
-let refreshTimer = setInterval(async () => {
-    // Only refresh if the page is visible
-    // No point refreshing a tab the admin isn't looking at
-    if (document.visibilityState === 'visible') {
+    let refreshTimer = setInterval(async () => {
+      if (document.visibilityState === 'visible') {
         await loadStats();
-        await loadToday();
-
-        // Show a subtle "last updated" timestamp
+        await loadAdminAnnouncements();
         const now = new Date().toLocaleTimeString('en-GB');
         const indicator = document.getElementById('refresh-indicator');
-        if (indicator) {
-            indicator.textContent = `Last updated: ${now}`;
-        }
-    }
-}, REFRESH_INTERVAL);
+        if (indicator) indicator.textContent = `Last updated: ${now}`;
+      }
+    }, REFRESH_INTERVAL);
 
-// Stop refreshing when the page is hidden (tab switched)
-// Resume when they come back
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
         clearInterval(refreshTimer);
-    } else {
-        // Refresh immediately when they return to the tab
+      } else {
         loadStats();
-        loadToday();
-        // Then restart the interval
+        loadAdminAnnouncements();
         refreshTimer = setInterval(async () => {
-            if (document.visibilityState === 'visible') {
-                await loadStats();
-                await loadToday();
-                const now = new Date().toLocaleTimeString('en-GB');
-                const indicator = document.getElementById('refresh-indicator');
-                if (indicator) indicator.textContent = `Last updated: ${now}`;
-            }
+          if (document.visibilityState === 'visible') {
+            await loadStats();
+            await loadAdminAnnouncements();
+            const now = new Date().toLocaleTimeString('en-GB');
+            const indicator = document.getElementById('refresh-indicator');
+            if (indicator) indicator.textContent = `Last updated: ${now}`;
+          }
         }, REFRESH_INTERVAL);
-    }
-});
+      }
+    });
   </script>
 
 </body>

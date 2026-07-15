@@ -24,17 +24,18 @@ try {
     ");
     $today = $stmt->fetchColumn();
 
-    $stmt = $pdo->query("
-        SELECT COUNT(*) FROM appointments
-        WHERE status = 'pending'
-    ");
-    $pending = $stmt->fetchColumn();
+    $stmt = $pdo->query("SELECT COUNT(*) FROM appointments");
+    $total_appts = $stmt->fetchColumn();
+
+    $stmt = $pdo->query("SELECT COUNT(*) FROM doctors WHERE is_active = 1");
+    $doctors = $stmt->fetchColumn();
 
     $stats = [
         'patients' => (int)$patients,
         'departments' => (int)$departments,
+        'total_appts' => (int)$total_appts,
         'today'    => (int)$today,
-        'pending'  => (int)$pending,
+        'doctors'  => (int)$doctors,
     ];
 
     // Store in cache for 5 minutes

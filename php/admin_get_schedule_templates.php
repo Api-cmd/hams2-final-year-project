@@ -6,6 +6,7 @@ try {
     $doctor_id = isset($_GET['doctor_id']) ? (int)$_GET['doctor_id'] : 0;
     $dept_id   = isset($_GET['dept_id']) ? (int)$_GET['dept_id'] : 0;
     $month     = clean($_GET['month'] ?? '');
+    $include_inactive = isset($_GET['include_inactive']) ? (bool)$_GET['include_inactive'] : false;
 
     $whereClauses = [];
     $params = [];
@@ -20,9 +21,13 @@ try {
         $params[] = $dept_id;
     }
 
+    if (!$include_inactive) {
+        $whereClauses[] = 't.is_active = 1';
+    }
+
     $whereSql = count($whereClauses) ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
 
-    $templates = $pdo->prepare("\
+    $templates = $pdo->prepare("
         SELECT
             t.template_id,
             t.template_name,
@@ -30,13 +35,15 @@ try {
             t.dept_id,
             t.slot_duration,
             t.is_active,
+            t.effective_from,
+            t.effective_to,
             doc.full_name AS doctor_name,
             dept.dept_name
         FROM schedule_templates t
         JOIN doctors doc ON t.doctor_id = doc.doctor_id
         JOIN departments dept ON t.dept_id = dept.dept_id
         $whereSql
-        ORDER BY dept.dept_name ASC, doc.full_name ASC, t.template_name ASC
+        ORDER BY dept.dept_name ASC, doc.full_name ASC, t.effective_from ASC, t.template_name ASC
     ");
     $templates->execute($params);
     $templates = $templates->fetchAll();
@@ -70,7 +77,7 @@ try {
         SELECT
             template_id,
             COUNT(*) AS total_slots,
-            SUM(booked_count) AS total_booked,
+            SUM(is_booked) AS total_booked,
             SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active_slots,
             SUM(CASE WHEN is_active = 1 AND is_booked = 0 THEN 1 ELSE 0 END) AS available_slots
         FROM time_slots
@@ -89,7 +96,7 @@ try {
             SELECT
                 template_id,
                 COUNT(*) AS total_slots,
-                SUM(booked_count) AS total_booked,
+                SUM(is_booked) AS total_booked,
                 SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active_slots,
                 SUM(CASE WHEN is_active = 1 AND is_booked = 0 THEN 1 ELSE 0 END) AS available_slots
             FROM time_slots
@@ -104,9 +111,23 @@ try {
         }
     }
 
+    $sessionStmt = $pdo->prepare("
+        SELECT session_id, template_id, day_of_week, start_time, end_time, sort_order, session_name
+        FROM template_day_sessions
+        WHERE template_id IN ($placeholders)
+        ORDER BY template_id, day_of_week, sort_order
+    ");
+    $sessionStmt->execute($templateIds);
+    $sessions = $sessionStmt->fetchAll();
+
     $templateDays = [];
     foreach ($days as $day) {
         $templateDays[$day['template_id']][] = $day;
+    }
+
+    $templateSessions = [];
+    foreach ($sessions as $session) {
+        $templateSessions[$session['template_id']][] = $session;
     }
 
     $templateHolidays = [];
@@ -121,6 +142,7 @@ try {
 
     foreach ($templates as &$template) {
         $template['days'] = $templateDays[$template['template_id']] ?? [];
+        $template['sessions'] = $templateSessions[$template['template_id']] ?? [];
         $template['holidays'] = $templateHolidays[$template['template_id']] ?? [];
         $template['stats'] = $templateStats[$template['template_id']] ?? [
             'total_slots' => 0,
@@ -128,7 +150,10 @@ try {
             'active_slots' => 0,
             'available_slots' => 0,
         ];
-        if (!empty($monthStats)) {
+        // Always set month_stats when a month filter is provided, even if no slots exist yet.
+        // This ensures the JS can properly display "This month" stats instead of falling back
+        // to total stats while showing "This month" as the label.
+        if ($month && preg_match('/^\d{4}-\d{2}$/', $month)) {
             $template['month_stats'] = $monthStats[$template['template_id']] ?? [
                 'total_slots' => 0,
                 'total_booked' => 0,

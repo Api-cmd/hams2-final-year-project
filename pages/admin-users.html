@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Users — HAMS</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /*
-      Modal overlay — covers the whole screen with a dark
+      Modal: a popup form that appears over the page with a
       semi-transparent background when adding/editing a user.
       display:none by default; JS sets it to flex to show it.
     */
@@ -58,33 +59,53 @@
       line-height: 1;
     }
     .btn-close:hover { color: var(--grey-900); }
+    
+    @media (max-width: 640px) {
+      .modal { max-width: 100%; border-radius: 14px; margin: 12px; }
+      .modal-footer { flex-direction: column; }
+      .modal-footer .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
 
+  <!-- NAVBAR -->
   <nav class="navbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
     <a href="admin-dashboard.html" class="navbar-brand">
       <i class="fa-solid fa-hospital"></i> HAMS Admin
     </a>
     <div class="navbar-links">
-      <a href="admin-dashboard.html">
-        <i class="fa-solid fa-gauge"></i> Dashboard
+      <a href="admin-dashboard.html" >
+         Dashboard
       </a>
       <a href="admin-users.html" class="active">
-        <i class="fa-solid fa-users"></i> Users
+        Users
       </a>
       <a href="admin-doctors.html">
-        <i class="fa-solid fa-user-doctor"></i> Doctors
+         Doctors
+      </a>
+      <a href="admin-departments.html">
+        Departments
+      </a>
+      <a href="admin-schedules.html">
+        Schedule Templates
       </a>
       <a href="admin-slots.html">
-        <i class="fa-solid fa-clock"></i> Slots
+        Time Slots
+      </a>
+      <a href="admin-appointments.html">
+        Appointments
       </a>
       <div class="divider"></div>
-      <a href="../php/logout.php">
+      <a href="../php/logout.php" class="navbar-user-link">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
       </a>
     </div>
   </nav>
+
 
   <div class="page-wrapper">
     <aside class="sidebar">
@@ -107,6 +128,9 @@
         </a>
         <a href="admin-departments.html">
           <i class="fa-solid fa-building-columns icon"></i> Departments
+        </a>
+        <a href="admin-schedules.html">
+          <i class="fa-solid fa-calendar-alt icon"></i> Schedule Templates
         </a>
         <a href="admin-slots.html">
           <i class="fa-solid fa-clock icon"></i> Time Slots
@@ -264,6 +288,7 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/responsive.js"></script>
   <script>
     // ==========================================================
     // ADMIN USERS PAGE JAVASCRIPT
@@ -332,13 +357,15 @@
           </td>
           <td>${date}</td>
           <td>
-            <button class="btn btn-ghost btn-sm" onclick='editUser(${JSON.stringify(u)})'>
-              <i class="fa-solid fa-pen"></i>
-            </button>
-            <button class="btn btn-ghost btn-sm"
-              onclick="toggleUser(${u.user_id}, ${u.is_active}, this)">
-              <i class="fa-solid fa-${u.is_active == 1 ? 'ban' : 'check'}"></i>
-            </button>
+            <div style="display:flex; gap:4px; flex-wrap:nowrap;">
+              <button class="btn btn-ghost btn-sm" onclick='editUser(${JSON.stringify(u)})'>
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-ghost btn-sm"
+                onclick="toggleUser(${u.user_id}, ${u.is_active}, this)">
+                <i class="fa-solid fa-${u.is_active == 1 ? 'ban' : 'check'}"></i>
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);

@@ -1,5 +1,12 @@
 <?php
+// ===========================================================
+// php/admin_generate_schedule_slots.php
+// Generates time slots from a schedule template using working sessions.
+// Supports: 1, 3, 6, 12 month ranges.
+// Handles holidays, doctor exceptions, and existing slot overlap.
+// ===========================================================
 require_once 'config.php';
+require_once 'audit_log.php';
 require_role('admin');
 
 $body = json_decode(file_get_contents('php://input'), true);
@@ -9,14 +16,21 @@ if (!$body) {
 
 $template_id = (int)($body['template_id'] ?? 0);
 $month = clean($body['month'] ?? '');
+$range = clean($body['range'] ?? '1');
 $confirm = isset($body['confirm']) ? (bool)$body['confirm'] : false;
 
 if (!$template_id || !preg_match('/^\d{4}-\d{2}$/', $month)) {
     send_json(['error' => 'Template and month are required. Use format YYYY-MM.'], 400);
 }
 
+$validRanges = ['1', '3', '6', '12'];
+if (!in_array($range, $validRanges)) {
+    send_json(['error' => 'Invalid range. Must be 1, 3, 6, or 12 months.'], 400);
+}
+
 try {
-    $stmt = $pdo->prepare("SELECT template_id, doctor_id, dept_id, slot_duration, is_active FROM schedule_templates WHERE template_id = ?");
+    // Load template
+    $stmt = $pdo->prepare("SELECT template_id, doctor_id, dept_id, slot_duration, is_active, effective_from, effective_to FROM schedule_templates WHERE template_id = ?");
     $stmt->execute([$template_id]);
     $template = $stmt->fetch();
 
@@ -33,67 +47,118 @@ try {
         send_json(['error' => 'Invalid month format.'], 400);
     }
 
+    // Calculate end date based on range
     $endDate = (clone $startDate)->modify('last day of this month');
-    $today = new DateTime('today');
-    $nowTime = new DateTime('now');
-
-    $dayStmt = $pdo->prepare("SELECT day_of_week, is_working, start_time, end_time, break_start, break_end FROM template_days WHERE template_id = ?");
-    $dayStmt->execute([$template_id]);
-    $dayRows = $dayStmt->fetchAll();
-
-    $days = [];
-    foreach ($dayRows as $row) {
-        $days[(int)$row['day_of_week']] = $row;
+    if ($range > 1) {
+        $endDate = (clone $startDate)->modify('+' . ($range - 1) . ' months');
+        $endDate->modify('last day of ' . $endDate->format('F Y'));
     }
 
-    // Ensure we have rows for all 7 days; missing day = not working.
-    for ($d = 0; $d <= 6; $d++) {
-        if (!isset($days[$d])) {
-            $days[$d] = [
-                'day_of_week' => $d,
-                'is_working' => 0,
-                'start_time' => null,
-                'end_time' => null,
-                'break_start' => null,
-                'break_end' => null,
-            ];
+    // Check if template is effective for the requested period (overlap check)
+    $templateEffectiveFrom = $template['effective_from'] ? new DateTime($template['effective_from']) : null;
+    $templateEffectiveTo = $template['effective_to'] ? new DateTime($template['effective_to']) : null;
+
+    if ($templateEffectiveFrom && $endDate < $templateEffectiveFrom) {
+        send_json(['error' => 'Template is not effective until ' . $templateEffectiveFrom->format('Y-m-d') . '. The requested period ends before the template becomes active.'], 400);
+    }
+    if ($templateEffectiveTo && $startDate > $templateEffectiveTo) {
+        send_json(['error' => 'Template is only effective until ' . $templateEffectiveTo->format('Y-m-d') . '. The requested period starts after the template has expired.'], 400);
+    }
+
+    $today = new DateTime('today');
+    $nowTime = new DateTime('now');
+    $doctorId = (int)$template['doctor_id'];
+
+    // ==========================================================
+    // LOAD WORKING SESSIONS (new sessions-based approach)
+    // Falls back to legacy template_days + break fields
+    // ==========================================================
+    $sessionStmt = $pdo->prepare("SELECT day_of_week, start_time, end_time, sort_order FROM template_day_sessions WHERE template_id = ? ORDER BY day_of_week, sort_order");
+    $sessionStmt->execute([$template_id]);
+    $sessionRows = $sessionStmt->fetchAll();
+
+    $sessionsByDay = [];
+    if (!empty($sessionRows)) {
+        foreach ($sessionRows as $row) {
+            $day = (int)$row['day_of_week'];
+            if (!isset($sessionsByDay[$day])) {
+                $sessionsByDay[$day] = [];
+            }
+            $sessionsByDay[$day][] = $row;
+        }
+    } else {
+        // Fallback: load from legacy template_days with break fields
+        $dayStmt = $pdo->prepare("SELECT day_of_week, start_time, end_time, break_start, break_end FROM template_days WHERE template_id = ?");
+        $dayStmt->execute([$template_id]);
+        $dayRows = $dayStmt->fetchAll();
+        foreach ($dayRows as $row) {
+            if ((int)$row['is_working'] !== 1) continue;
+            $day = (int)$row['day_of_week'];
+            if (!isset($sessionsByDay[$day])) {
+                $sessionsByDay[$day] = [];
+            }
+            $start = $row['start_time'];
+            $end = $row['end_time'];
+            $bs = $row['break_start'];
+            $be = $row['break_end'];
+            // Without break: single session. With break: two sessions.
+            if ($bs && $be && $be > $bs) {
+                if ($bs > $start) {
+                    $sessionsByDay[$day][] = ['start_time' => $start, 'end_time' => $bs, 'sort_order' => 0];
+                }
+                if ($be < $end) {
+                    $sessionsByDay[$day][] = ['start_time' => $be, 'end_time' => $end, 'sort_order' => 1];
+                }
+            } else {
+                $sessionsByDay[$day][] = ['start_time' => $start, 'end_time' => $end, 'sort_order' => 0];
+            }
         }
     }
 
-    $holidayStmt = $pdo->prepare("SELECT holiday_date FROM template_holidays WHERE template_id = ?");
-    $holidayStmt->execute([$template_id]);
+    // Load template holidays
+    $holidayStmt = $pdo->prepare("SELECT holiday_date FROM template_holidays WHERE template_id = ? AND holiday_date BETWEEN ? AND ?");
+    $holidayStmt->execute([$template_id, $startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
     $holidayDates = $holidayStmt->fetchAll(PDO::FETCH_COLUMN);
     $holidayMap = array_flip($holidayDates);
 
+    // Load global hospital holidays
     $globalHolidayStmt = $pdo->prepare("SELECT holiday_date FROM holidays WHERE holiday_date BETWEEN ? AND ?");
     $globalHolidayStmt->execute([$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
     $globalHolidayDates = $globalHolidayStmt->fetchAll(PDO::FETCH_COLUMN);
     $globalHolidayMap = array_flip($globalHolidayDates);
 
-    $exceptionStmt = $pdo->prepare("SELECT exception_date, is_working, start_time, end_time, break_start, break_end FROM schedule_exceptions WHERE doctor_id = ? AND exception_date BETWEEN ? AND ?");
-    $exceptionStmt->execute([$template['doctor_id'], $startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+    // Load doctor exceptions
+    $exceptionStmt = $pdo->prepare("SELECT exception_date, is_working, start_time, end_time, break_start, break_end, note FROM schedule_exceptions WHERE doctor_id = ? AND exception_date BETWEEN ? AND ?");
+    $exceptionStmt->execute([$doctorId, $startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
     $exceptionRows = $exceptionStmt->fetchAll();
     $exceptionMap = [];
     foreach ($exceptionRows as $row) {
         $exceptionMap[$row['exception_date']] = $row;
     }
 
-    $existingStmt = $pdo->prepare("SELECT slot_date, COUNT(*) AS count FROM time_slots WHERE doctor_id = ? AND slot_date BETWEEN ? AND ? GROUP BY slot_date");
-    $existingStmt->execute([$template['doctor_id'], $startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+    // Check for existing slots in the period
+    $existingStmt = $pdo->prepare("SELECT slot_date, COUNT(*) AS count, SUM(is_booked) AS booked_count FROM time_slots WHERE doctor_id = ? AND slot_date BETWEEN ? AND ? GROUP BY slot_date");
+    $existingStmt->execute([$doctorId, $startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
     $existingRows = $existingStmt->fetchAll();
 
-    $duplicates = [];
+    $existingDates = [];
+    $totalExistingSlots = 0;
+    $totalBookedSlots = 0;
     foreach ($existingRows as $row) {
-        $duplicates[] = $row['slot_date'];
+        $existingDates[] = $row['slot_date'];
+        $totalExistingSlots += (int)$row['count'];
+        $totalBookedSlots += (int)$row['booked_count'];
     }
 
-    if (!$confirm && !empty($duplicates)) {
+    if (!$confirm && !empty($existingDates)) {
         send_json([
             'success' => false,
             'need_confirmation' => true,
-            'message' => 'Existing slots already exist for some days in this month. Confirm regeneration to skip duplicates and keep existing bookings.',
-            'duplicate_dates' => array_values($duplicates),
-            'duplicate_count' => count($duplicates),
+            'message' => 'Existing slots already exist for ' . count($existingDates) . ' day(s) in this period (' . $totalExistingSlots . ' total slots, ' . $totalBookedSlots . ' booked). Confirming will skip duplicates and keep existing bookings.',
+            'duplicate_dates' => array_values($existingDates),
+            'duplicate_count' => count($existingDates),
+            'existing_slots' => $totalExistingSlots,
+            'booked_slots' => $totalBookedSlots,
         ]);
     }
 
@@ -104,6 +169,8 @@ try {
 
     $created = 0;
     $skipped = 0;
+    $holidaysSkipped = 0;
+    $leaveSkipped = 0;
     $generatedDays = 0;
     $current = clone $startDate;
     $todayString = $today->format('Y-m-d');
@@ -112,82 +179,95 @@ try {
         $weekday = (int)$current->format('w');
         $dateString = $current->format('Y-m-d');
 
+        // Skip past dates
         if ($dateString < $todayString) {
             $current->modify('+1 day');
             continue;
         }
 
-        if (isset($globalHolidayMap[$dateString]) || isset($holidayMap[$dateString])) {
+        // Check global holiday
+        if (isset($globalHolidayMap[$dateString])) {
+            $holidaysSkipped++;
             $current->modify('+1 day');
             continue;
         }
 
+        // Check template holiday
+        if (isset($holidayMap[$dateString])) {
+            $holidaysSkipped++;
+            $current->modify('+1 day');
+            continue;
+        }
+
+        // Check doctor exception (override)
         $override = $exceptionMap[$dateString] ?? null;
         if ($override !== null) {
             if ((int)$override['is_working'] !== 1) {
+                $leaveSkipped++;
                 $current->modify('+1 day');
                 continue;
             }
-            $day = [
-                'start_time' => $override['start_time'],
-                'end_time' => $override['end_time'],
-                'break_start' => $override['break_start'],
-                'break_end' => $override['break_end'],
-            ];
+            // Override with custom times - build sessions from override
+            $overrideSessions = [];
+            $os = $override['start_time'];
+            $oe = $override['end_time'];
+            $obs = $override['break_start'];
+            $obe = $override['break_end'];
+            if ($os && $oe) {
+                if ($obs && $obe && $obe > $obs) {
+                    if ($obs > $os) {
+                        $overrideSessions[] = ['start_time' => $os, 'end_time' => $obs];
+                    }
+                    if ($obe < $oe) {
+                        $overrideSessions[] = ['start_time' => $obe, 'end_time' => $oe];
+                    }
+                } else {
+                    $overrideSessions[] = ['start_time' => $os, 'end_time' => $oe];
+                }
+            }
+            $daySessions = $overrideSessions;
         } else {
-            $day = $days[$weekday];
-            if ((int)$day['is_working'] !== 1) {
-                $current->modify('+1 day');
-                continue;
-            }
+            // No override - use template sessions for this day of week
+            $daySessions = $sessionsByDay[$weekday] ?? [];
         }
 
-        $ranges = [];
-        $startTime = $day['start_time'];
-        $endTime = $day['end_time'];
-        $breakStart = $day['break_start'];
-        $breakEnd = $day['break_end'];
-
-        if (!$startTime || !$endTime) {
+        if (empty($daySessions)) {
             $current->modify('+1 day');
             continue;
         }
 
-        if ($breakStart && $breakEnd && time_to_minutes($breakEnd) > time_to_minutes($breakStart)) {
-            if (time_to_minutes($breakStart) > time_to_minutes($startTime)) {
-                $ranges[] = [$startTime, $breakStart];
-            }
-            if (time_to_minutes($breakEnd) < time_to_minutes($endTime)) {
-                $ranges[] = [$breakEnd, $endTime];
-            }
-        } else {
-            $ranges[] = [$startTime, $endTime];
-        }
+        // Generate slots for each session
+        $hasSlotsToday = false;
+        foreach ($daySessions as $session) {
+            $sessionStart = $session['start_time'];
+            $sessionEnd = $session['end_time'];
+            if (!$sessionStart || !$sessionEnd) continue;
 
-        foreach ($ranges as [$rangeStart, $rangeEnd]) {
-            $currentMinute = time_to_minutes($rangeStart);
-            $endMinute = time_to_minutes($rangeEnd);
-            while ($currentMinute + (int)$template['slot_duration'] <= $endMinute) {
+            $currentMinute = time_to_minutes($sessionStart);
+            $endMinute = time_to_minutes($sessionEnd);
+            $duration = (int)$template['slot_duration'];
+
+            while ($currentMinute + $duration <= $endMinute) {
                 $slotStart = minutes_to_time($currentMinute);
-                $slotEnd = minutes_to_time($currentMinute + (int)$template['slot_duration']);
+                $slotEnd = minutes_to_time($currentMinute + $duration);
 
+                // Skip past time slots for today
                 if ($dateString === $todayString) {
                     $nowMinute = time_to_minutes($nowTime->format('H:i'));
                     if ($currentMinute <= $nowMinute) {
-                        $currentMinute += (int)$template['slot_duration'];
+                        $currentMinute += $duration;
                         continue;
                     }
                 }
 
-                // Single-patient slots (capacity = 1) to simplify booking flow and avoid multi-seat complexity
                 $insertStmt->execute([
                     $template['dept_id'],
-                    $template['doctor_id'],
+                    $doctorId,
                     $template_id,
                     $dateString,
                     $slotStart,
                     $slotEnd,
-                    1,
+                    1, // capacity = 1
                 ]);
 
                 if ($insertStmt->rowCount() > 0) {
@@ -195,7 +275,7 @@ try {
                 } else {
                     $skipped++;
                 }
-                $currentMinute += (int)$template['slot_duration'];
+                $currentMinute += $duration;
             }
         }
 
@@ -203,16 +283,44 @@ try {
         $current->modify('+1 day');
     }
 
-    $message = "Generated $created slots for {$generatedDays} active day(s).";
-    if ($skipped > 0) {
-        $message .= " Skipped $skipped duplicate slot(s).";
-    }
+    $rangeLabel = $range == 1 ? '1 month' : "$range months";
+    $summaryParts = [];
+    $summaryParts[] = "<i class=\"fa-solid fa-check-circle\"></i> $created slots created";
+    if ($skipped > 0) $summaryParts[] = "<i class=\"fa-solid fa-rotate-left\"></i> $skipped duplicates skipped";
+    if ($holidaysSkipped > 0) $summaryParts[] = "<i class=\"fa-solid fa-calendar-xmark\"></i> $holidaysSkipped holidays skipped";
+    if ($leaveSkipped > 0) $summaryParts[] = "<i class=\"fa-solid fa-user-clock\"></i> $leaveSkipped leave days skipped";
+    $message = implode('<br>', $summaryParts);
+
+    // Audit log
+    audit_log(
+        $pdo,
+        (int)$_SESSION['user_id'],
+        'slots_generated',
+        'time_slots',
+        $template_id,
+        "Generated $created slots for template ID $template_id ($rangeLabel starting $month)",
+        null,
+        [
+            'template_id' => $template_id,
+            'month' => $month,
+            'range' => $range,
+            'created' => $created,
+            'skipped' => $skipped,
+            'holidays_skipped' => $holidaysSkipped,
+            'leave_skipped' => $leaveSkipped,
+            'generated_days' => $generatedDays,
+        ]
+    );
 
     send_json([
         'success' => true,
         'created' => $created,
         'skipped' => $skipped,
+        'holidays_skipped' => $holidaysSkipped,
+        'leave_skipped' => $leaveSkipped,
+        'generated_days' => $generatedDays,
         'month' => $month,
+        'range' => $range,
         'message' => $message,
     ]);
 } catch (PDOException $e) {

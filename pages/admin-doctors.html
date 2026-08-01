@@ -172,7 +172,7 @@
       data.forEach((d, i) => {
         const isActive = parseInt(d.is_active) === 1;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="text-muted">${i+1}</td><td style="font-weight:600;">${escapeHtml(d.full_name)}</td><td>${escapeHtml(d.dept_name)}</td><td>${escapeHtml(d.specialization || '—')}</td><td><span class="badge ${isActive ? 'badge-seen' : 'badge-cancelled'}">${isActive ? 'Active' : 'Disabled'}</span></td><td><div style="display:flex;gap:6px;flex-wrap:nowrap;"><button class="btn btn-ghost btn-sm" onclick='editDoctor(${JSON.stringify(d)})'><i class="fa-solid fa-pen"></i> Edit</button><button class="btn btn-ghost btn-sm" onclick="toggleDoctor(${d.doctor_id}, ${d.is_active}, '${escapeHtml(d.full_name)}', this)"><i class="fa-solid fa-${isActive ? 'ban' : 'circle-check'}"></i> ${isActive ? 'Disable' : 'Enable'}</button></div></td>`;
+        tr.innerHTML = `<td class="text-muted">${i+1}</td><td style="font-weight:600;">${escapeHtml(d.full_name)}</td><td>${escapeHtml(d.dept_name)}</td><td>${escapeHtml(d.specialization || '—')}</td><td><span class="badge ${isActive ? 'badge-seen' : 'badge-cancelled'}">${isActive ? 'Active' : 'Disabled'}</span></td><td><div style="display:flex;gap:6px;flex-wrap:nowrap;"><button class="btn btn-ghost btn-sm" onclick='editDoctor(${JSON.stringify(d)})'><i class="fa-solid fa-pen"></i> Edit</button><button class="btn btn-ghost btn-sm" onclick="toggleDoctor(${d.doctor_id}, ${d.is_active}, '${escapeHtml(d.full_name)}', this)"><i class="fa-solid fa-${isActive ? 'ban' : 'circle-check'}"></i> ${isActive ? 'Disable' : 'Enable'}</button><button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteDoctor(${d.doctor_id}, '${escapeHtml(d.full_name)}', this)"><i class="fa-solid fa-trash"></i> Delete</button></div></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -207,9 +207,19 @@
       if (!confirm(`Are you sure you want to ${action} ${name}?`)) return;
       btn.disabled = true;
       try {
-        const res = await fetch('../php/admin_save_doctor.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctor_id: doctorId, dept_id: 0, full_name: name, is_active: newStatus }) });
+        const res = await fetch('../php/admin_save_doctor.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctor_id: doctorId, is_active: newStatus }) });
         const data = await res.json();
         if (data.success) loadDoctors(); else { showAlert(data.error||'Failed.', 'error'); btn.disabled = false; }
+      } catch(err) { showAlert('Network error.', 'error'); btn.disabled = false; }
+    }
+
+    async function deleteDoctor(doctorId, name, btn) {
+      if (!confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch('../php/admin_delete_doctor.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctor_id: doctorId }) });
+        const data = await res.json();
+        if (data.success) loadDoctors(); else { showAlert(data.error||'Failed to delete doctor.', 'error'); btn.disabled = false; }
       } catch(err) { showAlert('Network error.', 'error'); btn.disabled = false; }
     }
 

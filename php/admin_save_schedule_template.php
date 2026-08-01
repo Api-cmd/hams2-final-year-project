@@ -273,13 +273,56 @@ try {
         }
 
         $isWorking = isset($exception['is_working']) ? (int)$exception['is_working'] : 0;
-        $startTime = strip_secs(trim($exception['start_time'] ?? ''));
-        $endTime   = strip_secs(trim($exception['end_time'] ?? ''));
-        $breakStart = strip_secs(trim($exception['break_start'] ?? ''));
-        $breakEnd   = strip_secs(trim($exception['break_end'] ?? ''));
-        $note       = clean($exception['note'] ?? '');
+        $overrideType = clean($exception['override_type'] ?? '');
+        
+        // Handle block_time type - store blocked range in note as JSON
+        if ($overrideType === 'block_time') {
+            $blockStart = strip_secs(trim($exception['block_start'] ?? ''));
+            $blockEnd = strip_secs(trim($exception['block_end'] ?? ''));
+            $noteData = json_encode([
+                'type' => 'block_time',
+                'block_start' => $blockStart,
+                'block_end' => $blockEnd,
+                'reason' => clean($exception['reason'] ?? '')
+            ]);
+            $note = $noteData;
+            // For block_time, doctor is still working but with blocked hours
+            // We'll handle the blocking during slot generation
+            $isWorking = 1;
+            $startTime = null;
+            $endTime = null;
+            $breakStart = null;
+            $breakEnd = null;
+        } else {
+            // Extract times from sessions array if available (custom schedule)
+            if (isset($exception['sessions']) && is_array($exception['sessions']) && !empty($exception['sessions'])) {
+                $firstSession = $exception['sessions'][0];
+                $startTime = strip_secs(trim($firstSession['start_time'] ?? ''));
+                $endTime   = strip_secs(trim($firstSession['end_time'] ?? ''));
+                $breakStart = null;
+                $breakEnd = null;
+            } else {
+                // Legacy format: direct start_time/end_time fields
+                $startTime = strip_secs(trim($exception['start_time'] ?? ''));
+                $endTime   = strip_secs(trim($exception['end_time'] ?? ''));
+                $breakStart = strip_secs(trim($exception['break_start'] ?? ''));
+                $breakEnd   = strip_secs(trim($exception['break_end'] ?? ''));
+            }
+            
+            $note = clean($exception['note'] ?? $exception['reason'] ?? '');
 
-        if ($isWorking) {
+            // If times are empty, treat as full day off regardless of is_working flag
+            if (empty($startTime) || empty($endTime)) {
+                $isWorking = 0;
+                $startTime = null;
+                $endTime = null;
+                $breakStart = null;
+                $breakEnd = null;
+            }
+        }
+
+        // Skip time validation for block_time - times are stored in note as JSON
+        if ($isWorking && $overrideType !== 'block_time') {
             if (!is_valid_time($startTime) || !is_valid_time($endTime)) {
                 send_json(['error' => sprintf('Invalid exception times for %s.', $exceptionDate)], 400);
             }

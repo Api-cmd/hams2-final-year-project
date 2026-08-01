@@ -17,13 +17,20 @@ try {
             s.end_time,
             u_p.full_name AS patient_name,
             dr.full_name AS doctor_name,
-            d.dept_name
+            d.dept_name,
+            CASE 
+                WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+                WHEN a.status IN ('pending', 'confirmed') THEN 2
+                WHEN a.status IN ('seen', 'no_show') THEN 3
+                WHEN a.status = 'cancelled' THEN 4
+                ELSE 5
+            END AS status_priority
         FROM appointments a
         JOIN time_slots  s   ON a.slot_id          = s.slot_id
         JOIN users       u_p ON a.patient_user_id  = u_p.user_id
         LEFT JOIN doctors dr  ON a.doctor_id       = dr.doctor_id
         JOIN departments d   ON a.dept_id          = d.dept_id
-        ORDER BY s.slot_date DESC, s.start_time DESC
+        ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
         LIMIT 500
     ");
 

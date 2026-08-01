@@ -1,4 +1,6 @@
-# HAMS2 - Hospital Appointment Management System (Simplified)
+NOTE there are features that i add but not in read me the admin schedule 
+ 
+ # HAMS2 - Hospital Appointment Management System (Simplified)
 
 A simplified online appointment booking system with only **Patient** and **Admin** roles. Unlike the original HAMS system, HAMS2 does not have doctor login - appointments are booked by department instead.
 

@@ -72,7 +72,7 @@
       <button class="tab-btn" onclick="switchTab('cancelled', this)"><i class="fa-solid fa-ban"></i> Cancelled</button>
     </div>
 
-    <!-- Improved Toolbar: Search + Status Filter -->
+    <!-- Improved Toolbar: Search + Status Filter + Date Range -->
     <div class="appt-toolbar">
       <div class="appt-search-wrap">
         <i class="fa-solid fa-search"></i>
@@ -86,6 +86,14 @@
         <option value="cancelled">Cancelled</option>
         <option value="no_show">No Show</option>
       </select>
+      <input type="date" id="appt-date-start" class="form-control" style="width:150px;" placeholder="Start Date">
+      <input type="date" id="appt-date-end" class="form-control" style="width:150px;" placeholder="End Date">
+      <button class="btn btn-primary btn-sm" onclick="filterAppointments()">
+        <i class="fa-solid fa-magnifying-glass"></i> Search
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="clearAppointmentFilters()">
+        <i class="fa-solid fa-filter-circle-xmark"></i> Reset
+      </button>
     </div>
 
     <div class="card">
@@ -174,7 +182,9 @@
           ? `<button class="btn text-danger btn-sm" onclick="event.stopPropagation(); cancelAppt(${a.appt_id}, this)"><i class="fa-solid fa-ban"></i> Cancel</button>`
           : '<span class="text-muted text-sm">—</span>';
         const doctorDisplay = a.doctor_name
-          ? `Dr. ${escapeHtml(a.doctor_name)}`
+          ? (a.doctor_name.toLowerCase().startsWith('dr') 
+              ? escapeHtml(a.doctor_name) 
+              : `Dr. ${escapeHtml(a.doctor_name)}`)
           : '<span class="text-muted text-sm">Auto-assigned</span>';
 
         const tr = document.createElement('tr');
@@ -215,12 +225,23 @@
     function filterAppointments() {
       const searchTerm = document.getElementById('appt-search').value.toLowerCase().trim();
       const statusFilter = document.getElementById('appt-status-filter').value;
+      const startDate = document.getElementById('appt-date-start').value;
+      const endDate = document.getElementById('appt-date-end').value;
 
       let filtered = allAppointments;
 
       // Apply status filter
       if (statusFilter !== 'all') {
         filtered = filtered.filter(a => a.status === statusFilter);
+      }
+
+      // Apply date range filter
+      if (startDate && endDate) {
+        filtered = filtered.filter(a => a.slot_date >= startDate && a.slot_date <= endDate);
+      } else if (startDate) {
+        filtered = filtered.filter(a => a.slot_date >= startDate);
+      } else if (endDate) {
+        filtered = filtered.filter(a => a.slot_date <= endDate);
       }
 
       // Apply search filter
@@ -243,10 +264,22 @@
       }
     }
 
+    function clearAppointmentFilters() {
+      document.getElementById('appt-search').value = '';
+      document.getElementById('appt-status-filter').value = 'all';
+      document.getElementById('appt-date-start').value = '';
+      document.getElementById('appt-date-end').value = '';
+      renderAppointments(allAppointments);
+    }
+
     function showDetail(appt) {
       const grid = document.getElementById('detail-grid');
       const actions = document.getElementById('detail-actions');
-      const doctorDisplay = appt.doctor_name ? 'Dr. ' + appt.doctor_name : 'Auto-assigned';
+      const doctorDisplay = appt.doctor_name 
+        ? (appt.doctor_name.toLowerCase().startsWith('dr') 
+            ? appt.doctor_name 
+            : 'Dr. ' + appt.doctor_name) 
+        : 'Auto-assigned';
       const dateStr = formatDateLong(appt.slot_date);
       const items = [
         {label:'Appointment ID',value:'#'+appt.appt_id},

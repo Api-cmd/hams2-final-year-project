@@ -201,31 +201,43 @@ try {
 
         // Check doctor exception (override)
         $override = $exceptionMap[$dateString] ?? null;
+        $blockedRange = null;
+        
         if ($override !== null) {
-            if ((int)$override['is_working'] !== 1) {
+            // Check if this is a block_time exception
+            $noteData = json_decode($override['note'] ?? '', true);
+            if (isset($noteData['type']) && $noteData['type'] === 'block_time') {
+                $blockedRange = [
+                    'start' => time_to_minutes($noteData['block_start']),
+                    'end' => time_to_minutes($noteData['block_end'])
+                ];
+                // Use template sessions but will filter out blocked slots later
+                $daySessions = $sessionsByDay[$weekday] ?? [];
+            } elseif ((int)$override['is_working'] !== 1) {
                 $leaveSkipped++;
                 $current->modify('+1 day');
                 continue;
-            }
-            // Override with custom times - build sessions from override
-            $overrideSessions = [];
-            $os = $override['start_time'];
-            $oe = $override['end_time'];
-            $obs = $override['break_start'];
-            $obe = $override['break_end'];
-            if ($os && $oe) {
-                if ($obs && $obe && $obe > $obs) {
-                    if ($obs > $os) {
-                        $overrideSessions[] = ['start_time' => $os, 'end_time' => $obs];
+            } else {
+                // Override with custom times - build sessions from override
+                $overrideSessions = [];
+                $os = $override['start_time'];
+                $oe = $override['end_time'];
+                $obs = $override['break_start'];
+                $obe = $override['break_end'];
+                if ($os && $oe) {
+                    if ($obs && $obe && $obe > $obs) {
+                        if ($obs > $os) {
+                            $overrideSessions[] = ['start_time' => $os, 'end_time' => $obs];
+                        }
+                        if ($obe < $oe) {
+                            $overrideSessions[] = ['start_time' => $obe, 'end_time' => $oe];
+                        }
+                    } else {
+                        $overrideSessions[] = ['start_time' => $os, 'end_time' => $oe];
                     }
-                    if ($obe < $oe) {
-                        $overrideSessions[] = ['start_time' => $obe, 'end_time' => $oe];
-                    }
-                } else {
-                    $overrideSessions[] = ['start_time' => $os, 'end_time' => $oe];
                 }
+                $daySessions = $overrideSessions;
             }
-            $daySessions = $overrideSessions;
         } else {
             // No override - use template sessions for this day of week
             $daySessions = $sessionsByDay[$weekday] ?? [];
@@ -260,20 +272,47 @@ try {
                     }
                 }
 
-                $insertStmt->execute([
+                // Check if slot falls within blocked time range
+                if ($blockedRange !== null) {
+                    if ($currentMinute >= $blockedRange['start'] && $currentMinute + $duration <= $blockedRange['end']) {
+                        $skipped++;
+                        $currentMinute += $duration;
+                        continue;
+                    }
+                }
+
+                // Check if slot already exists before insertion
+                $checkStmt = $pdo->prepare("
+                    SELECT slot_id FROM time_slots 
+                    WHERE dept_id = ? AND doctor_id = ? AND slot_date = ? 
+                    AND start_time = ? AND end_time = ?
+                ");
+                $checkStmt->execute([
                     $template['dept_id'],
                     $doctorId,
-                    $template_id,
                     $dateString,
                     $slotStart,
                     $slotEnd,
-                    1, // capacity = 1
                 ]);
-
-                if ($insertStmt->rowCount() > 0) {
-                    $created++;
-                } else {
+                
+                if ($checkStmt->fetch()) {
                     $skipped++;
+                } else {
+                    $insertStmt->execute([
+                        $template['dept_id'],
+                        $doctorId,
+                        $template_id,
+                        $dateString,
+                        $slotStart,
+                        $slotEnd,
+                        1, // capacity = 1
+                    ]);
+
+                    if ($insertStmt->rowCount() > 0) {
+                        $created++;
+                    } else {
+                        $skipped++;
+                    }
                 }
                 $currentMinute += $duration;
             }
@@ -285,11 +324,11 @@ try {
 
     $rangeLabel = $range == 1 ? '1 month' : "$range months";
     $summaryParts = [];
-    $summaryParts[] = "<i class=\"fa-solid fa-check-circle\"></i> $created slots created";
-    if ($skipped > 0) $summaryParts[] = "<i class=\"fa-solid fa-rotate-left\"></i> $skipped duplicates skipped";
-    if ($holidaysSkipped > 0) $summaryParts[] = "<i class=\"fa-solid fa-calendar-xmark\"></i> $holidaysSkipped holidays skipped";
-    if ($leaveSkipped > 0) $summaryParts[] = "<i class=\"fa-solid fa-user-clock\"></i> $leaveSkipped leave days skipped";
-    $message = implode('<br>', $summaryParts);
+    $summaryParts[] = "$created slots created";
+    if ($skipped > 0) $summaryParts[] = "$skipped duplicates skipped";
+    if ($holidaysSkipped > 0) $summaryParts[] = "$holidaysSkipped holidays skipped";
+    if ($leaveSkipped > 0) $summaryParts[] = "$leaveSkipped leave days skipped";
+    $message = implode('. ', $summaryParts);
 
     // Audit log
     audit_log(

@@ -20,7 +20,8 @@ $bio = $input['bio'] ?? null;
 $is_active = $input['is_active'] ?? 1;
 
 // Basic validation
-if (!$dept_id || !$full_name) {
+// For updates, we only need doctor_id. For new doctors, we need dept_id and full_name.
+if (!$doctor_id && (!$dept_id || !$full_name)) {
     send_json(['error' => 'Department and full name are required.'], 400);
 }
 
@@ -28,26 +29,38 @@ try {
     $pdo->beginTransaction();
 
     if ($doctor_id) {
-        // UPDATE existing doctor
-        // Logic: Update the doctor record with new values
-        // We preserve the doctor_id but can change all other fields
-        $stmt = $pdo->prepare("
-            UPDATE doctors
-            SET dept_id = :dept_id,
-                full_name = :full_name,
-                specialization = :specialization,
-                bio = :bio,
-                is_active = :is_active
-            WHERE doctor_id = :doctor_id
-        ");
-        $stmt->execute([
-            ':dept_id' => $dept_id,
-            ':full_name' => $full_name,
-            ':specialization' => $specialization,
-            ':bio' => $bio,
-            ':is_active' => $is_active,
-            ':doctor_id' => $doctor_id
-        ]);
+        // Check if this is a status-only update (disable/enable)
+        if ($dept_id === null && $full_name === null && $specialization === null && $bio === null) {
+            // Only update is_active field
+            $stmt = $pdo->prepare("
+                UPDATE doctors
+                SET is_active = :is_active
+                WHERE doctor_id = :doctor_id
+            ");
+            $stmt->execute([
+                ':is_active' => $is_active,
+                ':doctor_id' => $doctor_id
+            ]);
+        } else {
+            // UPDATE existing doctor with all fields
+            $stmt = $pdo->prepare("
+                UPDATE doctors
+                SET dept_id = :dept_id,
+                    full_name = :full_name,
+                    specialization = :specialization,
+                    bio = :bio,
+                    is_active = :is_active
+                WHERE doctor_id = :doctor_id
+            ");
+            $stmt->execute([
+                ':dept_id' => $dept_id,
+                ':full_name' => $full_name,
+                ':specialization' => $specialization,
+                ':bio' => $bio,
+                ':is_active' => $is_active,
+                ':doctor_id' => $doctor_id
+            ]);
+        }
 
     } else {
         // CREATE new doctor

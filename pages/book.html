@@ -399,15 +399,15 @@
       document.getElementById('slot_id').value = '';
       document.getElementById('slot_date').value = '';
       document.getElementById('doctor_id').value = '';
-      document.getElementById('filter_doctor_id').innerHTML =
-        '<option value="">— All doctors in department —</option>';
+      const filterSel = document.getElementById('filter_doctor_id');
+      filterSel.innerHTML = '<option value="">— All doctors in department —</option>';
 
       if (!this.value) return;
 
       try {
         const res = await fetch(`../php/get_doctors.php?dept_id=${this.value}`);
         const doctors = await res.json();
-        const filterSel = document.getElementById('filter_doctor_id');
+        filterSel.innerHTML = '<option value="">— All doctors in department —</option>';
         doctors.forEach(d => {
           const opt = document.createElement('option');
           opt.value = d.doctor_id;

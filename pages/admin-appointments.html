@@ -126,11 +126,18 @@
               <option value="no_show">No Show</option>
             </select>
 
-            <input type="date" id="filter-date" class="form-control"
-                   style="width:170px;" onchange="filterTable()">
+            <input type="date" id="filter-date-start" class="form-control"
+                   style="width:170px;" placeholder="Start Date">
+
+            <input type="date" id="filter-date-end" class="form-control"
+                   style="width:170px;" placeholder="End Date">
+
+            <button class="btn btn-primary btn-sm" onclick="filterTable()">
+              <i class="fa-solid fa-magnifying-glass"></i> Search
+            </button>
 
             <button class="btn btn-ghost btn-sm" onclick="clearFilters()">
-              <i class="fa-solid fa-filter-circle-xmark"></i> Clear
+              <i class="fa-solid fa-filter-circle-xmark"></i> Reset
             </button>
 
           </div>
@@ -242,7 +249,9 @@
         tr.onclick = () => showDetail(a);
 
         const doctorDisplay = a.doctor_name
-          ? `Dr. ${escapeHtml(a.doctor_name)}`
+          ? (a.doctor_name.toLowerCase().startsWith('dr') 
+              ? escapeHtml(a.doctor_name) 
+              : `Dr. ${escapeHtml(a.doctor_name)}`)
           : '<span class="text-muted text-sm">Auto-assigned</span>';
         const dateStr = formatDateLong(a.slot_date);
         const timeStr = formatTime(a.start_time);
@@ -280,14 +289,24 @@
     function filterTable() {
       const search = document.getElementById('search-input').value.toLowerCase();
       const status = document.getElementById('filter-status').value;
-      const date   = document.getElementById('filter-date').value;
+      const startDate = document.getElementById('filter-date-start').value;
+      const endDate = document.getElementById('filter-date-end').value;
 
       const filtered = allAppointments.filter(a => {
         const forName = (a.family_name || a.patient_name || '').toLowerCase();
         const matchSearch = forName.includes(search) ||
                             a.dept_name.toLowerCase().includes(search);
         const matchStatus = status ? a.status === status : true;
-        const matchDate   = date   ? a.slot_date === date : true;
+        
+        let matchDate = true;
+        if (startDate && endDate) {
+          matchDate = a.slot_date >= startDate && a.slot_date <= endDate;
+        } else if (startDate) {
+          matchDate = a.slot_date >= startDate;
+        } else if (endDate) {
+          matchDate = a.slot_date <= endDate;
+        }
+        
         return matchSearch && matchStatus && matchDate;
       });
 
@@ -297,7 +316,8 @@
     function clearFilters() {
       document.getElementById('search-input').value  = '';
       document.getElementById('filter-status').value = '';
-      document.getElementById('filter-date').value   = '';
+      document.getElementById('filter-date-start').value = '';
+      document.getElementById('filter-date-end').value = '';
       renderTable(allAppointments);
     }
 
@@ -335,7 +355,11 @@
     function showDetail(appt) {
       const grid = document.getElementById('detail-grid');
       const actions = document.getElementById('detail-actions');
-      const doctorDisplay = appt.doctor_name ? 'Dr. ' + appt.doctor_name : 'Auto-assigned';
+      const doctorDisplay = appt.doctor_name 
+        ? (appt.doctor_name.toLowerCase().startsWith('dr') 
+            ? appt.doctor_name 
+            : 'Dr. ' + appt.doctor_name) 
+        : 'Auto-assigned';
       const dateStr = formatDateLong(appt.slot_date);
       const items = [
         {label:'Appointment ID',value:'#'+appt.appt_id},

@@ -26,7 +26,7 @@
    ============================================================ */
 :root {
   /* --- Colour palette --- */
-  --blue:        #1a6fc4;   /* main brand blue — buttons, links, accents  */
+  --blue:        #ec0d3d;   /* main brand blue — buttons, links, accents  */
   --blue-dark:   #145aa3;   /* darker blue — button hover state            */
   --blue-light:  #e8f1fb;   /* very light blue — card backgrounds, inputs */
   --white:       #ffffff;

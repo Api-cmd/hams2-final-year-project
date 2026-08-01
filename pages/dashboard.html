@@ -271,7 +271,11 @@
         }
 
         const timeFormatted = formatTime(data.start_time);
-        const doctorName = data.doctor_name ? `Dr. ${escapeHtml(data.doctor_name)}` : 'Auto-assigned';
+        const doctorName = data.doctor_name 
+          ? (data.doctor_name.toLowerCase().startsWith('dr') 
+              ? escapeHtml(data.doctor_name) 
+              : `Dr. ${escapeHtml(data.doctor_name)}`) 
+          : 'Auto-assigned';
 
         area.innerHTML = `
           <div class="welcome-has-appt">

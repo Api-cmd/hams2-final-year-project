@@ -1,21 +1,16 @@
 <?php
 
 
-// ===========================================================
-// php/config.php
-// Central configuration file for HAMS (Hospital Appointment Management System)
-// This file is required in almost every PHP script.
-// ===========================================================
 
-// ====================== DATABASE CREDENTIALS ======================
-// Update these values according to your environment (XAMPP, live server, etc.)
+// --------------------- DATABASE CREDENTIALS ---------------------
+
 define('DB_HOST', 'localhost');
 define('DB_PORT', 3306);
 define('DB_NAME', 'hams2_db');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
-// ====================== APPLICATION SETTINGS ======================
+// ----------------- APPLICATION SETTINGS ---------------------
 define('APP_NAME', 'HAMS2');
 define('APP_URL',  'http://localhost/hams2');
 
@@ -29,7 +24,7 @@ if (!file_exists(__DIR__ . '/../logs')) {
     mkdir(__DIR__ . '/../logs', 0777, true);
 }
 
-// ====================== SESSION CONFIGURATION ======================
+// ----------------- SESSION CONFIGURATION ---------------
 // Security and session lifetime settings
 ini_set('session.gc_maxlifetime',  7200);     // 2 hours
 ini_set('session.cookie_lifetime', 7200);      // 2 hours
@@ -134,11 +129,13 @@ function clean(string $value): string {
     return strip_tags(trim($value));
 }
 
-function is_valid_time(string $value): bool {
+function is_valid_time(?string $value): bool {
+    if ($value === null) return false;
     return preg_match('/^([01]\d|2[0-3]):([0-5]\d)$/', $value) === 1;
 }
 
-function time_to_minutes(string $value): int {
+function time_to_minutes(?string $value): int {
+    if ($value === null) return 0;
     [$h, $m] = explode(':', $value);
     return (int)$h * 60 + (int)$m;
 }

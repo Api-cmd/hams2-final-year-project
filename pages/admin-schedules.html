@@ -569,6 +569,11 @@
                   <strong>Custom Schedule</strong>
                   <div class="text-muted text-sm">Different hours for this date</div>
                 </div>
+                <div class="type-option" id="type-block" onclick="selectOverrideType('block_time')">
+                  <i class="fa-solid fa-ban" style="font-size:1.2rem;display:block;margin-bottom:6px;"></i>
+                  <strong>Block Time Range</strong>
+                  <div class="text-muted text-sm">Mark specific hours unavailable</div>
+                </div>
               </div>
               <div id="custom-sessions-section" style="display:none;">
                 <label class="text-sm" style="display:block;margin-bottom:4px;">Custom sessions</label>
@@ -580,6 +585,20 @@
                   </div>
                 </div>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="addOverrideSession()" style="margin-top:4px;"><i class="fa-solid fa-plus"></i> Add session</button>
+              </div>
+              <div id="block-time-section" style="display:none;">
+                <label class="text-sm" style="display:block;margin-bottom:4px;">Block time range (unavailable)</label>
+                <div class="form-row">
+                  <div class="form-group" style="margin:0;">
+                    <label for="block-start">Start Time</label>
+                    <input id="block-start" type="time" class="form-control">
+                  </div>
+                  <div class="form-group" style="margin:0;">
+                    <label for="block-end">End Time</label>
+                    <input id="block-end" type="time" class="form-control">
+                  </div>
+                </div>
+                <p class="form-hint">Doctor will be unavailable during this time (e.g., training, surgery)</p>
               </div>
               <button class="btn btn-primary" onclick="addOverride()" style="margin-top:12px;"><i class="fa-solid fa-floppy-disk"></i> Save Override</button>
             </div>
@@ -1423,7 +1442,9 @@
       currentOverrideType = type;
       document.getElementById('type-full-off').classList.toggle('active', type === 'full_off');
       document.getElementById('type-custom').classList.toggle('active', type === 'custom_schedule');
+      document.getElementById('type-block').classList.toggle('active', type === 'block_time');
       document.getElementById('custom-sessions-section').style.display = type === 'custom_schedule' ? 'block' : 'none';
+      document.getElementById('block-time-section').style.display = type === 'block_time' ? 'block' : 'none';
       if (type === 'custom_schedule' && overrideSessions.length === 0) {
         overrideSessions = [{ start_time: '09:00', end_time: '13:00' }];
         renderOverrideSessions();
@@ -1465,15 +1486,33 @@
       const reason = document.getElementById('override-reason').value.trim();
       if (!date) { showToast('Date is required', 'error'); return; }
       if (exceptions.some(e => e.exception_date === date)) { showToast('Override already exists for this date', 'warning'); return; }
-      if (currentOverrideType === 'custom_schedule' && overrideSessions.length === 0) { showToast('Add at least one session', 'error'); return; }
+      
+      if (currentOverrideType === 'custom_schedule' && overrideSessions.length === 0) { 
+        showToast('Add at least one session', 'error'); return; 
+      }
+      
+      if (currentOverrideType === 'block_time') {
+        const blockStart = document.getElementById('block-start').value;
+        const blockEnd = document.getElementById('block-end').value;
+        if (!blockStart || !blockEnd) { showToast('Start and end time are required', 'error'); return; }
+        if (blockEnd <= blockStart) { showToast('End time must be after start time', 'error'); return; }
+      }
 
-      exceptions.push({
+      const exceptionData = {
         exception_date: date,
         override_type: currentOverrideType,
-        reason: reason || (currentOverrideType === 'full_off' ? 'Full Day Off' : 'Custom Schedule'),
-        sessions: currentOverrideType === 'custom_schedule' ? JSON.parse(JSON.stringify(overrideSessions)) : [],
-        is_working: currentOverrideType === 'custom_schedule' ? 1 : 0
-      });
+        reason: reason || (currentOverrideType === 'full_off' ? 'Full Day Off' : currentOverrideType === 'block_time' ? 'Blocked Time' : 'Custom Schedule'),
+        is_working: currentOverrideType === 'full_off' ? 0 : 1
+      };
+
+      if (currentOverrideType === 'custom_schedule') {
+        exceptionData.sessions = JSON.parse(JSON.stringify(overrideSessions));
+      } else if (currentOverrideType === 'block_time') {
+        exceptionData.block_start = document.getElementById('block-start').value;
+        exceptionData.block_end = document.getElementById('block-end').value;
+      }
+
+      exceptions.push(exceptionData);
 
       refreshExceptionList();
       resetOverrideForm();
@@ -1483,6 +1522,8 @@
     function resetOverrideForm() {
       document.getElementById('override-date').value = '';
       document.getElementById('override-reason').value = '';
+      document.getElementById('block-start').value = '';
+      document.getElementById('block-end').value = '';
       overrideSessions = [];
       currentOverrideType = 'full_off';
       selectOverrideType('full_off');
@@ -1496,14 +1537,29 @@
       }
       container.innerHTML = exceptions.map((exc, i) => {
         const isOff = exc.override_type === 'full_off';
+        const isBlock = exc.override_type === 'block_time';
+        let typeLabel = 'Custom Schedule';
+        let typeIcon = 'fa-clock';
+        let typeClass = 'custom';
+        
+        if (isOff) {
+          typeLabel = 'Full Day Off';
+          typeIcon = 'fa-calendar-xmark';
+          typeClass = 'off';
+        } else if (isBlock) {
+          typeLabel = 'Blocked Time';
+          typeIcon = 'fa-ban';
+          typeClass = 'block';
+        }
+        
         return `
           <div class="exception-card">
             <div class="exception-header">
               <div>
                 <strong>${formatDate(exc.exception_date)}</strong>
-                <span class="exception-type ${isOff ? 'off' : 'custom'}">
-                  <i class="fa-solid ${isOff ? 'fa-calendar-xmark' : 'fa-clock'}"></i>
-                  ${isOff ? 'Full Day Off' : 'Custom Schedule'}
+                <span class="exception-type ${typeClass}">
+                  <i class="fa-solid ${typeIcon}"></i>
+                  ${typeLabel}
                 </span>
               </div>
               <button onclick="removeException(${i})" class="btn btn-ghost btn-sm"><i class="fa-solid fa-trash"></i></button>
@@ -1511,6 +1567,10 @@
             ${exc.sessions && exc.sessions.length ? `
               <div class="override-sessions">
                 ${exc.sessions.map(s => `<span class="session-pill">${s.start_time}–${s.end_time}</span>`).join('')}
+              </div>` : ''}
+            ${exc.block_start && exc.block_end ? `
+              <div class="override-sessions">
+                <span class="session-pill" style="background:#fee2e2;color:#dc2626;">Blocked: ${exc.block_start}–${exc.block_end}</span>
               </div>` : ''}
             ${exc.reason ? `<div class="text-sm text-muted"><i class="fa-solid fa-comment-dots"></i> ${escapeHtml(exc.reason)}</div>` : ''}
           </div>
@@ -1562,7 +1622,12 @@
 
     async function openTemplateEditor(templateId) {
       const editor = document.getElementById('inline-editor');
-      if (editor.classList.contains('open')) { editor.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      // If editor is already open, close it first then reopen fresh
+      if (editor.classList.contains('open')) {
+        closeModal();
+        // Small delay to allow DOM to reset
+        await new Promise(r => setTimeout(r, 100));
+      }
 
       document.getElementById('modal-alert').style.display = 'none';
       document.getElementById('conflict-review').style.display = 'none';

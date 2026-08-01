@@ -105,17 +105,28 @@ for ($i = 0; $i < $days_ahead; $i++) {
         $endTime = $template['end_time'];
         $breakStart = $template['break_start'];
         $breakEnd = $template['break_end'];
+        $blockedRange = null;
 
         if ($exception) {
-            $isWorking = (int)$exception['is_working'];
-            if ($exception['start_time']) {
-                $startTime = $exception['start_time'];
+            // Check if this is a block_time exception
+            $noteData = json_decode($exception['note'] ?? '', true);
+            if (isset($noteData['type']) && $noteData['type'] === 'block_time') {
+                $blockedRange = [
+                    'start' => timeToMins($noteData['block_start']),
+                    'end' => timeToMins($noteData['block_end'])
+                ];
+                // Keep template times but will filter blocked slots later
+            } else {
+                $isWorking = (int)$exception['is_working'];
+                if ($exception['start_time']) {
+                    $startTime = $exception['start_time'];
+                }
+                if ($exception['end_time']) {
+                    $endTime = $exception['end_time'];
+                }
+                $breakStart = $exception['break_start'] ?: $breakStart;
+                $breakEnd = $exception['break_end'] ?: $breakEnd;
             }
-            if ($exception['end_time']) {
-                $endTime = $exception['end_time'];
-            }
-            $breakStart = $exception['break_start'] ?: $breakStart;
-            $breakEnd = $exception['break_end'] ?: $breakEnd;
         }
 
         if ($isWorking !== 1 || !$startTime || !$endTime) {
@@ -144,20 +155,47 @@ for ($i = 0; $i < $days_ahead; $i++) {
         foreach ($periods as [$periodStart, $periodEnd]) {
             $slotStart = $periodStart;
             while ($slotStart + $duration <= $periodEnd) {
-                $insert->execute([
+                // Check if slot falls within blocked time range
+                if ($blockedRange !== null) {
+                    if ($slotStart >= $blockedRange['start'] && $slotStart + $duration <= $blockedRange['end']) {
+                        $skipped++;
+                        $slotStart += $duration;
+                        continue;
+                    }
+                }
+
+                // Check if slot already exists before insertion
+                $checkStmt = $pdo->prepare("
+                    SELECT slot_id FROM time_slots 
+                    WHERE dept_id = ? AND doctor_id = ? AND slot_date = ? 
+                    AND start_time = ? AND end_time = ?
+                ");
+                $checkStmt->execute([
                     $template['dept_id'],
                     $template['doctor_id'],
-                    $template['template_id'],
                     $date,
                     minsToTime($slotStart),
                     minsToTime($slotStart + $duration),
-                    $capacity,
                 ]);
-
-                if ($insert->rowCount() > 0) {
-                    $generated++;
-                } else {
+                
+                if ($checkStmt->fetch()) {
                     $skipped++;
+                } else {
+                    $insert->execute([
+                        $template['dept_id'],
+                        $template['doctor_id'],
+                        $template['template_id'],
+                        $date,
+                        minsToTime($slotStart),
+                        minsToTime($slotStart + $duration),
+                        $capacity,
+                    ]);
+
+                    if ($insert->rowCount() > 0) {
+                        $generated++;
+                    } else {
+                        $skipped++;
+                    }
                 }
 
                 $slotStart += $duration;

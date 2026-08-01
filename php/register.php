@@ -90,7 +90,20 @@ $stmt->execute([
     ':password' => $hashed_password,
 ]);
 
-// Redirect to login with a success message
-header('Location: ../index.html?msg=registered');
+// Get the newly created user ID
+$user_id = $pdo->lastInsertId();
+
+// Create session for auto sign-in
+$_SESSION['user_id']   = $user_id;
+$_SESSION['user_name'] = $full_name;
+$_SESSION['user_role'] = 'patient';
+$_SESSION['user_email'] = $email;
+$_SESSION['login_ip']   = $_SERVER['REMOTE_ADDR'];
+
+// Regenerate session ID to prevent session fixation
+session_regenerate_id(true);
+
+// Redirect to patient dashboard
+header('Location: ../pages/dashboard.html');
 exit();
 ?>

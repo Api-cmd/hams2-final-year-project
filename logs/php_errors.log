@@ -502,3 +502,707 @@ Stack trace:
     LIMIT :limit
 
 [15-Jul-2026 08:29:29 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 12:32:11 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 12:32:11 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[15-Jul-2026 12:32:11 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 12:32:11 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 12:32:59 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[15-Jul-2026 12:32:59 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"1853","dept_id":"1","doctor_id":1,"notes":"","family_profile_id":"0"}
+[15-Jul-2026 12:33:02 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[15-Jul-2026 12:33:02 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 12:33:02 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 12 appointments
+[15-Jul-2026 12:37:43 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 12:37:43 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[15-Jul-2026 12:37:43 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 12:37:43 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 12:38:20 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 3
+[15-Jul-2026 12:38:20 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"2924","dept_id":"1","doctor_id":14,"notes":"","family_profile_id":"0"}
+[15-Jul-2026 20:10:41 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 20:10:41 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":8,"user_name":"moyo","user_role":"patient","user_email":"moyo@gmail.com","login_ip":"::1"}
+[15-Jul-2026 20:10:41 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 20:10:41 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 20:20:05 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 20:20:05 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":8,"user_name":"moyo","user_role":"patient","user_email":"moyo@gmail.com","login_ip":"::1"}
+[15-Jul-2026 20:20:05 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 20:20:05 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 20:22:08 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 20:22:08 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":8,"user_name":"moyo","user_role":"patient","user_email":"moyo@gmail.com","login_ip":"::1"}
+[15-Jul-2026 20:22:08 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 20:22:08 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 20:23:34 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[15-Jul-2026 20:23:34 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":8,"user_name":"moyo","user_role":"patient","user_email":"moyo@gmail.com","login_ip":"::1"}
+[15-Jul-2026 20:23:34 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[15-Jul-2026 20:23:34 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[15-Jul-2026 20:24:42 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 8
+[15-Jul-2026 20:24:42 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"4049","dept_id":"3","doctor_id":5,"notes":"nnnn","family_profile_id":"0"}
+[15-Jul-2026 20:24:44 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:24:44 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:24:44 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[15-Jul-2026 20:25:14 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:25:14 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:25:14 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[15-Jul-2026 20:30:08 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:30:08 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:30:08 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[15-Jul-2026 20:30:15 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:30:15 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:30:15 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[15-Jul-2026 20:30:17 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:30:17 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid AND a.status IN ('pending','confirmed') AND s.slot_date >= CURDATE()
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:30:17 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 20:30:18 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:30:18 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid AND a.status = 'cancelled'
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:30:18 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 0 appointments
+[15-Jul-2026 20:30:20 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:30:20 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:30:20 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[15-Jul-2026 20:34:06 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[15-Jul-2026 20:34:06 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY s.slot_date DESC, s.start_time DESC
+    LIMIT :limit
+
+[15-Jul-2026 20:34:06 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[16-Jul-2026 00:59:03 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 00:59:03 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 00:59:03 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 00:59:03 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:00:06 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:00:06 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:00:06 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:00:06 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:03:02 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[16-Jul-2026 01:03:02 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name,
+        CASE 
+            WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+            WHEN a.status IN ('pending', 'confirmed') THEN 2
+            WHEN a.status IN ('seen', 'no_show') THEN 3
+            WHEN a.status = 'cancelled' THEN 4
+            ELSE 5
+        END AS status_priority
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
+    LIMIT :limit
+
+[16-Jul-2026 01:03:02 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 13 appointments
+[16-Jul-2026 01:09:38 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:09:38 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:09:38 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:09:38 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:09:39 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:09:39 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:09:39 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:09:39 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:13:03 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:13:03 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:13:03 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:13:03 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:14:44 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:14:44 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:14:44 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:14:44 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:18:04 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:18:04 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:18:04 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:18:04 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:34:32 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:34:32 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:34:32 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:34:32 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 01:41:06 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 01:41:06 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 01:41:06 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 01:41:06 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[16-Jul-2026 02:00:53 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:54 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:55 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:55 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:55 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:55 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:56 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:56 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:56 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:56 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:56 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:56 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:56 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:57 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:57 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:57 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:00:57 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:46 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:48 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:48 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:48 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:48 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:48 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:49 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:49 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:49 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:49 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:49 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:01:50 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:02:43 Africa/Dar_es_Salaam] PHP Fatal error:  Uncaught TypeError: is_valid_time(): Argument #1 ($value) must be of type string, null given, called in C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php on line 325 and defined in C:\xampp\htdocs\hams2.1\php\config.php:132
+Stack trace:
+#0 C:\xampp\htdocs\hams2.1\php\admin_save_schedule_template.php(325): is_valid_time(NULL)
+#1 {main}
+  thrown in C:\xampp\htdocs\hams2.1\php\config.php on line 132
+[16-Jul-2026 02:10:46 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[16-Jul-2026 02:10:46 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[16-Jul-2026 02:10:46 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[16-Jul-2026 02:10:46 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 13:52:12 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 13:52:12 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 13:52:12 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 13:52:12 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 13:52:52 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 13:52:52 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 13:52:52 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 13:52:52 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 13:54:59 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 13:54:59 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 13:54:59 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 13:54:59 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 13:57:31 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 13:57:31 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 13:57:31 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 13:57:31 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 13:58:22 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 13:58:22 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 13:58:22 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 13:58:22 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 14:07:31 Africa/Dar_es_Salaam] [HAMS] Error saving doctor: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`hams2_db`.`doctors`, CONSTRAINT `doctors_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `departments` (`dept_id`) ON DELETE CASCADE)
+[17-Jul-2026 14:07:37 Africa/Dar_es_Salaam] [HAMS] Error saving doctor: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`hams2_db`.`doctors`, CONSTRAINT `doctors_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `departments` (`dept_id`) ON DELETE CASCADE)
+[17-Jul-2026 14:11:30 Africa/Dar_es_Salaam] [HAMS] Error saving doctor: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`hams2_db`.`doctors`, CONSTRAINT `doctors_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `departments` (`dept_id`) ON DELETE CASCADE)
+[17-Jul-2026 14:20:46 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 14:20:46 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 14:20:46 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 14:20:46 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 14:21:11 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 9
+[17-Jul-2026 14:21:11 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"6633","dept_id":"3","doctor_id":6,"notes":"","family_profile_id":"0"}
+[17-Jul-2026 14:21:13 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 9
+[17-Jul-2026 14:21:13 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name,
+        CASE 
+            WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+            WHEN a.status IN ('pending', 'confirmed') THEN 2
+            WHEN a.status IN ('seen', 'no_show') THEN 3
+            WHEN a.status = 'cancelled' THEN 4
+            ELSE 5
+        END AS status_priority
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
+    LIMIT :limit
+
+[17-Jul-2026 14:21:13 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[17-Jul-2026 14:21:23 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 14:21:23 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 14:21:23 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 14:21:23 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 14:21:35 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 9
+[17-Jul-2026 14:21:35 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name,
+        CASE 
+            WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+            WHEN a.status IN ('pending', 'confirmed') THEN 2
+            WHEN a.status IN ('seen', 'no_show') THEN 3
+            WHEN a.status = 'cancelled' THEN 4
+            ELSE 5
+        END AS status_priority
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
+    LIMIT :limit
+
+[17-Jul-2026 14:21:35 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[17-Jul-2026 14:21:36 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 9
+[17-Jul-2026 14:21:36 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name,
+        CASE 
+            WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+            WHEN a.status IN ('pending', 'confirmed') THEN 2
+            WHEN a.status IN ('seen', 'no_show') THEN 3
+            WHEN a.status = 'cancelled' THEN 4
+            ELSE 5
+        END AS status_priority
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
+    LIMIT :limit
+
+[17-Jul-2026 14:21:36 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 1 appointments
+[17-Jul-2026 14:21:40 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 14:21:40 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":"9","user_name":"karoza","user_role":"patient","user_email":"karoza@gmail.com","login_ip":"::1"}
+[17-Jul-2026 14:21:40 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 14:21:40 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 15:32:52 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 15:32:52 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":8,"user_name":"moyo","user_role":"patient","user_email":"moyo@gmail.com","login_ip":"::1"}
+[17-Jul-2026 15:32:52 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 15:32:52 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 15:34:02 Africa/Dar_es_Salaam] [HAMS] Booking request received from user_id: 8
+[17-Jul-2026 15:34:02 Africa/Dar_es_Salaam] [HAMS] Request data: {"slot_id":"6836","dept_id":"3","doctor_id":6,"notes":"fever","family_profile_id":"0"}
+[17-Jul-2026 15:34:12 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[17-Jul-2026 15:34:12 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name,
+        CASE 
+            WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+            WHEN a.status IN ('pending', 'confirmed') THEN 2
+            WHEN a.status IN ('seen', 'no_show') THEN 3
+            WHEN a.status = 'cancelled' THEN 4
+            ELSE 5
+        END AS status_priority
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
+    LIMIT :limit
+
+[17-Jul-2026 15:34:12 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 2 appointments
+[17-Jul-2026 23:11:18 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[17-Jul-2026 23:11:18 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":3,"user_name":"new","user_role":"patient","user_email":"neww@gmail.com","login_ip":"::1"}
+[17-Jul-2026 23:11:18 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[17-Jul-2026 23:11:18 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
+[17-Jul-2026 23:11:23 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 3
+[17-Jul-2026 23:11:23 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name,
+        CASE 
+            WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+            WHEN a.status IN ('pending', 'confirmed') THEN 2
+            WHEN a.status IN ('seen', 'no_show') THEN 3
+            WHEN a.status = 'cancelled' THEN 4
+            ELSE 5
+        END AS status_priority
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
+    LIMIT :limit
+
+[17-Jul-2026 23:11:23 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 13 appointments
+[22-Jul-2026 17:55:36 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - User ID: 8
+[22-Jul-2026 17:55:36 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - SQL: 
+    SELECT
+        a.appt_id,
+        a.status,
+        a.notes,
+        a.created_at,
+        a.cancellation_reason,
+        s.slot_date,
+        s.start_time,
+        s.end_time,
+        dr.full_name AS doctor_name,
+        d.dept_name,
+        fp.full_name AS family_name,
+        CASE 
+            WHEN a.status IN ('pending', 'confirmed') AND s.slot_date >= CURDATE() THEN 1
+            WHEN a.status IN ('pending', 'confirmed') THEN 2
+            WHEN a.status IN ('seen', 'no_show') THEN 3
+            WHEN a.status = 'cancelled' THEN 4
+            ELSE 5
+        END AS status_priority
+    FROM appointments a
+    JOIN time_slots       s  ON a.slot_id           = s.slot_id
+    LEFT JOIN doctors     dr ON a.doctor_id         = dr.doctor_id
+    JOIN departments      d  ON a.dept_id            = d.dept_id
+    LEFT JOIN family_profiles fp ON a.family_profile_id = fp.profile_id
+    WHERE a.patient_user_id = :uid
+    ORDER BY status_priority ASC, s.slot_date ASC, s.start_time ASC
+    LIMIT :limit
+
+[22-Jul-2026 17:55:36 Africa/Dar_es_Salaam] [HAMS] get_appointments.php - Found 2 appointments
+[22-Jul-2026 17:57:37 Africa/Dar_es_Salaam] [HAMS] get_departments.php called, session status: active
+[22-Jul-2026 17:57:37 Africa/Dar_es_Salaam] [HAMS] Session data: {"user_id":8,"user_name":"moyo","user_role":"patient","user_email":"moyo@gmail.com","login_ip":"::1"}
+[22-Jul-2026 17:57:37 Africa/Dar_es_Salaam] [HAMS] User authenticated, fetching departments
+[22-Jul-2026 17:57:37 Africa/Dar_es_Salaam] [HAMS] Found 6 departments
